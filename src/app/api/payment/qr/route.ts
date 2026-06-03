@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     const qrPayload = qrData.payload || qrData.qr_payload || qrData.data || qrData.raw || "";
     const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrPayload);
 
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 3 * 60 * 1000).toISOString();
 
     return NextResponse.json({
       success: true,

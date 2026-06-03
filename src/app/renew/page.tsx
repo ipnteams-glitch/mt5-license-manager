@@ -23,7 +23,7 @@ export default function RenewPage() {
   const [verifying, setVerifying] = useState(false);
   const [activating, setActivating] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const [timeLeft, setTimeLeft] = useState(900); // 15 นาที
+  const [timeLeft, setTimeLeft] = useState(180); // 3 นาที
 
   // นับถอยหลัง
   useEffect(() => {

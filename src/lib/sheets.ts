@@ -336,7 +336,7 @@ export async function markPaymentPaid(txnId: string): Promise<Payment> {
 }
 
 // ── Cleanup Expired Payments (ลบ pending ที่ทิ้งไว้เกินเวลา) ──
-export async function cleanupExpiredPayments(minutesOld: number = 15): Promise<number> {
+export async function cleanupExpiredPayments(minutesOld: number = 3): Promise<number> {
   const all = await getAllPayments();
   const now = new Date();
   const threshold = minutesOld * 60 * 1000;
@@ -387,7 +387,7 @@ export async function reserveSatang(): Promise<number | null> {
   for (const p of all) {
     if (p.status === "pending") {
       const created = new Date(p.created_at);
-      if (now.getTime() - created.getTime() < 15 * 60 * 1000) {
+      if (now.getTime() - created.getTime() < 3 * 60 * 1000) {
         usedSatangs.push(p.satang);
       }
     }
