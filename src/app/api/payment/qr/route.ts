@@ -50,12 +50,15 @@ export async function POST(req: Request) {
     const qrData = await qrRes.json();
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
 
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
     return NextResponse.json({
       success: true,
       qr_base64: `data:image/png;base64,${qrData.image_base64}`,
       amount: totalAmount,
       satang,
       txn_id: payment.id,
+      expires_at: expiresAt,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

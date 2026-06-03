@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { PackageType } from "@/types";
 import { PACKAGES, BUYABLE_PACKAGES } from "@/types";
@@ -12,9 +12,34 @@ export default function RenewPage() {
   const [qrBase64, setQrBase64] = useState("");
   const [amount, setAmount] = useState(0);
   const [txnId, setTxnId] = useState("");
+  const [expiresAt, setExpiresAt] = useState<string>("");
   const [error, setError] = useState("");
   const [verifying, setVerifying] = useState(false);
   const [activating, setActivating] = useState(false);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const [timeLeft, setTimeLeft] = useState(900); // 15 นาที
+
+  // นับถอยหลัง
+  useEffect(() => {
+    if (step !== "qr" || !expiresAt) return;
+    const tick = () => {
+      const remaining = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0 && pollingRef.current) {
+        clearInterval(pollingRef.current);
+        setVerifying(false);
+      }
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [step, expiresAt]);
+
+  function formatTime(seconds: number) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
 
   async function handleActivate() {
     if (!selected) return;
@@ -50,14 +75,15 @@ export default function RenewPage() {
       setQrBase64(data.qr_base64);
       setAmount(data.amount);
       setTxnId(data.txn_id);
+      setExpiresAt(data.expires_at || "");
       setStep("qr");
-      startPolling(data.txn_id);
+      startPolling(data.txn_id, data.expires_at);
     } catch (err: any) {
       setError(err.message);
     }
   }
 
-  function startPolling(txnId: string) {
+  function startPolling(txnId: string, expiresAtStr: string) {
     setVerifying(true);
     const interval = setInterval(async () => {
       try {
@@ -75,12 +101,22 @@ export default function RenewPage() {
         }
       } catch {}
     }, 5000);
+    pollingRef.current = interval;
 
-    setTimeout(() => {
-      clearInterval(interval);
-      if (step === "qr") setError("หมดเวลาตรวจสอบ กรุณาลองใหม่");
-      setVerifying(false);
-    }, 300000);
+    // หยุด poll ตามเวลา expires_at (ไม่เกิน 15 นาที)
+    if (expiresAtStr) {
+      const expiresTime = new Date(expiresAtStr).getTime();
+      const timeout = Math.max(0, expiresTime - Date.now());
+      setTimeout(() => {
+        clearInterval(interval);
+        setVerifying(false);
+      }, timeout + 2000); // เผื่อ 2 วินาทีหลังหมดอายุ
+    } else {
+      setTimeout(() => {
+        clearInterval(interval);
+        setVerifying(false);
+      }, 300000);
+    }
   }
 
   if (step === "done") {
@@ -96,15 +132,34 @@ export default function RenewPage() {
   }
 
   if (step === "qr") {
+    const isExpired = timeLeft <= 0;
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
         <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg text-center">
           <h2 className="text-lg font-bold text-zinc-800 mb-2">📱 สแกน QR เพื่อชำระเงิน</h2>
-          <p className="text-sm text-zinc-500 mb-4">จำนวน {amount.toFixed(2)} บาท</p>
-          {qrBase64 && (
+          <p className="text-sm text-zinc-500 mb-2">จำนวน {amount.toFixed(2)} บาท</p>
+
+          {/* นับถอยหลัง */}
+          <div className="mb-4">
+            {isExpired ? (
+              <p className="inline-block rounded-full bg-red-100 px-4 py-1 text-sm font-semibold text-red-600">
+                ⏰ หมดเวลา — กรุณาสร้าง QR ใหม่
+              </p>
+            ) : (
+              <p className="inline-block rounded-full bg-amber-50 px-4 py-1 text-sm font-semibold text-amber-700">
+                ⏱️ ชำระภายใน{" "}
+                <span className={timeLeft < 60 ? "text-red-600" : "text-amber-700"}>
+                  {formatTime(timeLeft)}
+                </span>{" "}
+                นาที
+              </p>
+            )}
+          </div>
+
+          {qrBase64 && !isExpired && (
             <img src={qrBase64} alt="PromptPay QR" className="mx-auto mb-4 rounded-lg" style={{ maxWidth: 250 }} />
           )}
-          {verifying && (
+          {verifying && !isExpired && (
             <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
               <span className="animate-spin">⏳</span> กำลังตรวจสอบการชำระเงิน...
             </div>
