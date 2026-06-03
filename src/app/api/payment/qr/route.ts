@@ -37,6 +37,9 @@ export async function POST(req: Request) {
     // สร้าง payment (จองสตางค์ในตัว)
     const payment = await createPayment(session.user.email, pkg as PackageType, pkgInfo.price);
 
+    // 📱 ส่ง Telegram ทันที (ก่อนสร้าง QR)
+    notifyNewPayment(session.user.email!, pkgInfo.name, payment.amount, payment.id).catch(() => {});
+
     // สร้าง QR ผ่าน EasySlip
     const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
       method: "POST",
@@ -47,9 +50,6 @@ export async function POST(req: Request) {
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-
-    // แจ้งเตือน admin ทาง Telegram
-    notifyNewPayment(session.user.email!, pkgInfo.name, payment.amount, payment.id).catch(() => {});
 
     return NextResponse.json({
       success: true,
