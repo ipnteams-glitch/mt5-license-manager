@@ -20,6 +20,7 @@ export async function POST(req: Request) {
 
     // ตรวจสอบกับ EasySlip v2 — ต้องมี qr_payload
     const apiKey = await getEasySlipApiKey();
+    console.log("[EasySlip v2] payload:", payment.qr_payload?.slice(0, 80), "len:", payment.qr_payload?.length);
 
     if (!payment.qr_payload) {
       return NextResponse.json({ success: false, message: "ยังไม่พบการจ่าย กรุณาลองใหม่" });

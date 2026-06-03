@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     });
 
     const qrData = await qrRes.json();
+    console.log("[EasySlip QR] keys:", Object.keys(qrData).join(","), "hasPayload:", !!qrData.payload, "hasData:", !!qrData.data);
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
 
     // Create pending payment (เก็บ qr_payload ไว้ verify ทีหลัง)
