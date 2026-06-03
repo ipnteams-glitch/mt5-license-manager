@@ -99,6 +99,7 @@ export interface QrResponse {
   amount: number;
   satang: number;
   txn_id: string;
+  expires_at: string;
 }
 
 export interface VerifyResponse {
