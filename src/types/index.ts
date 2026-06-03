@@ -1,0 +1,109 @@
+// ── Member (สมาชิก) ──
+export interface Member {
+  email: string;
+  name: string;
+  package: PackageType;
+  max_ports: number;
+  expiry_date: string;
+  role: "user" | "admin";
+  created_at: string;
+}
+
+// ── Port (พอร์ต MT5) ──
+export interface Port {
+  id: string;
+  member_email: string;
+  mt5_account: string;
+  mt5_broker: string;
+  status: "active" | "removed";
+  created_at: string;
+}
+
+// ── Payment Transaction ──
+export interface Payment {
+  id: string;
+  email: string;
+  package: PackageType;
+  amount: number;
+  satang: number;
+  status: "pending" | "paid" | "failed";
+  created_at: string;
+  paid_at?: string;
+}
+
+// ── Package Types ──
+export type PackageType = "free" | "1000_2m" | "2000_2m" | "2490_3m" | "9990_1y" | "none";
+
+export interface PackageInfo {
+  key: PackageType;
+  name: string;
+  name_en: string;
+  price: number;
+  duration_days: number;
+  max_ports: number;
+  label: string;
+  rank: number;
+}
+
+export const PACKAGES: Record<PackageType, PackageInfo> = {
+  none: {
+    key: "none", name: "ไม่มีแพคเกจ", name_en: "None", price: 0, duration_days: 0, max_ports: 0,
+    label: "ไม่มีแพคเกจ", rank: 0,
+  },
+  free: {
+    key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 7, max_ports: 1,
+    label: "ฟรี 7 วัน (1 พอร์ต)", rank: 1,
+  },
+  "1000_2m": {
+    key: "1000_2m", name: "Basic", name_en: "Basic", price: 1000, duration_days: 60, max_ports: 2,
+    label: "1,000 บาท / 60 วัน (2 พอร์ต)", rank: 2,
+  },
+  "2000_2m": {
+    key: "2000_2m", name: "Standard", name_en: "Standard", price: 2000, duration_days: 60, max_ports: 5,
+    label: "2,000 บาท / 60 วัน (5 พอร์ต)", rank: 3,
+  },
+  "2490_3m": {
+    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2590, duration_days: 90, max_ports: 7,
+    label: "2,590 บาท / 90 วัน (7 พอร์ต)", rank: 4,
+  },
+  "9990_1y": {
+    key: "9990_1y", name: "VIP", name_en: "VIP", price: 9990, duration_days: 365, max_ports: 10,
+    label: "9,990 บาท / 1 ปี (10 พอร์ต)", rank: 5,
+  },
+};
+
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2000_2m", "2490_3m", "9990_1y"];
+
+// ── API Responses ──
+export interface VerifyPortResponse {
+  valid: boolean;
+  email?: string;
+  package?: string;
+  expiry_date?: string;
+  days_left?: number;
+  reason?: string;
+}
+
+export interface DashboardData {
+  member: Member;
+  ports: Port[];
+  ports_used: number;
+  ports_total: number;
+  package_label: string;
+  days_left: number;
+  is_expired: boolean;
+}
+
+export interface QrResponse {
+  qr_base64: string;
+  amount: number;
+  satang: number;
+  txn_id: string;
+}
+
+export interface VerifyResponse {
+  success: boolean;
+  message: string;
+  package?: string;
+  expiry_date?: string;
+}
