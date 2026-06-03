@@ -85,7 +85,7 @@ export default function DashboardClient({
               MT5
             </a>
             <span className="font-semibold text-zinc-800">License Manager</span>
-            <span className="text-xs text-zinc-400 ml-4">Line: @479ufnya Tel: 0976653645</span>
+            <span className="text-xs text-zinc-400 ml-4">Line: @479ufnya </span>
           </div>
           <div className="flex items-center gap-3">
             <a
