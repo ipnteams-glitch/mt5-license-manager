@@ -206,9 +206,9 @@ export default function AdminClient({ members, ports, payments }: Props) {
 
         {activeTab === "payments" && (
           <div className="rounded-xl bg-white shadow-sm overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-base">
               <thead>
-                <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-zinc-500">
+                <tr className="border-b bg-zinc-50 text-left text-sm font-semibold text-zinc-600">
                   <th className="px-4 py-3">เวลา</th>
                   <th className="px-4 py-3">อีเมล</th>
                   <th className="px-4 py-3">แพคเกจ</th>
@@ -225,19 +225,19 @@ export default function AdminClient({ members, ports, payments }: Props) {
                     const isPending = p.status === "pending";
                     return (
                       <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                        <td className="px-4 py-3 text-xs text-zinc-500">
+                        <td className="px-4 py-3 text-sm text-zinc-500">
                           {new Date(p.created_at).toLocaleString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                         </td>
-                        <td className="px-4 py-3 text-xs text-zinc-600">{p.email}</td>
-                        <td className="px-4 py-3 text-xs">{PACKAGES[p.package]?.name || p.package}</td>
-                        <td className="px-4 py-3 font-mono text-xs">{p.amount.toFixed(2)} ฿</td>
+                        <td className="px-4 py-3 text-sm text-zinc-600">{p.email}</td>
+                        <td className="px-4 py-3 text-sm">{PACKAGES[p.package]?.name || p.package}</td>
+                        <td className="px-4 py-3 font-mono text-sm">{p.amount.toFixed(2)} ฿</td>
                         <td className="px-4 py-3">
                           <span
-                            className={`rounded-full px-2 py-0.5 text-xs ${
+                            className={`rounded-full px-3 py-1 text-sm font-medium ${
                               p.status === "paid" ? "bg-green-100 text-green-700" : p.status === "failed" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
-                            {p.status === "paid" ? "จ่ายแล้ว" : p.status === "failed" ? "ล้มเหลว" : "รอตรวจสอบ"}
+                            {p.status === "paid" ? "✅ จ่ายแล้ว" : p.status === "failed" ? "❌ ล้มเหลว" : "⏳ รอตรวจสอบ"}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -245,9 +245,9 @@ export default function AdminClient({ members, ports, payments }: Props) {
                             <button
                               onClick={() => handleAdminVerify(p.id)}
                               disabled={verifyingPayId === p.id}
-                              className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50"
+                              className="rounded bg-green-600 px-5 py-2 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
                             >
-                              {verifyingPayId === p.id ? "..." : "✅ ยืนยัน"}
+                              {verifyingPayId === p.id ? "..." : "✅ ยืนยันการชำระเงิน"}
                             </button>
                           )}
                         </td>

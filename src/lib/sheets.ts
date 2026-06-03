@@ -266,7 +266,8 @@ export async function getAllPayments(): Promise<Payment[]> {
   try {
     const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I` });
     const rows = res.data.values; if (!rows || rows.length <= 1) return [];
-    return rows.slice(1).map(paymentFromRow);
+    // ดึงเฉพาะ 200 รายการล่าสุด (กันหน่วงเมื่อข้อมูลเยอะ)
+    return rows.slice(-200).map(paymentFromRow);
   } catch {
     // Sheet payments ยังไม่มี → return empty
     return [];
