@@ -124,7 +124,7 @@ export default function AdminClient({ members, ports }: Props) {
                           <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900" />
                         ) : (
                           <span className={m.expiry_date && new Date(m.expiry_date) <= new Date() ? "text-red-500" : "text-zinc-600"}>
-                            {m.expiry_date ? new Date(m.expiry_date).toLocaleDateString("th-TH") : "-"}
+                            {m.expiry_date ? new Date(m.expiry_date).toLocaleDateString("en-GB") : "-"}
                           </span>
                         )}
                       </td>
@@ -170,7 +170,7 @@ export default function AdminClient({ members, ports }: Props) {
                     <td className="px-4 py-3 text-zinc-600">{p.mt5_broker}</td>
                     <td className="px-4 py-3 text-xs text-zinc-500">{p.member_email}</td>
                     <td className="px-4 py-3"><span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">active</span></td>
-                    <td className="px-4 py-3 text-zinc-500">{new Date(p.created_at).toLocaleDateString("th-TH")}</td>
+                    <td className="px-4 py-3 text-zinc-500">{new Date(p.created_at).toLocaleDateString("en-GB")}</td>
                   </tr>
                 ))}
               </tbody>

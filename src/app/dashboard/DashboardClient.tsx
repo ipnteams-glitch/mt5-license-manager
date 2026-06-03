@@ -215,12 +215,12 @@ export default function DashboardClient({
                     <tr key={port.id} className="border-b border-zinc-100">
                       <td className="py-3 font-mono font-medium text-zinc-800">{port.mt5_account}</td>
                       <td className="py-3 text-zinc-500">
-                        {new Date(port.created_at).toLocaleDateString("th-TH")}
+                        {new Date(port.created_at).toLocaleDateString("en-GB")}
                       </td>
                       <td className="py-3">
                         {member.expiry_date ? (
                           <span className={isExpired ? "text-red-500 font-medium" : "text-zinc-600"}>
-                            {new Date(member.expiry_date).toLocaleDateString("th-TH")}
+                            {new Date(member.expiry_date).toLocaleDateString("en-GB")}
                           </span>
                         ) : (
                           <span className="text-zinc-400">-</span>
