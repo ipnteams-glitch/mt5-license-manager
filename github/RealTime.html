@@ -56,8 +56,13 @@
             text-align: right; 
         }
         th, td {
-            padding: 16px 20px;
+            padding: 12px 14px;
             white-space: nowrap;
+        }
+        th:first-child, td:first-child {
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         th {
             background-color: rgba(212, 175, 55, 0.1);
@@ -128,9 +133,12 @@
             color: #ffeb3b;
         }
         @media (max-width: 600px) {
-            th, td { padding: 12px 10px; font-size: 13px; }
-            th { font-size: 12px; }
+            th, td { padding: 10px 8px; font-size: 12px; }
+            th { font-size: 11px; }
             .header-box h1 { font-size: 22px; }
+            th:first-child, td:first-child { max-width: 90px; }
+            .ea-name-cell { font-size: 12px; }
+            .stars { font-size: 13px; letter-spacing: 1px; }
         }
     </style>
 </head>
@@ -157,7 +165,7 @@
                 </tbody>
                 <tfoot id="tableFoot" style="display:none;">
                     <tr>
-                        <td>📊 ผลรวมทั้งหมด</td>
+                        <td>📊 ผลรวม</td>
                         <td id="sumProfit">-</td>
                         <td id="sumWeek">-</td>
                         <td id="sumBalance">-</td>
