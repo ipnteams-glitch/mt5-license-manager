@@ -29,6 +29,7 @@ export async function POST(req: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         action: "list",
+        msisdn: "0954149282",
         api_key: apiKey,
         type: "PROMPTPAY",
         limit: 20,
