@@ -39,23 +39,9 @@ export async function POST(req: Request) {
 
     const totalAmount = pkgInfo.price + satang;
 
-    // Generate QR via EasySlip
-    const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "PROMPTPAY",
-        msisdn: "0954149282",
-        amount: totalAmount,
-      }),
-    });
-
-    const qrData = await qrRes.json();
-    console.log("[EasySlip QR] keys:", Object.keys(qrData).join(","), "hasPayload:", !!qrData.payload, "hasData:", !!qrData.data);
-    if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
-
-    // สร้าง PromptPay payload เอง (ใช้ verify กับ EasySlip v2 ทีหลัง)
+    // สร้าง PromptPay payload เอง (ใช้ทั้งสร้าง QR และ verify v2)
     const qrPayload = generatePromptPayPayload("0954149282", totalAmount);
+    const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrPayload)}&size=300&margin=1`;
 
     // Create pending payment (เก็บ qr_payload ไว้ verify)
     const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrPayload);
@@ -64,7 +50,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      qr_base64: `data:image/png;base64,${qrData.image_base64}`,
+      qr_base64: qrImageUrl,
       amount: totalAmount,
       satang,
       txn_id: payment.id,
