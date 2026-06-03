@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { createPayment, reserveSatang, getMemberByEmail } from "@/lib/sheets";
+import { createPayment, reserveSatang, getMemberByEmail, canUpgrade } from "@/lib/sheets";
 import { PACKAGES, BUYABLE_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
@@ -18,6 +18,11 @@ export async function POST(req: Request) {
     const pkgInfo = PACKAGES[pkg as PackageType];
     const member = await getMemberByEmail(session.user.email);
     if (!member) return NextResponse.json({ error: "ไม่พบสมาชิก" }, { status: 404 });
+
+    // ตรวจสอบสิทธิ์การอัปเกรด (ห้าม downgrade)
+    const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
+    const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
+    if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
 
     // Reserve satang
     const satang = await reserveSatang();
