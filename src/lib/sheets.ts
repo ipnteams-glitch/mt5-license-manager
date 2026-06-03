@@ -393,7 +393,7 @@ export async function reserveSatang(): Promise<number | null> {
     }
   }
 
-  for (let i = 1; i <= 99; i++) {
+  for (let i = 1; i <= 49; i++) {
     const val = parseFloat((i / 100).toFixed(2));
     if (!usedSatangs.includes(val)) return val;
   }
