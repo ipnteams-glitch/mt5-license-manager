@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
     const payment = await getPaymentById(txn_id);
     if (!payment) return NextResponse.json({ error: "ไม่พบรายการ" }, { status: 404 });
-    if (payment.status === "paid") return NextResponse.json({ success: false, message: "รายการนี้จ่ายแล้ว" });
+    if (payment.status === "paid") return NextResponse.json({ success: true, message: "ชำระเงินสำเร็จแล้ว" });
 
     // ตรวจสอบกับ EasySlip
     const apiKey = await getEasySlipApiKey();
