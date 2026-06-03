@@ -33,36 +33,25 @@ export async function POST(req: Request) {
     // ลบ pending เก่าที่เกิน 15 นาที (ไม่สแกนจ่าย)
     cleanupExpiredPayments().catch((e) => console.error("Cleanup failed:", e));
 
-    // Reserve satang
-    const satang = await reserveSatang();
-    if (satang === null) return NextResponse.json({ error: "ระบบไม่ว่าง กรุณาลองใหม่" }, { status: 503 });
-
-    const totalAmount = pkgInfo.price + satang;
+    // สร้าง payment (จองสตางค์ในตัว)
+    const payment = await createPayment(session.user.email, pkg as PackageType, pkgInfo.price);
 
     // สร้าง QR ผ่าน EasySlip
     const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "PROMPTPAY", msisdn: "0954149282", amount: totalAmount }),
+      body: JSON.stringify({ type: "PROMPTPAY", msisdn: "0954149282", amount: payment.amount }),
     });
     const qrData = await qrRes.json();
-    console.log("[EasySlip QR] all keys:", Object.keys(qrData).join(", "));
-    for (const [k, v] of Object.entries(qrData)) {
-      console.log(`[EasySlip QR] ${k}:`, String(v).slice(0, 100));
-    }
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
-
-    // เก็บ payload ถ้ามี (เผื่อใช้ verify v2)
-    const qrPayload = qrData.payload || qrData.qr_payload || qrData.data || qrData.raw || "";
-    const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrPayload);
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     return NextResponse.json({
       success: true,
       qr_base64: `data:image/png;base64,${qrData.image_base64}`,
-      amount: totalAmount,
-      satang,
+      amount: payment.amount,
+      satang: payment.satang,
       txn_id: payment.id,
       expires_at: expiresAt,
     });
