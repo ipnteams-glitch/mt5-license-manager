@@ -280,9 +280,26 @@ export async function getAllPayments(): Promise<Payment[]> {
   }
 }
 
-export async function createPayment(email: string, pkg: PackageType, amount: number, satang: number, qrPayload?: string): Promise<Payment> {
+export async function createPayment(email: string, pkg: PackageType, price: number, qrPayload?: string): Promise<Payment> {
+  // จองสตางค์ — อ่าน pending เลือกค่าที่ไม่ซ้ำ
+  const all = await getAllPayments();
+  const now = new Date();
+  const usedSatangs: number[] = [];
+  for (const p of all) {
+    if (p.status === "pending" && now.getTime() - new Date(p.created_at).getTime() < 15 * 60 * 1000) {
+      usedSatangs.push(p.satang);
+    }
+  }
+  let satang = 0;
+  for (let i = 1; i <= 99; i++) {
+    const val = parseFloat((i / 100).toFixed(2));
+    if (!usedSatangs.includes(val)) { satang = val; break; }
+  }
+  if (satang === 0) throw new Error("ระบบไม่ว่าง กรุณาลองใหม่");
+
+  const totalAmount = price + satang;
   const payment: Payment = {
-    id: uuidv4(), email, package: pkg, amount, satang,
+    id: uuidv4(), email, package: pkg, amount: totalAmount, satang,
     status: "pending", created_at: new Date().toISOString(),
     qr_payload: qrPayload || "",
   };
