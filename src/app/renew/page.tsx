@@ -208,7 +208,7 @@ export default function RenewPage() {
           )}
           {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
           <p className="mt-3 pt-3 border-t border-zinc-200 text-xs text-zinc-400">
-            ติดต่อ: Line: @479ufnya | Tel: 0976653645
+            ติดต่อ: Line: @479ufnya Tel: 0976653645
           </p>
           <button onClick={() => { setStep("select"); setError(""); }} className="mt-2 text-sm text-blue-600 hover:underline">
             ← เลือกแพคเกจใหม่
