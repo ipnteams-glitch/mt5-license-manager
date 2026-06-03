@@ -85,7 +85,7 @@ export default function AdminClient({ members, ports, payments }: Props) {
   return (
     <div className="min-h-screen bg-zinc-50">
       <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-2 py-1">
           <div className="flex items-center gap-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-600 text-base font-bold text-white">A</div>
             <span className="font-semibold text-zinc-800">Admin Panel</span>
@@ -94,7 +94,7 @@ export default function AdminClient({ members, ports, payments }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-6 py-3">
         <div className="mb-6 flex gap-2">
           {(["members", "ports", "payments"] as const).map((tab) => (
             <button
@@ -115,16 +115,16 @@ export default function AdminClient({ members, ports, payments }: Props) {
 
         {activeTab === "members" && (
           <div className="rounded-xl bg-white shadow-sm overflow-x-auto">
-            <table className="w-full text-base">
+            <table className="w-full text-xs">
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
-                  <th className="px-4 py-3">อีเมล</th>
-                  <th className="px-4 py-3">ชื่อ</th>
-                  <th className="px-4 py-3">แพคเกจ</th>
-                  <th className="px-4 py-3">โควต้า</th>
-                  <th className="px-4 py-3">หมดอายุ</th>
-                  <th className="px-4 py-3">พอร์ต</th>
-                  <th className="px-4 py-3 text-right">จัดการ</th>
+                  <th className="px-2 py-1">อีเมล</th>
+                  <th className="px-2 py-1">ชื่อ</th>
+                  <th className="px-2 py-1">แพคเกจ</th>
+                  <th className="px-2 py-1">โควต้า</th>
+                  <th className="px-2 py-1">หมดอายุ</th>
+                  <th className="px-2 py-1">พอร์ต</th>
+                  <th className="px-2 py-1 text-right">จัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,9 +133,9 @@ export default function AdminClient({ members, ports, payments }: Props) {
                   const isEditing = editing === m.email;
                   return (
                     <tr key={m.email} className="border-b border-zinc-100 hover:bg-zinc-50">
-                      <td className="px-4 py-3 font-mono text-xs text-black">{m.email}</td>
-                      <td className="px-4 py-3 font-medium text-zinc-800">{m.name}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-1 font-mono text-xs text-black">{m.email}</td>
+                      <td className="px-2 py-1 font-medium text-zinc-800">{m.name}</td>
+                      <td className="px-2 py-1">
                         {isEditing ? (
                           <select value={selectedPkg} onChange={(e) => setSelectedPkg(e.target.value as PackageType)} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900">
                             {pkgOptions.map((k) => (<option key={k} value={k}>{PACKAGES[k].label}</option>))}
@@ -144,8 +144,8 @@ export default function AdminClient({ members, ports, payments }: Props) {
                           <span className={m.package === "none" ? "text-zinc-400" : "text-green-700"}>{PACKAGES[m.package].name}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-black">{m.max_ports}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-1 text-black">{m.max_ports}</td>
+                      <td className="px-2 py-1">
                         {isEditing ? (
                           <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900" />
                         ) : (
@@ -154,12 +154,12 @@ export default function AdminClient({ members, ports, payments }: Props) {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-1">
                         <span className={`text-xs font-medium ${used >= m.max_ports && m.max_ports > 0 ? "text-orange-500" : "text-black"}`}>
                           {used}/{m.max_ports}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-2 py-1 text-right">
                         {isEditing ? (
                           <div className="flex gap-1 justify-end">
                             <button onClick={saveEdit} disabled={saving} className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50">{saving ? "..." : "💾"}</button>
@@ -179,24 +179,24 @@ export default function AdminClient({ members, ports, payments }: Props) {
 
         {activeTab === "ports" && (
           <div className="rounded-xl bg-white shadow-sm overflow-x-auto">
-            <table className="w-full text-base">
+            <table className="w-full text-xs">
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
-                  <th className="px-4 py-3">MT5 Account</th>
-                  <th className="px-4 py-3">Broker</th>
-                  <th className="px-4 py-3">เจ้าของ</th>
-                  <th className="px-4 py-3">สถานะ</th>
-                  <th className="px-4 py-3">วันที่เพิ่ม</th>
+                  <th className="px-2 py-1">MT5 Account</th>
+                  <th className="px-2 py-1">Broker</th>
+                  <th className="px-2 py-1">เจ้าของ</th>
+                  <th className="px-2 py-1">สถานะ</th>
+                  <th className="px-2 py-1">วันที่เพิ่ม</th>
                 </tr>
               </thead>
               <tbody>
                 {ports.filter((p) => p.status === "active").map((p) => (
                   <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                    <td className="px-4 py-3 font-mono font-medium text-zinc-800">{p.mt5_account}</td>
-                    <td className="px-4 py-3 text-black">{p.mt5_broker}</td>
-                    <td className="px-4 py-3 text-xs text-black">{p.member_email}</td>
-                    <td className="px-4 py-3"><span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">active</span></td>
-                    <td className="px-4 py-3 text-black">{new Date(p.created_at).toLocaleDateString("en-GB")}</td>
+                    <td className="px-2 py-1 font-mono font-medium text-zinc-800">{p.mt5_account}</td>
+                    <td className="px-2 py-1 text-black">{p.mt5_broker}</td>
+                    <td className="px-2 py-1 text-xs text-black">{p.member_email}</td>
+                    <td className="px-2 py-1"><span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">active</span></td>
+                    <td className="px-2 py-1 text-black">{new Date(p.created_at).toLocaleDateString("en-GB")}</td>
                   </tr>
                 ))}
               </tbody>
@@ -206,15 +206,15 @@ export default function AdminClient({ members, ports, payments }: Props) {
 
         {activeTab === "payments" && (
           <div className="rounded-xl bg-white shadow-sm overflow-x-auto">
-            <table className="w-full text-base">
+            <table className="w-full text-xs">
               <thead>
-                <tr className="border-b bg-zinc-50 text-left text-base font-semibold text-black">
-                  <th className="px-4 py-3">เวลา</th>
-                  <th className="px-4 py-3">อีเมล</th>
-                  <th className="px-4 py-3">แพคเกจ</th>
-                  <th className="px-4 py-3">จำนวน</th>
-                  <th className="px-4 py-3">สถานะ</th>
-                  <th className="px-4 py-3 text-right">จัดการ</th>
+                <tr className="border-b bg-zinc-50 text-left text-xs font-semibold text-black">
+                  <th className="px-2 py-1">เวลา</th>
+                  <th className="px-2 py-1">อีเมล</th>
+                  <th className="px-2 py-1">แพคเกจ</th>
+                  <th className="px-2 py-1">จำนวน</th>
+                  <th className="px-2 py-1">สถานะ</th>
+                  <th className="px-2 py-1 text-right">จัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -225,22 +225,22 @@ export default function AdminClient({ members, ports, payments }: Props) {
                     const isPending = p.status === "pending";
                     return (
                       <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                        <td className="px-4 py-3 text-base text-black">
+                        <td className="px-2 py-1 text-xs text-black">
                           {new Date(p.created_at).toLocaleString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                         </td>
-                        <td className="px-4 py-3 text-base text-black">{p.email}</td>
-                        <td className="px-4 py-3 text-base font-semibold text-black">{PACKAGES[p.package]?.name || p.package}</td>
-                        <td className="px-4 py-3 font-mono text-lg font-bold text-black">{p.amount.toFixed(2)} ฿</td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 py-1 text-xs text-black">{p.email}</td>
+                        <td className="px-2 py-1 text-xs font-semibold text-black">{PACKAGES[p.package]?.name || p.package}</td>
+                        <td className="px-2 py-1 font-mono text-xs font-bold text-black">{p.amount.toFixed(2)} ฿</td>
+                        <td className="px-2 py-1">
                           <span
-                            className={`rounded-full px-3 py-1 text-base font-medium ${
+                            className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${
                               p.status === "paid" ? "bg-green-500 text-white" : p.status === "failed" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
                             {p.status === "paid" ? "✅ จ่ายแล้ว" : p.status === "failed" ? "❌ ล้มเหลว" : "⏳ รอตรวจสอบ"}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-2 py-1 text-right">
                           {isPending && (
                             <button
                               onClick={() => handleAdminVerify(p.id)}
@@ -256,7 +256,7 @@ export default function AdminClient({ members, ports, payments }: Props) {
                   })}
                 {paymentList.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-base text-zinc-400">ยังไม่มีรายการ</td>
+                    <td colSpan={6} className="px-4 py-3 text-center text-base text-zinc-400">ยังไม่มีรายการ</td>
                   </tr>
                 )}
               </tbody>
