@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     // แจ้งเตือน admin ทาง Telegram
-    notifyNewPayment(session.user.email!, pkgInfo.name, payment.amount).catch(() => {});
+    notifyNewPayment(session.user.email!, pkgInfo.name, payment.amount, payment.id).catch(() => {});
 
     return NextResponse.json({
       success: true,

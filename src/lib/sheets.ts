@@ -357,6 +357,19 @@ export async function markPaymentPaid(txnId: string): Promise<Payment> {
   return all[idx];
 }
 
+export async function markPaymentFailed(txnId: string): Promise<Payment> {
+  const all = await getAllPayments();
+  const idx = all.findIndex((p) => p.id === txnId);
+  if (idx === -1) throw new Error("Payment not found");
+  all[idx].status = "failed";
+  const sheets = await getSheets();
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:I${idx + 2}`,
+    valueInputOption: "RAW", requestBody: { values: [paymentToRow(all[idx])] },
+  });
+  return all[idx];
+}
+
 // ── Cleanup Expired Payments (ลบ pending ที่ทิ้งไว้เกินเวลา) ──
 export async function cleanupExpiredPayments(minutesOld: number = 15): Promise<number> {
   const all = await getAllPayments();
