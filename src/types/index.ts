@@ -32,7 +32,7 @@ export interface Payment {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "1000_2m" | "2000_2m" | "2490_3m" | "9990_1y" | "none";
+export type PackageType = "free" | "promo_99" | "1000_2m" | "2000_2m" | "2490_3m" | "9990_1y" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -54,25 +54,29 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 7, max_ports: 1,
     label: "ฟรี 7 วัน (1 พอร์ต)", rank: 1,
   },
+  promo_99: {
+    key: "promo_99", name: "โปรโมชั่น", name_en: "Promo", price: 99, duration_days: 30, max_ports: 2,
+    label: "🔥 99 บาท / 30 วัน (2 พอร์ต)", rank: 2,
+  },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 990, duration_days: 30, max_ports: 2,
-    label: "990 บาท / 30 วัน (2 พอร์ต)", rank: 2,
+    label: "990 บาท / 30 วัน (2 พอร์ต)", rank: 3,
   },
   "2000_2m": {
     key: "2000_2m", name: "Standard", name_en: "Standard", price: 1990, duration_days: 60, max_ports: 5,
-    label: "1,990 บาท / 60 วัน (5 พอร์ต)", rank: 3,
+    label: "1,990 บาท / 60 วัน (5 พอร์ต)", rank: 4,
   },
   "2490_3m": {
     key: "2490_3m", name: "Premium", name_en: "Premium", price: 2590, duration_days: 90, max_ports: 7,
-    label: "2,590 บาท / 90 วัน (7 พอร์ต)", rank: 4,
+    label: "2,590 บาท / 90 วัน (7 พอร์ต)", rank: 5,
   },
   "9990_1y": {
     key: "9990_1y", name: "VIP", name_en: "VIP", price: 9990, duration_days: 365, max_ports: 10,
-    label: "9,990 บาท / 1 ปี (10 พอร์ต)", rank: 5,
+    label: "9,990 บาท / 1 ปี (10 พอร์ต)", rank: 6,
   },
 };
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2000_2m", "2490_3m", "9990_1y"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "promo_99", "1000_2m", "2000_2m", "2490_3m", "9990_1y"];
 
 // ── API Responses ──
 export interface VerifyPortResponse {
