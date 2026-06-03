@@ -3,6 +3,7 @@ import { createPayment, getMemberByEmail, canUpgrade, cleanupExpiredPayments } f
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
+import { notifyNewPayment } from "@/lib/notify";
 
 
 // POST /api/payment/qr — สร้าง QR PromptPay
@@ -46,6 +47,9 @@ export async function POST(req: Request) {
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    // แจ้งเตือน admin ทาง Telegram
+    notifyNewPayment(session.user.email!, pkgInfo.name, payment.amount).catch(() => {});
 
     return NextResponse.json({
       success: true,
