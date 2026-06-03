@@ -2,11 +2,17 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
-import { PACKAGES, BUYABLE_PACKAGES } from "@/types";
+import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 
 export default function RenewPage() {
   const router = useRouter();
+  const { data: session } = useSession();
+  const isTestUser = session?.user?.email === "ipnteams@gmail.com";
+  const visiblePackages = isTestUser
+    ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES]
+    : BUYABLE_PACKAGES;
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [step, setStep] = useState<"select" | "qr" | "done">("select");
   const [qrBase64, setQrBase64] = useState("");
@@ -182,7 +188,7 @@ export default function RenewPage() {
         {error && <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
 
         <div className="space-y-3">
-          {BUYABLE_PACKAGES.map((key) => {
+          {visiblePackages.map((key) => {
             const pkg = PACKAGES[key];
             const isSelected = selected === key;
             const isFree = key === "free";
