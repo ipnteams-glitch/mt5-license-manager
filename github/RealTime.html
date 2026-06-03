@@ -101,6 +101,19 @@
             border-color: var(--gold);
             color: var(--gold);
         }
+        /* ── Summary Row ── */
+        tfoot td {
+            background: linear-gradient(90deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+            border-top: 2px solid var(--gold);
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--gold);
+            padding: 14px 20px;
+        }
+        tfoot td:first-child {
+            text-align: right;
+            letter-spacing: 1px;
+        }
         /* ── Star Ratings ── */
         .stars {
             display: inline-block;
@@ -142,6 +155,14 @@
                         <td colspan="4"><div class="loader">⏳ กำลังโหลดข้อมูล...</div></td>
                     </tr>
                 </tbody>
+                <tfoot id="tableFoot" style="display:none;">
+                    <tr>
+                        <td>📊 ผลรวมทั้งหมด</td>
+                        <td id="sumProfit">-</td>
+                        <td id="sumWeek">-</td>
+                        <td id="sumBalance">-</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
         <div style="text-align: center;">
@@ -210,7 +231,14 @@
                 }
             }
             data.sort((a, b) => String(a.name).localeCompare(String(b.name), undefined, { numeric: true, sensitivity: 'base' }));
+            
+            let sumProfit = 0, sumWeek = 0, sumBalance = 0;
+            
             data.forEach(row => {
+                sumProfit += row.profit;
+                sumWeek += row.profit7day;
+                sumBalance += row.balance;
+                
                 let profitColor = row.profit > 0 ? '#4cd137' : (row.profit < 0 ? '#ff3b3b' : '#ffffff');
                 let p7Color = row.profit7day > 0 ? '#4cd137' : (row.profit7day < 0 ? '#ff3b3b' : '#ffffff');
                 const tr = document.createElement('tr');
@@ -225,6 +253,14 @@
                 `;
                 tableBody.appendChild(tr);
             });
+            
+            // Summary row
+            const sumColor = sumProfit > 0 ? '#4cd137' : (sumProfit < 0 ? '#ff3b3b' : '#D4AF37');
+            const weekColor = sumWeek > 0 ? '#4cd137' : (sumWeek < 0 ? '#ff3b3b' : '#D4AF37');
+            document.getElementById('sumProfit').innerHTML = `<span style="color:${sumColor}">${sumProfit > 0 ? '+' : ''}${formatNumber(sumProfit)}</span>`;
+            document.getElementById('sumWeek').innerHTML = `<span style="color:${weekColor}">${sumWeek > 0 ? '+' : ''}${formatNumber(sumWeek)}</span>`;
+            document.getElementById('sumBalance').innerHTML = `$${formatNumber(sumBalance)}`;
+            document.getElementById('tableFoot').style.display = '';
         } catch (error) {
             console.error("Fetch Error:", error);
             const tableBody = document.getElementById('tableBody') || document.querySelector('tbody');
