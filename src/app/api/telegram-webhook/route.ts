@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPaymentById, markPaymentPaid, markPaymentFailed, getMemberByEmail, updateMemberPackage } from "@/lib/sheets";
 import { canUpgrade, calculateNewExpiry } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
+import { sendPaymentSuccessEmail } from "@/lib/mail";
 
 // POST /api/telegram-webhook — รับ callback จาก Telegram Bot
 export async function POST(req: Request) {
@@ -35,13 +36,20 @@ export async function POST(req: Request) {
       // อนุมัติการจ่าย
       await markPaymentPaid(txnId);
       const member = await getMemberByEmail(payment.email);
+      let expiryDate = "";
       if (member) {
         const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
         const { allowed } = canUpgrade(member.package, payment.package, isExpired);
         if (allowed) {
           const { expiry, maxPorts } = calculateNewExpiry(member, payment.package);
           await updateMemberPackage(payment.email, payment.package, maxPorts, expiry);
+          expiryDate = expiry;
         }
+      }
+      // ส่ง email แจ้งลูกค้า
+      if (member && expiryDate) {
+        const pkgInfo = PACKAGES[payment.package];
+        sendPaymentSuccessEmail(payment.email, member.name, pkgInfo.label, expiryDate).catch(() => {});
       }
       const newText = `✅ อนุมัติแล้ว\n${msg.text}`;
       await editMessage(botToken, chatId, msg.message_id, newText);
