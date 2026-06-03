@@ -127,6 +127,10 @@ export default function RenewPage() {
           setStep("done");
           setVerifying(false);
           setTimeout(() => router.push("/dashboard"), 3000);
+        } else if (data.cancelled) {
+          clearInterval(interval);
+          setVerifying(false);
+          setError("❌ รายการนี้ถูกยกเลิก — กรุณาสร้าง QR ใหม่");
         }
       } catch {}
     }, 5000);

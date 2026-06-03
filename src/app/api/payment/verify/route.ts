@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     const payment = await getPaymentById(txn_id);
     if (!payment) return NextResponse.json({ error: "ไม่พบรายการ" }, { status: 404 });
     if (payment.status === "paid") return NextResponse.json({ success: true, message: "ชำระเงินสำเร็จแล้ว" });
+    if (payment.status === "failed") return NextResponse.json({ success: false, cancelled: true, message: "รายการนี้ถูกยกเลิก" });
 
     // ถ้ามี qr_payload → ลอง verify ผ่าน EasySlip v2
     if (payment.qr_payload && payment.qr_payload.length > 10) {
