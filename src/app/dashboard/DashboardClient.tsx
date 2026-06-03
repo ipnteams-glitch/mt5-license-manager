@@ -81,9 +81,9 @@ export default function DashboardClient({
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white">
+            <a href="https://www.harvestfarm.site" target="_blank" rel="noopener" className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white hover:opacity-80">
               MT5
-            </div>
+            </a>
             <span className="font-semibold text-zinc-800">License Manager</span>
           </div>
           <div className="flex items-center gap-3">
