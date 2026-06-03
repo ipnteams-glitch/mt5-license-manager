@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { createPayment, reserveSatang, getMemberByEmail, canUpgrade } from "@/lib/sheets";
+import { createPayment, reserveSatang, getMemberByEmail, canUpgrade, cleanupExpiredPayments } from "@/lib/sheets";
 import { PACKAGES, BUYABLE_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
@@ -23,6 +23,9 @@ export async function POST(req: Request) {
     const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
     const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
     if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
+
+    // ลบ pending เก่าที่เกิน 15 นาที (ไม่สแกนจ่าย)
+    cleanupExpiredPayments().catch((e) => console.error("Cleanup failed:", e));
 
     // Reserve satang
     const satang = await reserveSatang();

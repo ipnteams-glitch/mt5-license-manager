@@ -331,6 +331,49 @@ export async function markPaymentPaid(txnId: string): Promise<Payment> {
   return all[idx];
 }
 
+// ── Cleanup Expired Payments (ลบ pending ที่ทิ้งไว้เกินเวลา) ──
+export async function cleanupExpiredPayments(minutesOld: number = 15): Promise<number> {
+  const all = await getAllPayments();
+  const now = new Date();
+  const threshold = minutesOld * 60 * 1000;
+
+  const toDelete: number[] = [];
+  for (let i = 0; i < all.length; i++) {
+    if (all[i].status === "pending") {
+      const created = new Date(all[i].created_at);
+      if (now.getTime() - created.getTime() > threshold) {
+        toDelete.push(i);
+      }
+    }
+  }
+
+  if (toDelete.length === 0) return 0;
+
+  const sheets = await getSheets();
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sheetId() });
+  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PAYMENTS_SHEET);
+  if (!sheet?.properties?.sheetId) return 0;
+  const paymentsSheetId = sheet.properties.sheetId;
+
+  const requests = toDelete.reverse().map((idx) => ({
+    deleteDimension: {
+      range: {
+        sheetId: paymentsSheetId,
+        dimension: "ROWS",
+        startIndex: idx + 1,
+        endIndex: idx + 2,
+      },
+    },
+  }));
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: sheetId(),
+    requestBody: { requests },
+  });
+
+  return toDelete.length;
+}
+
 // ── Reserve Satang (กันสตางค์ซ้ำ เหมือน payment.gs) ──
 export async function reserveSatang(): Promise<number | null> {
   const all = await getAllPayments();
