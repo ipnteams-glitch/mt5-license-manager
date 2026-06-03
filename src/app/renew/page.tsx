@@ -165,7 +165,8 @@ export default function RenewPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
         <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg text-center">
-          <h2 className="text-lg font-bold text-zinc-800 mb-2">📱 สแกน QR เพื่อชำระเงิน</h2>
+          <h2 className="text-lg font-bold text-zinc-800 mb-1">📱 สแกน QR เพื่อชำระเงิน</h2>
+          {selected && <p className="text-sm font-semibold text-blue-600 mb-1">{PACKAGES[selected].name} — {PACKAGES[selected].label}</p>}
           <p className="text-sm text-zinc-500 mb-2">จำนวน {amount.toFixed(2)} บาท</p>
 
           {/* นับถอยหลัง */}
