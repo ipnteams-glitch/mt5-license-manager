@@ -251,6 +251,10 @@ export default function DashboardClient({
             </div>
           )}
         </div>
+        {/* Footer */}
+        <div className="mx-auto max-w-4xl px-6 pb-6 text-center text-xs text-zinc-400">
+          ติดต่อ: Line: @479ufnya | Tel: 0976653645
+        </div>
       </main>
     </div>
   );
