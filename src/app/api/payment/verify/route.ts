@@ -28,18 +28,39 @@ export async function POST(req: Request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        action: "check",
+        action: "list",
         api_key: apiKey,
         type: "PROMPTPAY",
-        amount: payment.amount,
+        limit: 20,
       }),
     });
 
-    const checkData = await checkRes.json();
-    console.log("[EasySlip verify] amount:", payment.amount, "status:", checkRes.status, "data:", JSON.stringify(checkData));
-    
-    // ถ้า API ตอบว่ามีการจ่ายตรงกับยอด
-    if (checkData.success || checkData.found) {
+    const listData = await checkRes.json();
+    console.log("[EasySlip list] count:", listData?.data?.length || 0);
+
+    // มองหาธุรกรรมที่ยอดตรงกัน ±5 นาทีจากตอนสร้าง payment
+    let matched = false;
+    const paymentTime = new Date(payment.created_at);
+    const windowMs = 5 * 60 * 1000;
+    if (listData.data && Array.isArray(listData.data)) {
+      for (const txn of listData.data) {
+        const txnAmount = parseFloat(txn.amount || txn.transaction_amount || "0");
+        const txnTime = txn.date || txn.transaction_date || txn.created_at;
+        if (txnAmount && txnTime) {
+          const txnDate = new Date(txnTime);
+          if (
+            Math.abs(txnAmount - payment.amount) < 0.05 &&
+            Math.abs(txnDate.getTime() - paymentTime.getTime()) < windowMs
+          ) {
+            matched = true;
+            console.log("[EasySlip] matched:", txnAmount, txnTime);
+            break;
+          }
+        }
+      }
+    }
+
+    if (matched) {
       // Mark as paid
       await markPaymentPaid(txn_id);
 
