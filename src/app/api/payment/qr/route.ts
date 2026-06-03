@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { createPayment, reserveSatang, getMemberByEmail, canUpgrade, cleanupExpiredPayments } from "@/lib/sheets";
-import { PACKAGES, BUYABLE_PACKAGES } from "@/types";
+import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
 
@@ -11,8 +11,13 @@ export async function POST(req: Request) {
 
   try {
     const { package: pkg } = await req.json();
-    if (!BUYABLE_PACKAGES.includes(pkg as PackageType)) {
+    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType)) {
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
+    }
+
+    // Test package — เฉพาะ ipnteams@gmail.com
+    if (TEST_PACKAGES.includes(pkg as PackageType) && session.user.email !== "ipnteams@gmail.com") {
+      return NextResponse.json({ error: "แพคเกจนี้สำหรับทดสอบเท่านั้น" }, { status: 403 });
     }
 
     const pkgInfo = PACKAGES[pkg as PackageType];

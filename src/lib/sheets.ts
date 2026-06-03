@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
 import type { Member, Port, Payment, PackageType } from "@/types";
-import { PACKAGES, BUYABLE_PACKAGES } from "@/types";
+import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 
 const MEMBERS_SHEET = "members";
 const PORTS_SHEET = "ports";
@@ -140,7 +140,7 @@ export async function updateMemberPackage(
 // ── Upgrade Logic ──
 // isExpired: true หากแพคเกจปัจจุบันหมดอายุแล้ว (ใช้ตรวจสอบ free→free)
 export function canUpgrade(currentPkg: PackageType, newPkg: PackageType, isExpired?: boolean): { allowed: boolean; reason?: string } {
-  if (!BUYABLE_PACKAGES.includes(newPkg)) {
+  if (!BUYABLE_PACKAGES.includes(newPkg) && !TEST_PACKAGES.includes(newPkg)) {
     return { allowed: false, reason: "แพคเกจไม่ถูกต้อง" };
   }
 
