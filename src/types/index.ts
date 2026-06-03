@@ -55,12 +55,12 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "ฟรี 7 วัน (1 พอร์ต)", rank: 1,
   },
   "1000_2m": {
-    key: "1000_2m", name: "Basic", name_en: "Basic", price: 1000, duration_days: 30, max_ports: 2,
-    label: "1,000 บาท / 30 วัน (2 พอร์ต)", rank: 2,
+    key: "1000_2m", name: "Basic", name_en: "Basic", price: 990, duration_days: 30, max_ports: 2,
+    label: "990 บาท / 30 วัน (2 พอร์ต)", rank: 2,
   },
   "2000_2m": {
-    key: "2000_2m", name: "Standard", name_en: "Standard", price: 2000, duration_days: 60, max_ports: 5,
-    label: "2,000 บาท / 60 วัน (5 พอร์ต)", rank: 3,
+    key: "2000_2m", name: "Standard", name_en: "Standard", price: 1990, duration_days: 60, max_ports: 5,
+    label: "1,990 บาท / 60 วัน (5 พอร์ต)", rank: 3,
   },
   "2490_3m": {
     key: "2490_3m", name: "Premium", name_en: "Premium", price: 2590, duration_days: 90, max_ports: 7,
