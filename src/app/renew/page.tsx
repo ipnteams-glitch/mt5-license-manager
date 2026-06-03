@@ -47,6 +47,29 @@ export default function RenewPage() {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }
 
+  async function handleAdminVerify() {
+    if (!txnId) return;
+    setError("");
+    try {
+      const res = await fetch("/api/payment/admin-verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txn_id: txnId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (pollingRef.current) clearInterval(pollingRef.current);
+        setStep("done");
+        setVerifying(false);
+        setTimeout(() => router.push("/dashboard"), 3000);
+      } else {
+        setError(data.message || "Admin verify failed");
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }
+
   async function handleActivate() {
     if (!selected) return;
     setError("");
@@ -169,6 +192,14 @@ export default function RenewPage() {
             <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
               <span className="animate-spin">⏳</span> กำลังตรวจสอบการชำระเงิน...
             </div>
+          )}
+          {verifying && !isExpired && isTestUser && (
+            <button
+              onClick={handleAdminVerify}
+              className="mt-3 w-full rounded-lg border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 transition-all"
+            >
+              ⚡ Admin: บังคับยืนยันการชำระเงิน
+            </button>
           )}
           {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
           <button onClick={() => setStep("select")} className="mt-4 text-sm text-blue-600 hover:underline">

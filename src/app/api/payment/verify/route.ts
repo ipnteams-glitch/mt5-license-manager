@@ -35,6 +35,7 @@ export async function POST(req: Request) {
     });
 
     const checkData = await checkRes.json();
+    console.log("[EasySlip verify] amount:", payment.amount, "status:", checkRes.status, "data:", JSON.stringify(checkData));
     
     // ถ้า API ตอบว่ามีการจ่ายตรงกับยอด
     if (checkData.success || checkData.found) {
