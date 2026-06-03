@@ -245,9 +245,9 @@ export default function AdminClient({ members, ports, payments }: Props) {
                             <button
                               onClick={() => handleAdminVerify(p.id)}
                               disabled={verifyingPayId === p.id}
-                              className="rounded bg-green-600 px-5 py-2 text-base font-bold text-white hover:bg-green-700 disabled:opacity-50"
+                              className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
                             >
-                              {verifyingPayId === p.id ? "..." : "✅ ยืนยันการชำระเงิน"}
+                              {verifyingPayId === p.id ? "..." : "✅ ยืนยัน"}
                             </button>
                           )}
                         </td>
