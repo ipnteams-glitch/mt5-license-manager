@@ -59,8 +59,8 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "🧪 1 บาท / 3 วัน (3 พอร์ต)", rank: 2,
   },
   promo_69: {
-    key: "promo_69", name: "โปรโมชั่น", name_en: "Promo", price: 69, duration_days: 30, max_ports: 2,
-    label: "🔥 69 บาท / 30 วัน (2 พอร์ต)", rank: 3,
+    key: "promo_69", name: "โปรโมชั่น", name_en: "Promo", price: 69, duration_days: 30, max_ports: 1,
+    label: "🔥 69 บาท / 30 วัน (1 พอร์ต)", rank: 3,
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 990, duration_days: 30, max_ports: 2,
