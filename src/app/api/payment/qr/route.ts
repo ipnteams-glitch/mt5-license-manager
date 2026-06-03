@@ -3,6 +3,7 @@ import { createPayment, reserveSatang, getMemberByEmail, canUpgrade, cleanupExpi
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
+import { generatePromptPayPayload } from "@/lib/promptpay";
 
 // POST /api/payment/qr — สร้าง QR PromptPay
 export async function POST(req: Request) {
@@ -53,8 +54,11 @@ export async function POST(req: Request) {
     console.log("[EasySlip QR] keys:", Object.keys(qrData).join(","), "hasPayload:", !!qrData.payload, "hasData:", !!qrData.data);
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
 
-    // Create pending payment (เก็บ qr_payload ไว้ verify ทีหลัง)
-    const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrData.payload || qrData.data || "");
+    // สร้าง PromptPay payload เอง (ใช้ verify กับ EasySlip v2 ทีหลัง)
+    const qrPayload = generatePromptPayPayload("0954149282", totalAmount);
+
+    // Create pending payment (เก็บ qr_payload ไว้ verify)
+    const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrPayload);
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
