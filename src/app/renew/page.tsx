@@ -190,10 +190,10 @@ export default function RenewPage() {
             )}
           </div>
 
-          {qrBase64 && !isExpired && (
+          {qrBase64 && !isExpired && !error && (
             <img src={qrBase64} alt="PromptPay QR" className="mx-auto mb-4 rounded-lg" style={{ maxWidth: 250 }} />
           )}
-          {verifying && !isExpired && (
+          {verifying && !isExpired && !error && (
             <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
               <span className="animate-spin">⏳</span> กำลังตรวจสอบการชำระเงิน...
             </div>
