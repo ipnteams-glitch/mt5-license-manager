@@ -46,6 +46,9 @@ export default async function DashboardPage() {
     isExpired = daysLeft <= 0;
   }
 
+  const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
+  const isAdmin = adminEmails.includes(session.user.email);
+
   return (
     <DashboardClient
       member={member}
@@ -55,6 +58,7 @@ export default async function DashboardPage() {
       packageLabel={pkgInfo.label}
       daysLeft={daysLeft}
       isExpired={isExpired}
+      isAdmin={isAdmin}
     />
   );
 }

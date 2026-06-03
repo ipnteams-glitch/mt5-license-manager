@@ -12,6 +12,7 @@ type Props = {
   packageLabel: string;
   daysLeft: number;
   isExpired: boolean;
+  isAdmin: boolean;
 };
 
 export default function DashboardClient({
@@ -22,6 +23,7 @@ export default function DashboardClient({
   packageLabel,
   daysLeft,
   isExpired,
+  isAdmin,
 }: Props) {
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
@@ -91,6 +93,14 @@ export default function DashboardClient({
             >
               🔐 ต่ออายุ
             </a>
+            {isAdmin && (
+              <a
+                href="/admin"
+                className="rounded-lg border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition-all"
+              >
+                ⚙️ จัดการ
+              </a>
+            )}
             <span className="text-sm text-zinc-500">{member.email}</span>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
