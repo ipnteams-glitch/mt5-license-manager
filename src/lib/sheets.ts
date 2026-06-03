@@ -370,15 +370,15 @@ export async function markPaymentFailed(txnId: string): Promise<Payment> {
   return all[idx];
 }
 
-// ── Cleanup Expired Payments (ลบ pending ที่ทิ้งไว้เกินเวลา) ──
-export async function cleanupExpiredPayments(minutesOld: number = 15): Promise<number> {
+// ── Cleanup Old Payments (ลบ paid/failed เกิน 7 วัน, pending เก็บไว้) ──
+export async function cleanupExpiredPayments(minutesOld: number = 10080): Promise<number> {
   const all = await getAllPayments();
   const now = new Date();
   const threshold = minutesOld * 60 * 1000;
 
   const toDelete: number[] = [];
   for (let i = 0; i < all.length; i++) {
-    if (all[i].status === "pending") {
+    if (all[i].status !== "pending") {
       const created = new Date(all[i].created_at);
       if (now.getTime() - created.getTime() > threshold) {
         toDelete.push(i);
