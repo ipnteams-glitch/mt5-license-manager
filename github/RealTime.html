@@ -200,12 +200,13 @@
                 if (row && row.c && row.c[0] && row.c[0].v !== null && String(row.c[0].v).toLowerCase() !== "acc") { 
                     const balance = row.c[2] && row.c[2].v !== null ? parseFloat(row.c[2].v) : 0;
                     const profit7day = row.c[6] && row.c[6].v !== null ? parseFloat(row.c[6].v) : 0;
+                    const lastWeekProfit = row.c[7] && row.c[7].v !== null ? parseFloat(row.c[7].v) : 0;
                     data.push({
                         name: row.c[1] && row.c[1].v !== null ? row.c[1].v : "-",
                         balance: balance,
                         profit: row.c[4] && row.c[4].v !== null ? parseFloat(row.c[4].v) : 0,
                         profit7day: profit7day,
-                        stars: getStars(profit7day, balance)
+                        stars: getStars(lastWeekProfit, balance)
                     });
                 }
             }
