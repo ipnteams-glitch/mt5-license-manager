@@ -229,8 +229,8 @@ export default function AdminClient({ members, ports, payments }: Props) {
                           {new Date(p.created_at).toLocaleString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                         </td>
                         <td className="px-4 py-3 text-base text-black">{p.email}</td>
-                        <td className="px-4 py-3 text-base">{PACKAGES[p.package]?.name || p.package}</td>
-                        <td className="px-4 py-3 font-mono text-base">{p.amount.toFixed(2)} ฿</td>
+                        <td className="px-4 py-3 text-base font-semibold text-black">{PACKAGES[p.package]?.name || p.package}</td>
+                        <td className="px-4 py-3 font-mono text-lg font-bold text-black">{p.amount.toFixed(2)} ฿</td>
                         <td className="px-4 py-3">
                           <span
                             className={`rounded-full px-3 py-1 text-base font-medium ${
