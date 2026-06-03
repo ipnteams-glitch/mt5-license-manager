@@ -60,9 +60,12 @@
             white-space: nowrap;
         }
         th:first-child, td:first-child {
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            min-width: 130px;
+        }
+        .ea-name-cell {
+            font-weight: bold;
+            color: #ffeb3b;
+            font-size: 14px;
         }
         th {
             background-color: rgba(212, 175, 55, 0.1);
@@ -128,16 +131,12 @@
         }
         .star-on { color: #D4AF37; }
         .star-off { color: #3a3f4b; }
-        .ea-name-cell {
-            font-weight: bold;
-            color: #ffeb3b;
-        }
         @media (max-width: 600px) {
             th, td { padding: 10px 8px; font-size: 12px; }
             th { font-size: 11px; }
             .header-box h1 { font-size: 22px; }
-            th:first-child, td:first-child { max-width: 90px; }
-            .ea-name-cell { font-size: 12px; }
+            th:first-child, td:first-child { min-width: 100px; }
+            .ea-name-cell { font-size: 11px; }
             .stars { font-size: 13px; letter-spacing: 1px; }
         }
     </style>
