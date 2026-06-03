@@ -3,7 +3,7 @@ import { createPayment, reserveSatang, getMemberByEmail, canUpgrade, cleanupExpi
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
-import { generatePromptPayPayload } from "@/lib/promptpay";
+
 
 // POST /api/payment/qr — สร้าง QR PromptPay
 export async function POST(req: Request) {
@@ -39,18 +39,28 @@ export async function POST(req: Request) {
 
     const totalAmount = pkgInfo.price + satang;
 
-    // สร้าง PromptPay payload เอง (ใช้ทั้งสร้าง QR และ verify v2)
-    const qrPayload = generatePromptPayPayload("0954149282", totalAmount);
-    const qrImageUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrPayload)}&size=300&margin=1`;
+    // สร้าง QR ผ่าน EasySlip
+    const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "PROMPTPAY", msisdn: "0954149282", amount: totalAmount }),
+    });
+    const qrData = await qrRes.json();
+    console.log("[EasySlip QR] all keys:", Object.keys(qrData).join(", "));
+    for (const [k, v] of Object.entries(qrData)) {
+      console.log(`[EasySlip QR] ${k}:`, String(v).slice(0, 100));
+    }
+    if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
 
-    // Create pending payment (เก็บ qr_payload ไว้ verify)
+    // เก็บ payload ถ้ามี (เผื่อใช้ verify v2)
+    const qrPayload = qrData.payload || qrData.qr_payload || qrData.data || qrData.raw || "";
     const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrPayload);
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
     return NextResponse.json({
       success: true,
-      qr_base64: qrImageUrl,
+      qr_base64: `data:image/png;base64,${qrData.image_base64}`,
       amount: totalAmount,
       satang,
       txn_id: payment.id,
