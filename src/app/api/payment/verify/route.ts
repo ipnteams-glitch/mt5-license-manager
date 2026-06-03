@@ -18,50 +18,29 @@ export async function POST(req: Request) {
     if (!payment) return NextResponse.json({ error: "ไม่พบรายการ" }, { status: 404 });
     if (payment.status === "paid") return NextResponse.json({ success: true, message: "ชำระเงินสำเร็จแล้ว" });
 
-    // ตรวจสอบกับ EasySlip
+    // ตรวจสอบกับ EasySlip v2 — ต้องมี qr_payload
     const apiKey = await getEasySlipApiKey();
-    // EasySlip verification: ตรวจสอบสลิป
-    const now = new Date();
-    // ลองเช็คโดยดึงรายการล่าสุด (simplified - EasySlip API อาจมีวิธีตรวจสอบต่างกัน)
-    // ในที่นี้ใช้วิธีเทียบยอดจาก transaction list
-    const checkRes = await fetch("https://bill-payment-api.easyslip.com/", {
+
+    if (!payment.qr_payload) {
+      return NextResponse.json({ success: false, message: "ยังไม่พบการจ่าย กรุณาลองใหม่" });
+    }
+
+    const v2Res = await fetch("https://api.easyslip.com/v2/verify/bank", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        action: "list",
-        msisdn: "0954149282",
-        api_key: apiKey,
-        type: "PROMPTPAY",
-        limit: 20,
+        payload: payment.qr_payload,
+        matchAmount: payment.amount,
       }),
     });
 
-    const listData = await checkRes.json();
-    console.log("[EasySlip list] status:", checkRes.status, "full:", JSON.stringify(listData).slice(0, 500));
+    const v2Data = await v2Res.json();
+    console.log("[EasySlip v2] status:", v2Res.status, "success:", v2Data.success, "matched:", v2Data.data?.isAmountMatched);
 
-    // มองหาธุรกรรมที่ยอดตรงกัน ±5 นาทีจากตอนสร้าง payment
-    let matched = false;
-    const paymentTime = new Date(payment.created_at);
-    const windowMs = 5 * 60 * 1000;
-    if (listData.data && Array.isArray(listData.data)) {
-      for (const txn of listData.data) {
-        const txnAmount = parseFloat(txn.amount || txn.transaction_amount || "0");
-        const txnTime = txn.date || txn.transaction_date || txn.created_at;
-        if (txnAmount && txnTime) {
-          const txnDate = new Date(txnTime);
-          if (
-            Math.abs(txnAmount - payment.amount) < 0.05 &&
-            Math.abs(txnDate.getTime() - paymentTime.getTime()) < windowMs
-          ) {
-            matched = true;
-            console.log("[EasySlip] matched:", txnAmount, txnTime);
-            break;
-          }
-        }
-      }
-    }
-
-    if (matched) {
+    if (v2Data.success && v2Data.data?.isAmountMatched) {
       // Mark as paid
       await markPaymentPaid(txn_id);
 

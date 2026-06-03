@@ -38,10 +38,7 @@ export async function POST(req: Request) {
 
     const totalAmount = pkgInfo.price + satang;
 
-    // Create pending payment
-    const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang);
-
-    // Generate QR via EasySlip (no API key needed)
+    // Generate QR via EasySlip
     const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -54,6 +51,9 @@ export async function POST(req: Request) {
 
     const qrData = await qrRes.json();
     if (!qrData.image_base64) throw new Error("สร้าง QR ไม่สำเร็จ");
+
+    // Create pending payment (เก็บ qr_payload ไว้ verify ทีหลัง)
+    const payment = await createPayment(session.user.email, pkg as PackageType, totalAmount, satang, qrData.payload || qrData.data || "");
 
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 

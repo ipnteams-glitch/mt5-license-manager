@@ -29,6 +29,7 @@ export interface Payment {
   status: "pending" | "paid" | "failed";
   created_at: string;
   paid_at?: string;
+  qr_payload?: string;
 }
 
 // ── Package Types ──

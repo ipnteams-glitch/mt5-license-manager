@@ -70,10 +70,11 @@ function paymentFromRow(row: string[]): Payment {
     amount: parseFloat(row[3]) || 0, satang: parseFloat(row[4]) || 0,
     status: (row[5] as "pending" | "paid" | "failed") || "pending",
     created_at: row[6] || "", paid_at: row[7] || "",
+    qr_payload: row[8] || "",
   };
 }
 function paymentToRow(p: Payment): string[] {
-  return [p.id, p.email, p.package, String(p.amount), String(p.satang), p.status, p.created_at, p.paid_at || ""];
+  return [p.id, p.email, p.package, String(p.amount), String(p.satang), p.status, p.created_at, p.paid_at || "", p.qr_payload || ""];
 }
 
 // ── Members ──
@@ -263,7 +264,7 @@ export async function findPortByAccount(mt5Account: string): Promise<Port | null
 export async function getAllPayments(): Promise<Payment[]> {
   const sheets = await getSheets();
   try {
-    const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:H` });
+    const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I` });
     const rows = res.data.values; if (!rows || rows.length <= 1) return [];
     return rows.slice(1).map(paymentFromRow);
   } catch {
@@ -272,15 +273,16 @@ export async function getAllPayments(): Promise<Payment[]> {
   }
 }
 
-export async function createPayment(email: string, pkg: PackageType, amount: number, satang: number): Promise<Payment> {
+export async function createPayment(email: string, pkg: PackageType, amount: number, satang: number, qrPayload?: string): Promise<Payment> {
   const payment: Payment = {
     id: uuidv4(), email, package: pkg, amount, satang,
     status: "pending", created_at: new Date().toISOString(),
+    qr_payload: qrPayload || "",
   };
   const sheets = await getSheets();
   try {
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:H`,
+      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I`,
       valueInputOption: "RAW", requestBody: { values: [paymentToRow(payment)] },
     });
   } catch {
@@ -299,13 +301,13 @@ export async function createPayment(email: string, pkg: PackageType, amount: num
     });
     // ใส่ header
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:H`,
+      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I`,
       valueInputOption: "RAW",
-      requestBody: { values: [["id", "email", "package", "amount", "satang", "status", "created_at", "paid_at"]] },
+      requestBody: { values: [["id", "email", "package", "amount", "satang", "status", "created_at", "paid_at", "qr_payload"]] },
     });
     // ลองเขียนอีกครั้ง
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:H`,
+      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I`,
       valueInputOption: "RAW", requestBody: { values: [paymentToRow(payment)] },
     });
   }
@@ -325,7 +327,7 @@ export async function markPaymentPaid(txnId: string): Promise<Payment> {
   all[idx].paid_at = new Date().toISOString();
   const sheets = await getSheets();
   await sheets.spreadsheets.values.update({
-    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:H${idx + 2}`,
+    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:I${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [paymentToRow(all[idx])] },
   });
   return all[idx];
