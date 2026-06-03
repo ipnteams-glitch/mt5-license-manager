@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     });
 
     const listData = await checkRes.json();
-    console.log("[EasySlip list] count:", listData?.data?.length || 0);
+    console.log("[EasySlip list] status:", checkRes.status, "full:", JSON.stringify(listData).slice(0, 500));
 
     // มองหาธุรกรรมที่ยอดตรงกัน ±5 นาทีจากตอนสร้าง payment
     let matched = false;
