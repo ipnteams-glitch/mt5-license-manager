@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         action: "check",
         api_key: apiKey,
+        type: "PROMPTPAY",
         amount: payment.amount,
       }),
     });
