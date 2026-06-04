@@ -13,7 +13,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
   const [expiryDate, setExpiryDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<"members" | "ports" | "payments">("members");
+  const [activeTab, setActiveTab] = useState<"members" | "ports" | "payments" | "whitelist">("members");
   const [paymentList, setPaymentList] = useState(payments);
   const [verifyingPayId, setVerifyingPayId] = useState<string | null>(null);
   const [wlList, setWlList] = useState(whitelist);
