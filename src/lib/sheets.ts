@@ -443,7 +443,7 @@ export async function getAllWhitelist(): Promise<{ name: string; broker: string;
   try {
     const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${WHITELIST_SHEET}!A:C` });
     const rows = res.data.values; if (!rows || rows.length <= 1) return [];
-    return rows.slice(1).map((r) => ({ name: r[0] || "", broker: r[1] || "", created_at: r[2] || "" }));
+    return rows.slice(1).slice(-100).map((r) => ({ name: r[0] || "", broker: r[1] || "", created_at: r[2] || "" }));
   } catch {
     return [];
   }
