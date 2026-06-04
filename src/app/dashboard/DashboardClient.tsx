@@ -79,36 +79,23 @@ export default function DashboardClient({
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <a href="https://www.harvestfarm.site" target="_blank" rel="noopener" className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white hover:opacity-80">
-              MT5
-            </a>
-            <span className="font-semibold text-zinc-800">License Manager</span>
-            <span className="text-xs text-zinc-400 ml-4">Line: @479ufnya </span>
+        <div className="mx-auto max-w-4xl px-3 py-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <a href="https://www.harvestfarm.site" target="_blank" rel="noopener" className="flex h-7 w-7 items-center justify-center rounded bg-blue-600 text-xs font-bold text-white hover:opacity-80">MT5</a>
+              <span className="text-sm font-semibold text-zinc-800">License Manager</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <a href="/renew" className="rounded bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white">🔐 ต่ออายุ</a>
+              {isAdmin && <a href="/admin" className="rounded border px-3 py-1 text-xs font-medium">⚙️ จัดการ</a>}
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <a
-              href="/renew"
-              className="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:from-purple-700 hover:to-blue-700 transition-all"
-            >
-              🔐 ต่ออายุ
-            </a>
-            {isAdmin && (
-              <a
-                href="/admin"
-                className="rounded-lg border border-zinc-300 px-4 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 transition-all"
-              >
-                ⚙️ จัดการ
-              </a>
-            )}
-            <span className="text-sm text-zinc-500">{member.email}</span>
-            <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              className="rounded-lg px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100"
-            >
-              ออกจากระบบ
-            </button>
+          <div className="flex items-center justify-between mt-1.5">
+            <a href="https://line.me/R/ti/p/@479ufnya" target="_blank" className="rounded bg-green-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-600">Line: @479ufnya</a>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-zinc-500">{member.email}</span>
+              <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-xs text-zinc-500 hover:text-red-500">ออก</button>
+            </div>
           </div>
         </div>
       </header>
