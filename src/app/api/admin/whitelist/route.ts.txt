@@ -1,0 +1,25 @@
+import { auth } from "@/lib/auth";                                                                                          ││ 100% complete (5/5)                            │
+    import { addWhitelist, removeWhitelist } from "@/lib/sheets";                                                               ││ [x] #1 sheets.ts: เพิ่ม whitelist CRUD           │
+    import { NextResponse } from "next/server";                                                                                 ││ [x] #2 verify-port route: รับ name + broker ... │
+                                                                                                                                ││ [x] #3 AdminClient: เพิ่มแท็บ whitelist + ปุ่มเพิ่... │
+    export async function POST(req: Request) {                                                                                  ││ [x] #4 admin/page.tsx: fetch whitelist data    │
+      const s = await auth();                                                                                                   ││ [x] #5 commit + push                           │
+      if (!s?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });                                ││                                                │
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());                                            ││                                                │
+      if (!admins.includes(s.user.email)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });                    ││                                                │
+      const { name, broker } = await req.json();                                                                                ││                                                │
+      if (!name || !broker) return NextResponse.json({ error: "Missing" }, { status: 400 });                                    ││                                                │
+      await addWhitelist(name, broker);                                                                                         ││                                                │
+      return NextResponse.json({ ok: true });                                                                                   ││                                                │
+    }                                                                                                                           │└────────────────────────────────────────────────┘
+                                                                                                                                │┌ Tasks ─────────────────────────────────────────┐
+    export async function DELETE(req: Request) {                                                                                ││ turn 47092f2d-... (completed)                  │
+      const s = await auth();                                                                                                   ││ No active tasks                                │
+      if (!s?.user?.email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });                                ││                                                │
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map(e => e.trim());                                            ││                                                │
+      if (!admins.includes(s.user.email)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });                    ││                                                │
+      const idx = parseInt(new URL(req.url).searchParams.get("idx") || "-1");                                                   ││                                                │
+      if (idx < 0) return NextResponse.json({ error: "Invalid" }, { status: 400 });                                             ││                                                │
+      await removeWhitelist(idx);                                                                                               ││                                                │
+      return NextResponse.json({ ok: true });                                                                                   ││                                                │
+    }
