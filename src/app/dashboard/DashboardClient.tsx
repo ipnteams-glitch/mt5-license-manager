@@ -104,32 +104,46 @@ export default function DashboardClient({
         {/* Package Card */}
         <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-bold text-zinc-800">📦 แพคเกจของคุณ</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div>
-              <p className="text-sm text-zinc-500">แพคเกจ</p>
-              <p className="font-semibold text-zinc-900">{packageLabel}</p>
-            </div>
-            <div>
-              <p className="text-sm text-zinc-500">สถานะ</p>
-              {isExpired ? (
-                <p className="font-semibold text-red-600">❌ หมดอายุแล้ว</p>
-              ) : daysLeft > 0 ? (
-                <p className="font-semibold text-green-600">✅ เหลือ {daysLeft} วัน</p>
-              ) : (
-                <p className="font-semibold text-zinc-500">ไม่มีแพคเกจ</p>
-              )}
-            </div>
-            <div>
-              <p className="text-sm text-zinc-500">โควต้าพอร์ต</p>
-              <p className="font-semibold text-zinc-900">
-                {usedCount} / {portsTotal}
-                {portsTotal > 0 && (
-                  <span className="ml-2 text-xs text-zinc-400">
-                    ({portsTotal - usedCount} เหลือ)
-                  </span>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 grid gap-4 sm:grid-cols-3">
+              <div>
+                <p className="text-sm text-zinc-500">แพคเกจ</p>
+                <p className="font-semibold text-zinc-900">{packageLabel}</p>
+              </div>
+              <div>
+                <p className="text-sm text-zinc-500">สถานะ</p>
+                {isExpired ? (
+                  <p className="font-semibold text-red-600">❌ หมดอายุแล้ว</p>
+                ) : daysLeft > 0 ? (
+                  <p className="font-semibold text-green-600">✅ เหลือ {daysLeft} วัน</p>
+                ) : (
+                  <p className="font-semibold text-zinc-500">ไม่มีแพคเกจ</p>
                 )}
-              </p>
+              </div>
+              <div>
+                <p className="text-sm text-zinc-500">โควต้าพอร์ต</p>
+                <p className="font-semibold text-zinc-900">
+                  {usedCount} / {portsTotal}
+                  {portsTotal > 0 && (
+                    <span className="ml-2 text-xs text-zinc-400">
+                      ({portsTotal - usedCount} เหลือ)
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
+            <a
+              href="https://drive.google.com/drive/folders/16l_45ZJOdT-qAtkU2gB9S5eWrVlHf_J9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 self-center"
+            >
+              <img
+                src="/downloadea.png"
+                alt="Download EA"
+                className="w-32 h-auto rounded-lg hover:opacity-80 transition-opacity"
+              />
+            </a>
           </div>
         </div>
 
