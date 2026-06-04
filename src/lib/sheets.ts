@@ -497,10 +497,12 @@ export async function removeWhitelist(index: number): Promise<void> {
 
 export function checkWhitelist(whitelist: { name: string; broker: string }[], name: string, broker: string): boolean {
   const inputWords = name.trim().toLowerCase().split(/\s+/).sort();
-  const brokerShort = broker.trim().toLowerCase().slice(0, 6);
+  const brokerLower = broker.trim().toLowerCase();
   return whitelist.some((w) => {
     const wlWords = w.name.trim().toLowerCase().split(/\s+/).sort();
     const nameMatch = inputWords.length === wlWords.length && inputWords.every((word, i) => word === wlWords[i]);
-    return nameMatch && w.broker.trim().toLowerCase().slice(0, 6) === brokerShort;
+    const wlBroker = w.broker.trim().toLowerCase();
+    const brokerMatch = brokerLower.includes(wlBroker) || wlBroker.includes(brokerLower);
+    return nameMatch && brokerMatch;
   });
 }
