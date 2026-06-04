@@ -298,8 +298,8 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
         {activeTab === "whitelist" && (
           <div className="rounded-xl bg-white shadow-sm p-4">
             <form onSubmit={handleAddWhitelist} className="flex gap-2 mb-4">
-              <input value={wlName} onChange={(e) => setWlName(e.target.value)} placeholder="ชื่อ-สกุล" className="flex-1 rounded border px-2 py-1 text-sm" required />
-              <input value={wlBroker} onChange={(e) => setWlBroker(e.target.value)} placeholder="Broker" className="w-32 rounded border px-2 py-1 text-sm" required />
+              <input value={wlName} onChange={(e) => setWlName(e.target.value)} placeholder="ชื่อ-สกุล" className="flex-1 rounded border px-2 py-1 text-sm text-black" required />
+              <input value={wlBroker} onChange={(e) => setWlBroker(e.target.value)} placeholder="Broker" className="w-32 rounded border px-2 py-1 text-sm text-black" required />
               <button type="submit" disabled={wlAdding} className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50">{wlAdding ? "..." : "✅ เพิ่ม"}</button>
             </form>
             <div className="overflow-x-auto">
