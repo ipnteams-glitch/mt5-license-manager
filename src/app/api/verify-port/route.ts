@@ -1,18 +1,31 @@
-import { findPortByAccount, getMemberByEmail } from "@/lib/sheets";
+import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 
-// GET /api/verify-port?account=12345678
-// ให้ EA เรียก — ตรวจสอบว่าพอร์ตนี้มีสิทธิ์ใช้งานหรือไม่
+// GET /api/verify-port?account=12345678&name=xxx&broker=yyy
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const account = searchParams.get("account");
+  const name = searchParams.get("name") || "";
+  const broker = searchParams.get("broker") || "";
 
   if (!account) {
-    return NextResponse.json(
-      { valid: false, reason: "ต้องระบุ account number" },
-      { status: 400 }
-    );
+    return NextResponse.json({ valid: false, reason: "ต้องระบุ account number" }, { status: 400 });
+  }
+
+  // Whitelist — ไม่จำกัดพอร์ต ไม่หมดอายุ
+  if (name && broker) {
+    const whitelist = await getAllWhitelist();
+    if (checkWhitelist(whitelist, name, broker)) {
+      return NextResponse.json({
+        valid: true,
+        email: "whitelist",
+        package: "Whitelist VIP",
+        package_key: "whitelist",
+        expiry_date: "2099-12-31",
+        days_left: 9999,
+      });
+    }
   }
 
   try {

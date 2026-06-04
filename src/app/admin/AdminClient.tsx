@@ -4,9 +4,9 @@ import { useState } from "react";
 import type { Member, Port, PackageType, Payment } from "@/types";
 import { PACKAGES } from "@/types";
 
-type Props = { members: Member[]; ports: Port[]; payments: Payment[] };
+type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist: { name: string; broker: string; created_at: string }[] };
 
-export default function AdminClient({ members, ports, payments }: Props) {
+export default function AdminClient({ members, ports, payments, whitelist }: Props) {
   const [memberList, setMemberList] = useState(members);
   const [editing, setEditing] = useState<string | null>(null);
   const [selectedPkg, setSelectedPkg] = useState<PackageType>("none");
@@ -16,6 +16,37 @@ export default function AdminClient({ members, ports, payments }: Props) {
   const [activeTab, setActiveTab] = useState<"members" | "ports" | "payments">("members");
   const [paymentList, setPaymentList] = useState(payments);
   const [verifyingPayId, setVerifyingPayId] = useState<string | null>(null);
+  const [wlList, setWlList] = useState(whitelist);
+  const [wlName, setWlName] = useState("");
+  const [wlBroker, setWlBroker] = useState("");
+  const [wlAdding, setWlAdding] = useState(false);
+
+  async function handleAddWhitelist(e: React.FormEvent) {
+    e.preventDefault();
+    if (!wlName.trim() || !wlBroker.trim()) return;
+    setWlAdding(true);
+    try {
+      const res = await fetch("/api/admin/whitelist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: wlName, broker: wlBroker }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setWlList([...wlList, { name: wlName, broker: wlBroker, created_at: new Date().toISOString() }]);
+      setWlName(""); setWlBroker("");
+      setMsg("✅ เพิ่ม whitelist แล้ว");
+    } catch { setMsg("❌ เพิ่มไม่สำเร็จ"); }
+    finally { setWlAdding(false); }
+  }
+
+  async function handleRemoveWhitelist(idx: number) {
+    try {
+      const res = await fetch(`/api/admin/whitelist?idx=${idx}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed");
+      setWlList(wlList.filter((_, i) => i !== idx));
+      setMsg("✅ ลบแล้ว");
+    } catch { setMsg("❌ ลบไม่สำเร็จ"); }
+  }
 
   async function handleAdminVerify(txnId: string) {
     setVerifyingPayId(txnId);
@@ -96,13 +127,13 @@ export default function AdminClient({ members, ports, payments }: Props) {
 
       <main className="mx-auto max-w-5xl px-6 py-3">
         <div className="mb-6 flex gap-2">
-          {(["members", "ports", "payments"] as const).map((tab) => (
+          {(["members", "ports", "payments", "whitelist"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`rounded-lg px-4 py-2 text-base font-medium ${activeTab === tab ? "bg-blue-600 text-white" : "bg-white text-black hover:bg-zinc-100"}`}
             >
-              {tab === "members" ? `👥 สมาชิก (${memberList.length})` : tab === "ports" ? `🔌 พอร์ต (${ports.filter((p) => p.status === "active").length})` : `💰 รอตรวจสอบ (${paymentList.filter((p) => p.status === "pending").length})`}
+              {tab === "members" ? `👥 สมาชิก` : tab === "ports" ? `🔌 พอร์ต` : tab === "payments" ? `💰 รอตรวจสอบ` : `⭐ Whitelist (${wlList.length})`}
             </button>
           ))}
         </div>
@@ -261,6 +292,43 @@ export default function AdminClient({ members, ports, payments }: Props) {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {activeTab === "whitelist" && (
+          <div className="rounded-xl bg-white shadow-sm p-4">
+            <form onSubmit={handleAddWhitelist} className="flex gap-2 mb-4">
+              <input value={wlName} onChange={(e) => setWlName(e.target.value)} placeholder="ชื่อ-สกุล" className="flex-1 rounded border px-2 py-1 text-sm" required />
+              <input value={wlBroker} onChange={(e) => setWlBroker(e.target.value)} placeholder="Broker" className="w-32 rounded border px-2 py-1 text-sm" required />
+              <button type="submit" disabled={wlAdding} className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50">{wlAdding ? "..." : "✅ เพิ่ม"}</button>
+            </form>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b text-left text-xs font-semibold text-black">
+                    <th className="px-2 py-1">ชื่อ</th>
+                    <th className="px-2 py-1">Broker</th>
+                    <th className="px-2 py-1">วันที่เพิ่ม</th>
+                    <th className="px-2 py-1 text-right"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {wlList.map((w, i) => (
+                    <tr key={i} className="border-b border-zinc-100">
+                      <td className="px-2 py-1 font-medium text-black">{w.name}</td>
+                      <td className="px-2 py-1 text-black">{w.broker}</td>
+                      <td className="px-2 py-1 text-zinc-500">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                      <td className="px-2 py-1 text-right">
+                        <button onClick={() => handleRemoveWhitelist(i)} className="text-xs text-red-500 hover:text-red-700">🗑</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {wlList.length === 0 && (
+                    <tr><td colSpan={4} className="px-2 py-4 text-center text-zinc-400">ยังไม่มีรายการ</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </main>

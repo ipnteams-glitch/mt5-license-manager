@@ -6,6 +6,7 @@ import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 const MEMBERS_SHEET = "members";
 const PORTS_SHEET = "ports";
 const PAYMENTS_SHEET = "payments";
+const WHITELIST_SHEET = "whitelist";
 
 // ── Auth ──
 function getAuth() {
@@ -428,9 +429,77 @@ export async function reserveSatang(): Promise<number | null> {
     }
   }
 
-  for (let i = 1; i <= 49; i++) {
+  for (let i = 1; i <= 99; i++) {
     const val = parseFloat((i / 100).toFixed(2));
     if (!usedSatangs.includes(val)) return val;
   }
   return null;
+}
+
+// ── Whitelist (VIP ไม่จำกัดพอร์ต ไม่งดอายุ) ──
+
+export async function getAllWhitelist(): Promise<{ name: string; broker: string; created_at: string }[]> {
+  const sheets = await getSheets();
+  try {
+    const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${WHITELIST_SHEET}!A:C` });
+    const rows = res.data.values; if (!rows || rows.length <= 1) return [];
+    return rows.slice(1).map((r) => ({ name: r[0] || "", broker: r[1] || "", created_at: r[2] || "" }));
+  } catch {
+    return [];
+  }
+}
+
+export async function addWhitelist(name: string, broker: string): Promise<void> {
+  const sheets = await getSheets();
+  try {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId(), range: `${WHITELIST_SHEET}!A:C`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[name, broker, new Date().toISOString()]] },
+    });
+  } catch {
+    // สร้าง sheet whitelist
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: sheetId(),
+      requestBody: { requests: [{ addSheet: { properties: { title: WHITELIST_SHEET } } }] },
+    });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId(), range: `${WHITELIST_SHEET}!A:C`,
+      valueInputOption: "RAW",
+      requestBody: { values: [["name", "broker", "created_at"]] },
+    });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sheetId(), range: `${WHITELIST_SHEET}!A:C`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[name, broker, new Date().toISOString()]] },
+    });
+  }
+}
+
+export async function removeWhitelist(index: number): Promise<void> {
+  const all = await getAllWhitelist();
+  if (index < 0 || index >= all.length) throw new Error("Invalid index");
+  const sheets = await getSheets();
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sheetId() });
+  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === WHITELIST_SHEET);
+  if (!sheet?.properties?.sheetId) throw new Error("Sheet not found");
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: sheetId(),
+    requestBody: {
+      requests: [{
+        deleteDimension: {
+          range: { sheetId: sheet.properties.sheetId, dimension: "ROWS", startIndex: index + 1, endIndex: index + 2 },
+        },
+      }],
+    },
+  });
+}
+
+export function checkWhitelist(whitelist: { name: string; broker: string }[], name: string, broker: string): boolean {
+  const nameLower = name.trim().toLowerCase();
+  const brokerShort = broker.trim().toLowerCase().slice(0, 6);
+  return whitelist.some((w) =>
+    w.name.trim().toLowerCase() === nameLower &&
+    w.broker.trim().toLowerCase().slice(0, 6) === brokerShort
+  );
 }

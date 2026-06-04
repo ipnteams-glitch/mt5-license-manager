@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getAllMembers, getAllPorts, getAllPayments } from "@/lib/sheets";
+import { getAllMembers, getAllPorts, getAllPayments, getAllWhitelist } from "@/lib/sheets";
 import type { Member, Port, Payment } from "@/types";
 import AdminClient from "./AdminClient";
 
@@ -26,13 +26,15 @@ export default async function AdminPage() {
   let members: Member[] = [];
   let ports: Port[] = [];
   let payments: Payment[] = [];
+  let whitelist: { name: string; broker: string; created_at: string }[] = [];
   try {
     members = await getAllMembers();
     ports = await getAllPorts();
     payments = await getAllPayments();
+    whitelist = await getAllWhitelist();
   } catch (e) {
     console.error("Admin fetch failed:", e);
   }
 
-  return <AdminClient members={members} ports={ports} payments={payments} />;
+  return <AdminClient members={members} ports={ports} payments={payments} whitelist={whitelist} />;
 }
