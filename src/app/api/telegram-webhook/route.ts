@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getPaymentById, markPaymentFailed, approvePaymentAndUpgrade } from "@/lib/sheets";
-import { PACKAGES } from "@/types";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { retry } from "@/lib/retry";
 
@@ -26,83 +25,52 @@ export async function POST(req: Request) {
 
     const payment = await getPaymentById(txnId);
 
-    if (!payment) {
-      await answerCallback(botToken, cb.id, "\u274c \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49");
+    if (!payment || payment.status === "paid" || payment.status === "failed") {
+      const label = !payment
+        ? "\u274c \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49"
+        : payment.status === "paid"
+        ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27"
+        : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27";
+
+      await answerCallback(botToken, cb.id, label);
+      await editMessage(botToken, chatId, msg.message_id, label);
       await removeKeyboard(botToken, chatId, msg.message_id);
       return NextResponse.json({ ok: true });
     }
 
-    if (payment.status === "paid") {
-      await answerCallback(botToken, cb.id, "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27");
-      await editMessage(botToken, chatId, msg.message_id, "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27");
-      await removeKeyboard(botToken, chatId, msg.message_id);
-      return NextResponse.json({ ok: true });
+    // ดำเนินการแบบ sync
+    let label = "";
+    try {
+      if (action === "approve") {
+        const result = await retry(
+          () => approvePaymentAndUpgrade(txnId),
+          "approvePaymentAndUpgrade",
+          3,
+        );
+        sendPaymentSuccessEmail(
+          result.memberEmail, result.memberName,
+          result.packageLabel, result.expiryDate,
+        ).catch(() => {});
+        label = "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27";
+      } else {
+        await retry(() => markPaymentFailed(txnId), "markPaymentFailed", 3);
+        label = "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27";
+      }
+    } catch (err: any) {
+      console.error(`[webhook] failed: ${err.message}`);
+      label = action === "approve"
+        ? "\u274c \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07"
+        : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07";
     }
 
-    if (payment.status === "failed") {
-      await answerCallback(botToken, cb.id, "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27");
-      await editMessage(botToken, chatId, msg.message_id, "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27");
-      await removeKeyboard(botToken, chatId, msg.message_id);
-      return NextResponse.json({ ok: true });
-    }
-
-    // หยุด spinner + แสดงสถานะทันที
-    await answerCallback(botToken, cb.id, "\u23f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e14\u0e33\u0e40\u0e19\u0e34\u0e19\u0e01\u0e32\u0e23...");
-    await editMessage(botToken, chatId, msg.message_id, msg.text + "\n\n\u23f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e14\u0e33\u0e40\u0e19\u0e34\u0e19\u0e01\u0e32\u0e23...");
-
-    // ประมวลผลเบื้องหลัง
-    processCallback(botToken, chatId, msg.message_id, action, txnId).catch(() => {});
+    await answerCallback(botToken, cb.id, label);
+    await editMessage(botToken, chatId, msg.message_id, label);
+    await removeKeyboard(botToken, chatId, msg.message_id);
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     console.error("Webhook error:", e);
     return NextResponse.json({ ok: true });
-  }
-}
-
-async function processCallback(
-  botToken: string,
-  chatId: number,
-  messageId: number,
-  action: string,
-  txnId: string,
-) {
-  try {
-    if (action === "approve") {
-      const result = await retry(
-        () => approvePaymentAndUpgrade(txnId),
-        "approvePaymentAndUpgrade",
-        3,
-      );
-
-      sendPaymentSuccessEmail(
-        result.memberEmail,
-        result.memberName,
-        result.packageLabel,
-        result.expiryDate,
-      ).catch(() => {});
-    } else if (action === "cancel") {
-      await retry(
-        () => markPaymentFailed(txnId),
-        "markPaymentFailed",
-        3,
-      );
-    }
-
-    const label = action === "approve"
-      ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27"
-      : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27";
-
-    await editMessage(botToken, chatId, messageId, label);
-    await removeKeyboard(botToken, chatId, messageId);
-  } catch (err: any) {
-    console.error(`[webhook] processCallback failed: ${err.message}`);
-
-    const label = action === "approve"
-      ? "\u274c \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07"
-      : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07";
-
-    await editMessage(botToken, chatId, messageId, label);
   }
 }
 
