@@ -33,19 +33,25 @@ export async function POST(req: Request) {
     }
 
     if (payment.status === "paid") {
-      await answerCallback(botToken, cb.id, "\u2705 \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e44\u0e14\u0e49\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27");
+      await answerCallback(botToken, cb.id, "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27");
+      await editMessage(botToken, chatId, msg.message_id, "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27");
       await removeKeyboard(botToken, chatId, msg.message_id);
       return NextResponse.json({ ok: true });
     }
 
     if (payment.status === "failed") {
-      await answerCallback(botToken, cb.id, "\u274c \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e16\u0e39\u0e01\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27");
+      await answerCallback(botToken, cb.id, "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27");
+      await editMessage(botToken, chatId, msg.message_id, "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27");
       await removeKeyboard(botToken, chatId, msg.message_id);
       return NextResponse.json({ ok: true });
     }
 
-    // ประมวลผลเบื้องหลัง (spinner จะหมุนจนเสร็จ)
-    processCallback(botToken, chatId, msg.message_id, cb.id, action, txnId).catch(() => {});
+    // หยุด spinner + แสดงสถานะทันที
+    await answerCallback(botToken, cb.id, "\u23f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e14\u0e33\u0e40\u0e19\u0e34\u0e19\u0e01\u0e32\u0e23...");
+    await editMessage(botToken, chatId, msg.message_id, msg.text + "\n\n\u23f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e14\u0e33\u0e40\u0e19\u0e34\u0e19\u0e01\u0e32\u0e23...");
+
+    // ประมวลผลเบื้องหลัง
+    processCallback(botToken, chatId, msg.message_id, action, txnId).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
@@ -58,7 +64,6 @@ async function processCallback(
   botToken: string,
   chatId: number,
   messageId: number,
-  callbackId: string,
   action: string,
   txnId: string,
 ) {
@@ -84,23 +89,19 @@ async function processCallback(
       );
     }
 
-    // สำเร็จ → หยุด spinner + แก้ข้อความ + ซ่อนปุ่ม
     const label = action === "approve"
       ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27"
       : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27";
 
-    await answerCallback(botToken, callbackId, label);
     await editMessage(botToken, chatId, messageId, label);
     await removeKeyboard(botToken, chatId, messageId);
   } catch (err: any) {
     console.error(`[webhook] processCallback failed: ${err.message}`);
 
-    // ล้มเหลว → หยุด spinner + แจ้ง error แต่เก็บปุ่มไว้
     const label = action === "approve"
       ? "\u274c \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07"
       : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07";
 
-    await answerCallback(botToken, callbackId, "\u274c \u0e42\u0e1b\u0e23\u0e14\u0e25\u0e2d\u0e07\u0e43\u0e2b\u0e21\u0e48");
     await editMessage(botToken, chatId, messageId, label);
   }
 }
