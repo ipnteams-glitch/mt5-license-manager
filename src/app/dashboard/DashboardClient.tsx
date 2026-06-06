@@ -310,11 +310,11 @@ export default function DashboardClient({
         </div>
 
         {/* Pending Payments — อัปโหลดสลิป */}
+        {slipMsg?.ok && <div className="mt-6 rounded-xl bg-green-50 p-4 text-sm text-green-700 shadow-sm">{slipMsg.msg}</div>}
+        {slipMsg && !slipMsg.ok && <div className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-600 shadow-sm">{slipMsg.msg}</div>}
         {pendingList && pendingList.length > 0 && (
           <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-bold text-zinc-800">📎 รายการรอชำระเงิน</h2>
-            {slipMsg?.ok && <p className="mb-3 rounded-lg bg-green-50 p-3 text-sm text-green-600">{slipMsg.msg}</p>}
-            {slipMsg && !slipMsg.ok && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{slipMsg.msg}</p>}
             <div className="space-y-3">
               {pendingList.map((p) => {
                 const pkgInfo = PACKAGES[p.package];
