@@ -31,9 +31,6 @@ export async function POST(req: Request) {
     const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
     if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
 
-    // ลบ pending เก่าที่เกิน 15 นาที (ไม่สแกนจ่าย)
-    cleanupExpiredPayments().catch((e) => console.error("Cleanup failed:", e));
-
     // สร้าง payment (จองสตางค์ในตัว)
     const payment = await createPayment(session.user.email, pkg as PackageType, pkgInfo.price);
 
