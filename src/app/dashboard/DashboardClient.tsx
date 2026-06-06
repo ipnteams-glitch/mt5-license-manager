@@ -72,6 +72,10 @@ export default function DashboardClient({
       const data = await res.json();
       if (data.success) {
         setSlipMsg({ ok: true, msg: data.message });
+        // auto-approval สำเร็จ → ลบรายการออกจาก pending list
+        if (data.expiry_date) {
+          setPendingList((prev) => prev?.filter((p) => p.id !== slipUploadTxnId));
+        }
         setSlipUploadTxnId(null);
         setSlipFile(null);
       } else {
