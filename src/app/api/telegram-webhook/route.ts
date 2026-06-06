@@ -43,8 +43,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // หยุด loading spinner ทันที
+    // หยุด spinner + ซ่อนปุ่มทันที
     await answerCallback(botToken, cb.id, "");
+    await removeKeyboard(botToken, chatId, msg.message_id);
 
     // ประมวลผลเบื้องหลัง
     processCallback(botToken, chatId, msg.message_id, action, txnId, payment.email, payment.package).catch(() => {});
@@ -89,7 +90,6 @@ async function processCallback(
   }
 
   await editMessage(botToken, chatId, messageId, label);
-  await removeKeyboard(botToken, chatId, messageId);
 }
 
 async function answerCallback(token: string, callbackId: string, text: string) {
