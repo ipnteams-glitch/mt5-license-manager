@@ -247,7 +247,7 @@ export default function RenewPage() {
                   <div className="text-right">
                     {pkg.old_price && pkg.old_price !== pkg.price ? (
                       <>
-                        <p className="text-sm text-red-500 line-through">
+                        <p className="text-sm text-zinc-400 line-through">
                           ฿{pkg.old_price.toLocaleString()}
                         </p>
                         <p className="text-lg font-bold text-green-600">
