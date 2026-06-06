@@ -25,6 +25,12 @@ export default function RenewPage() {
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const [timeLeft, setTimeLeft] = useState(900); // 15 นาที
 
+  // Upload slip
+  const [showUploadSlip, setShowUploadSlip] = useState(false);
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [slipResult, setSlipResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
   // นับถอยหลัง
   useEffect(() => {
     if (step !== "qr" || !expiresAt) return;
@@ -152,6 +158,30 @@ export default function RenewPage() {
     }
   }
 
+  async function handleUploadSlip() {
+    if (!slipFile || !txnId) return;
+    setUploading(true);
+    setSlipResult(null);
+    try {
+      const fd = new FormData();
+      fd.append("txn_id", txnId);
+      fd.append("file", slipFile);
+      const res = await fetch("/api/payment/upload-slip", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.success) {
+        setSlipResult({ ok: true, msg: data.message });
+        setShowUploadSlip(false);
+        setSlipFile(null);
+      } else {
+        setSlipResult({ ok: false, msg: data.message || data.error || "เกิดข้อผิดพลาด" });
+      }
+    } catch (err: any) {
+      setSlipResult({ ok: false, msg: err.message });
+    } finally {
+      setUploading(false);
+    }
+  }
+
   if (step === "done") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50">
@@ -190,6 +220,51 @@ export default function RenewPage() {
             )}
           </div>
 
+          {/* Upload Slip — แสดงเมื่อหมดอายุ หรือกดปุ่มอัปโหลด */}
+          {isExpired && !slipResult?.ok && (
+            <div className="mb-4">
+              {!showUploadSlip ? (
+                <button
+                  onClick={() => { setShowUploadSlip(true); setSlipResult(null); }}
+                  className="rounded-lg border-2 border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
+                >
+                  📎 อัปโหลดสลิปแทน
+                </button>
+              ) : (
+                <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left">
+                  <p className="text-xs text-zinc-500 mb-2">ถ้าโอนเงินแล้ว — อัปโหลดรูปสลิป</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      setSlipFile(e.target.files?.[0] || null);
+                      setSlipResult(null);
+                    }}
+                    className="mb-2 w-full text-xs text-zinc-600 file:mr-2 file:rounded file:border-0 file:bg-blue-50 file:px-2 file:py-1 file:text-xs file:text-blue-600"
+                  />
+                  {slipFile && (
+                    <p className="text-xs text-zinc-400 mb-2">{slipFile.name} ({(slipFile.size / 1024).toFixed(0)} KB)</p>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleUploadSlip}
+                      disabled={!slipFile || uploading}
+                      className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                    >
+                      {uploading ? "กำลังตรวจสอบ..." : "📤 ส่งสลิป"}
+                    </button>
+                    <button
+                      onClick={() => { setShowUploadSlip(false); setSlipFile(null); setSlipResult(null); }}
+                      className="rounded px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-200"
+                    >
+                      ยกเลิก
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {qrBase64 && !isExpired && !error && (
             <img src={qrBase64} alt="PromptPay QR" className="mx-auto mb-4 rounded-lg" style={{ maxWidth: 250 }} />
           )}
@@ -205,6 +280,12 @@ export default function RenewPage() {
             >
               ⚡ Admin: บังคับยืนยันการชำระเงิน
             </button>
+          )}
+          {slipResult?.ok && (
+            <p className="mt-3 rounded-lg bg-green-50 p-3 text-sm text-green-600">{slipResult.msg}</p>
+          )}
+          {slipResult && !slipResult.ok && (
+            <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{slipResult.msg}</p>
           )}
           {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
           <p className="mt-3 pt-3 border-t border-zinc-200 text-xs text-zinc-400">

@@ -2,7 +2,8 @@
 
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
-import type { Member, Port } from "@/types";
+import type { Member, Port, Payment } from "@/types";
+import { PACKAGES } from "@/types";
 
 type Props = {
   member: Member;
@@ -13,6 +14,7 @@ type Props = {
   daysLeft: number;
   isExpired: boolean;
   isAdmin: boolean;
+  pendingPayments?: Payment[];
 };
 
 export default function DashboardClient({
@@ -24,6 +26,7 @@ export default function DashboardClient({
   daysLeft,
   isExpired,
   isAdmin,
+  pendingPayments,
 }: Props) {
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
@@ -32,6 +35,36 @@ export default function DashboardClient({
   const [success, setSuccess] = useState("");
   const [portList, setPortList] = useState(ports);
   const [usedCount, setUsedCount] = useState(portsUsed);
+
+  // Upload slip
+  const [slipUploadTxnId, setSlipUploadTxnId] = useState<string | null>(null);
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [slipUploading, setSlipUploading] = useState(false);
+  const [slipMsg, setSlipMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  async function handleUploadSlip() {
+    if (!slipFile || !slipUploadTxnId) return;
+    setSlipUploading(true);
+    setSlipMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append("txn_id", slipUploadTxnId);
+      fd.append("file", slipFile);
+      const res = await fetch("/api/payment/upload-slip", { method: "POST", body: fd });
+      const data = await res.json();
+      if (data.success) {
+        setSlipMsg({ ok: true, msg: data.message });
+        setSlipUploadTxnId(null);
+        setSlipFile(null);
+      } else {
+        setSlipMsg({ ok: false, msg: data.message || data.error || "เกิดข้อผิดพลาด" });
+      }
+    } catch (err: any) {
+      setSlipMsg({ ok: false, msg: err.message });
+    } finally {
+      setSlipUploading(false);
+    }
+  }
 
   async function handleAddPort(e: React.FormEvent) {
     e.preventDefault();
@@ -253,6 +286,73 @@ export default function DashboardClient({
             </div>
           )}
         </div>
+
+        {/* Pending Payments — อัปโหลดสลิป */}
+        {pendingPayments && pendingPayments.length > 0 && (
+          <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-bold text-zinc-800">📎 รายการรอชำระเงิน</h2>
+            {slipMsg?.ok && <p className="mb-3 rounded-lg bg-green-50 p-3 text-sm text-green-600">{slipMsg.msg}</p>}
+            {slipMsg && !slipMsg.ok && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{slipMsg.msg}</p>}
+            <div className="space-y-3">
+              {pendingPayments.map((p) => {
+                const pkgInfo = PACKAGES[p.package];
+                const isOpen = slipUploadTxnId === p.id;
+                return (
+                  <div key={p.id} className="rounded-lg border border-zinc-200 p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-sm text-zinc-800">{pkgInfo?.name || p.package}</p>
+                        <p className="text-xs text-zinc-500">
+                          {p.amount.toFixed(2)} บาท · {new Date(p.created_at).toLocaleDateString("th-TH")}
+                        </p>
+                      </div>
+                      {!isOpen ? (
+                        <button
+                          onClick={() => { setSlipUploadTxnId(p.id); setSlipFile(null); setSlipMsg(null); }}
+                          className="rounded-lg border-2 border-dashed border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
+                        >
+                          📎 อัปโหลดสลิป
+                        </button>
+                      ) : null}
+                    </div>
+                    {isOpen && (
+                      <div className="mt-3 rounded-lg bg-zinc-50 p-3">
+                        <p className="text-xs text-zinc-500 mb-2">อัปโหลดรูปสลิปการโอนเงิน</p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            setSlipFile(e.target.files?.[0] || null);
+                            setSlipMsg(null);
+                          }}
+                          className="mb-2 w-full text-xs text-zinc-600 file:mr-2 file:rounded file:border-0 file:bg-blue-50 file:px-2 file:py-1 file:text-xs file:text-blue-600"
+                        />
+                        {slipFile && (
+                          <p className="text-xs text-zinc-400 mb-2">{slipFile.name} ({(slipFile.size / 1024).toFixed(0)} KB)</p>
+                        )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleUploadSlip}
+                            disabled={!slipFile || slipUploading}
+                            className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {slipUploading ? "กำลังตรวจสอบ..." : "📤 ส่งสลิป"}
+                          </button>
+                          <button
+                            onClick={() => { setSlipUploadTxnId(null); setSlipFile(null); setSlipMsg(null); }}
+                            className="rounded px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-200"
+                          >
+                            ยกเลิก
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
       </main>
     </div>

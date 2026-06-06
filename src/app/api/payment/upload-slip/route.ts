@@ -1,0 +1,93 @@
+import { auth } from "@/lib/auth";
+import { getPaymentById, getEasySlipApiKey } from "@/lib/sheets";
+import { PACKAGES } from "@/types";
+import { NextResponse } from "next/server";
+import { notifySlipUpload } from "@/lib/notify";
+
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user?.email) {
+    return NextResponse.json({ error: "กรุณาล็อคอินก่อน" }, { status: 401 });
+  }
+
+  try {
+    const formData = await req.formData();
+    const txnId = formData.get("txn_id") as string;
+    const file = formData.get("file") as File;
+
+    if (!txnId || !file) {
+      return NextResponse.json({ error: "ต้องระบุ txn_id และไฟล์สลิป" }, { status: 400 });
+    }
+
+    // ตรวจสอบ payment
+    const payment = await getPaymentById(txnId);
+    if (!payment) {
+      return NextResponse.json({ error: "ไม่พบรายการชำระเงิน" }, { status: 404 });
+    }
+    if (payment.email !== session.user.email) {
+      return NextResponse.json({ error: "ไม่ใช่รายการของคุณ" }, { status: 403 });
+    }
+    if (payment.status === "paid") {
+      return NextResponse.json({ success: true, message: "รายการนี้ชำระเงินแล้ว" });
+    }
+    if (payment.status === "failed") {
+      return NextResponse.json({ error: "รายการนี้ถูกยกเลิกแล้ว" }, { status: 400 });
+    }
+
+    // แปลงไฟล์เป็น base64
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const base64 = buffer.toString("base64");
+
+    // ส่ง EasySlip ตรวจสอบ
+    const apiKey = await getEasySlipApiKey();
+    if (!apiKey) {
+      return NextResponse.json({ error: "ระบบตรวจสอบสลิปไม่พร้อมใช้งาน" }, { status: 500 });
+    }
+
+    const slipRes = await fetch("https://developer.easyslip.com/api/v1/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ image: base64 }),
+    });
+
+    const slipData = await slipRes.json();
+
+    if (!slipData.success) {
+      return NextResponse.json({
+        success: false,
+        message: slipData.message || "ไม่สามารถอ่านสลิปได้ กรุณาลองใหม่",
+      });
+    }
+
+    // ตรวจสอบยอดเงิน
+    const slipAmount = parseFloat(slipData.data?.amount?.amount || "0");
+    if (Math.abs(slipAmount - payment.amount) > 0.05) {
+      return NextResponse.json({
+        success: false,
+        message: `ยอดเงินในสลิป (${slipAmount.toFixed(2)} บาท) ไม่ตรงกับยอดที่ต้องจ่าย (${payment.amount.toFixed(2)} บาท)`,
+      });
+    }
+
+    // ยอดตรง → แจ้ง Telegram พร้อมรูปสลิป
+    const pkgInfo = PACKAGES[payment.package];
+    notifySlipUpload(
+      payment.email,
+      pkgInfo?.name || payment.package,
+      payment.amount,
+      txnId,
+      base64
+    ).catch((e) => console.error("Notify slip failed:", e));
+
+    return NextResponse.json({
+      success: true,
+      message: "ส่งสลิปให้แอดมินตรวจสอบแล้ว รอการอนุมัติ",
+    });
+  } catch (err: any) {
+    console.error("Upload slip error:", err);
+    return NextResponse.json({ error: err.message || "เกิดข้อผิดพลาด" }, { status: 500 });
+  }
+}

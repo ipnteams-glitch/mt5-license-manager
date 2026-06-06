@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getMemberByEmail, getPortsByEmail } from "@/lib/sheets";
+import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
-import type { Member, Port } from "@/types";
+import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
 
 export default async function DashboardPage() {
@@ -11,10 +11,15 @@ export default async function DashboardPage() {
 
   let member: Member | null = null;
   let ports: Port[] = [];
+  let pendingPayments: Payment[] = [];
 
   try {
     member = await getMemberByEmail(session.user.email);
     ports = await getPortsByEmail(session.user.email);
+    const allPayments = await getAllPayments();
+    pendingPayments = allPayments
+      .filter((p) => p.email === session.user!.email && p.status === "pending")
+      .slice(0, 5); // เอา 5 รายการล่าสุด
   } catch (e) {
     console.error("Dashboard fetch failed:", e);
   }
@@ -59,6 +64,7 @@ export default async function DashboardPage() {
       daysLeft={daysLeft}
       isExpired={isExpired}
       isAdmin={isAdmin}
+      pendingPayments={pendingPayments}
     />
   );
 }

@@ -22,3 +22,46 @@ export async function notifyNewPayment(email: string, packageName: string, amoun
     console.error("Notify failed:", e);
   }
 }
+
+export async function notifySlipUpload(
+  email: string,
+  packageName: string,
+  amount: number,
+  txnId: string,
+  slipBase64: string,
+) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!botToken || !chatId) return;
+
+  try {
+    const caption = `📎 อัปโหลดสลิป\n👤 ${email}\n📦 ${packageName}\n💵 ${amount.toFixed(2)} บาท\n🔑 ${txnId.slice(0, 8)}...`;
+
+    const formData = new FormData();
+    formData.append("chat_id", chatId);
+    formData.append(
+      "photo",
+      new Blob([Buffer.from(slipBase64, "base64")], { type: "image/png" }),
+      "slip.png",
+    );
+    formData.append("caption", caption);
+    formData.append(
+      "reply_markup",
+      JSON.stringify({
+        inline_keyboard: [
+          [
+            { text: "✅ อนุมัติ", callback_data: `approve|${txnId}` },
+            { text: "❌ ยกเลิก", callback_data: `cancel|${txnId}` },
+          ],
+        ],
+      }),
+    );
+
+    await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (e) {
+    console.error("Notify slip upload failed:", e);
+  }
+}
