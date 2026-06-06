@@ -62,11 +62,16 @@ export async function POST(req: Request) {
           console.log("[EasySlip v2] success:", v2Data.success, "status:", v2Res.status, "isAmountMatched:", v2Data.data?.isAmountMatched);
 
           if (v2Data.success) {
-            ocrAmount = v2Data.data?.amountInSlip
-              ?? v2Data.data?.rawSlip?.amount?.amount
-              ?? null;
-            if (ocrAmount !== null && ocrAmount !== undefined) {
-              ocrAmount = parseFloat(String(ocrAmount));
+            // ปฏิเสธสลิปซ้ำ
+            if (v2Data.data?.isDuplicate) {
+              console.log("[EasySlip v2] duplicate slip rejected — fallback to admin");
+            } else {
+              ocrAmount = v2Data.data?.amountInSlip
+                ?? v2Data.data?.rawSlip?.amount?.amount
+                ?? null;
+              if (ocrAmount !== null && ocrAmount !== undefined) {
+                ocrAmount = parseFloat(String(ocrAmount));
+              }
             }
           }
         } catch (e) {

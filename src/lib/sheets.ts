@@ -305,6 +305,8 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
     qr_payload: qrPayload || "",
   };
   const sheets = await getSheets();
+
+  // เขียน payment ลง sheet (อาจต้องลองใหม่ถ้า sheet ยังไม่มี)
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I`,
@@ -336,6 +338,37 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
       valueInputOption: "RAW", requestBody: { values: [paymentToRow(payment)] },
     });
   }
+
+  // Race-condition guard: ตรวจซ้ำหลังเขียนว่ามี pending อื่นใช้สตางค์เดียวกันหรือไม่
+  const recheck = await getAllPayments();
+  const dup = recheck.find(
+    (p) => p.id !== payment.id && p.status === "pending" && p.satang === satang
+  );
+  if (dup) {
+    // สตางค์ชน → สุ่มใหม่
+    const usedSatangsFinal: number[] = [];
+    for (const p of recheck) {
+      if (p.status === "pending" && now.getTime() - new Date(p.created_at).getTime() < 15 * 60 * 1000) {
+        usedSatangsFinal.push(p.satang);
+      }
+    }
+    let newSatang = 0;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const val = parseFloat((Math.random() * 0.99).toFixed(2));
+      if (val > 0 && !usedSatangsFinal.includes(val)) { newSatang = val; break; }
+    }
+    if (newSatang === 0) throw new Error("ระบบไม่ว่าง กรุณาลองใหม่");
+
+    payment.satang = newSatang;
+    payment.amount = price + newSatang;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sheetId(),
+      range: `${PAYMENTS_SHEET}!A${recheck.length + 1}:I${recheck.length + 1}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [paymentToRow(payment)] },
+    });
+  }
+
   return payment;
 }
 
