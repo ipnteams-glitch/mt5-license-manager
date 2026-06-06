@@ -43,6 +43,7 @@ export interface PackageInfo {
   duration_days: number;
   max_ports: number;
   label: string;
+  old_price?: number;
   rank: number;
 }
 
@@ -64,20 +65,24 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "🔥 69 บาท / 30 วัน", rank: 3,
   },
   "1000_2m": {
-    key: "1000_2m", name: "Basic", name_en: "Basic", price: 990, duration_days: 30, max_ports: 2,
-    label: "990 บาท / 30 วัน", rank: 4,
+    key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
+    label: "590 บาท / 30 วัน", rank: 4,
+    old_price: 990,
   },
   "2000_2m": {
-    key: "2000_2m", name: "Standard", name_en: "Standard", price: 1990, duration_days: 60, max_ports: 5,
-    label: "1,990 บาท / 60 วัน", rank: 5,
+    key: "2000_2m", name: "Standard", name_en: "Standard", price: 1290, duration_days: 60, max_ports: 5,
+    label: "1,290 บาท / 60 วัน", rank: 5,
+    old_price: 1990,
   },
   "2490_3m": {
-    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2590, duration_days: 90, max_ports: 7,
-    label: "2,590 บาท / 90 วัน", rank: 6,
+    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2290, duration_days: 90, max_ports: 7,
+    label: "2,290 บาท / 90 วัน", rank: 6,
+    old_price: 2590,
   },
   "9990_1y": {
-    key: "9990_1y", name: "VIP+FreeVPS 1Y", name_en: "VIP+FreeVPS 1Y", price: 9990, duration_days: 365, max_ports: 10,
-    label: "9,990 บาท / 1 ปี + Free VPS", rank: 7,
+    key: "9990_1y", name: "VIP+FreeVPS 1Y", name_en: "VIP+FreeVPS 1Y", price: 7990, duration_days: 365, max_ports: 10,
+    label: "7,990 บาท / 1 ปี + Free VPS", rank: 7,
+    old_price: 9990,
   },
 };
 

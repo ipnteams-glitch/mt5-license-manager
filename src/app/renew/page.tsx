@@ -245,9 +245,20 @@ export default function RenewPage() {
                     <p className="text-xs text-zinc-500">{pkg.label}</p>
                   </div>
                   <div className="text-right">
-                    <p className={`text-lg font-bold ${isFree ? "text-green-600" : "text-blue-600"}`}>
-                      {isFree ? "ฟรี" : `฿${pkg.price.toLocaleString()}`}
-                    </p>
+                    {pkg.old_price && pkg.old_price !== pkg.price ? (
+                      <>
+                        <p className="text-sm text-red-500 line-through">
+                          ฿{pkg.old_price.toLocaleString()}
+                        </p>
+                        <p className="text-lg font-bold text-green-600">
+                          ฿{pkg.price.toLocaleString()}
+                        </p>
+                      </>
+                    ) : (
+                      <p className={`text-lg font-bold ${isFree ? "text-green-600" : "text-blue-600"}`}>
+                        {isFree ? "ฟรี" : `฿${pkg.price.toLocaleString()}`}
+                      </p>
+                    )}
                     <p className="text-xs text-zinc-400">{pkg.max_ports} พอร์ต</p>
                   </div>
                 </div>
