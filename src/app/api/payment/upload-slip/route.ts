@@ -19,7 +19,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "ต้องระบุ txn_id และไฟล์สลิป" }, { status: 400 });
     }
 
-    // ตรวจสอบ payment
     const payment = await getPaymentById(txnId);
     if (!payment) {
       return NextResponse.json({ error: "ไม่พบรายการชำระเงิน" }, { status: 404 });
@@ -34,52 +33,59 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "รายการนี้ถูกยกเลิกแล้ว" }, { status: 400 });
     }
 
-    // แปลงไฟล์เป็น base64
+    // แปลงเป็น base64
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString("base64");
 
-    // ส่ง EasySlip ตรวจสอบ
-    const apiKey = await getEasySlipApiKey();
-    if (!apiKey) {
-      return NextResponse.json({ error: "ระบบตรวจสอบสลิปไม่พร้อมใช้งาน" }, { status: 500 });
+    // ลอง OCR (ไม่ block — ถ้าล้มเหลวก็ยังส่ง Telegram ต่อ)
+    let ocrAmount: number | null = null;
+    try {
+      const apiKey = await getEasySlipApiKey();
+      if (apiKey) {
+        const urls = [
+          "https://api.easyslip.com/v1/verify",
+          "https://developer.easyslip.com/api/v1/verify",
+        ];
+        for (const url of urls) {
+          try {
+            const slipRes = await fetch(url, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify({ image: base64 }),
+            });
+            const slipData = await slipRes.json();
+            if (slipData.success) {
+              ocrAmount = parseFloat(slipData.data?.amount?.amount || "0");
+              break;
+            }
+          } catch {}
+        }
+      }
+    } catch (e) {
+      console.error("EasySlip OCR failed:", e);
     }
 
-    const slipRes = await fetch("https://developer.easyslip.com/api/v1/verify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ image: base64 }),
-    });
-
-    const slipData = await slipRes.json();
-
-    if (!slipData.success) {
+    // ตรวจสอบยอด (ถ้า OCR สำเร็จ)
+    if (ocrAmount !== null && Math.abs(ocrAmount - payment.amount) > 0.05) {
       return NextResponse.json({
         success: false,
-        message: slipData.message || "ไม่สามารถอ่านสลิปได้ กรุณาลองใหม่",
+        message: `ยอดเงินในสลิป (${ocrAmount.toFixed(2)} บาท) ไม่ตรงกับยอดที่ต้องจ่าย (${payment.amount.toFixed(2)} บาท)`,
       });
     }
 
-    // ตรวจสอบยอดเงิน
-    const slipAmount = parseFloat(slipData.data?.amount?.amount || "0");
-    if (Math.abs(slipAmount - payment.amount) > 0.05) {
-      return NextResponse.json({
-        success: false,
-        message: `ยอดเงินในสลิป (${slipAmount.toFixed(2)} บาท) ไม่ตรงกับยอดที่ต้องจ่าย (${payment.amount.toFixed(2)} บาท)`,
-      });
-    }
-
-    // ยอดตรง → แจ้ง Telegram พร้อมรูปสลิป
+    // ส่ง Telegram พร้อมรูปสลิป
     const pkgInfo = PACKAGES[payment.package];
-    notifySlipUpload(
+    await notifySlipUpload(
       payment.email,
       pkgInfo?.name || payment.package,
       payment.amount,
       txnId,
-      base64
+      base64,
+      ocrAmount,
     ).catch((e) => console.error("Notify slip failed:", e));
 
     return NextResponse.json({

@@ -29,13 +29,20 @@ export async function notifySlipUpload(
   amount: number,
   txnId: string,
   slipBase64: string,
+  ocrAmount?: number | null,
 ) {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!botToken || !chatId) return;
 
   try {
-    const caption = `📎 อัปโหลดสลิป\n👤 ${email}\n📦 ${packageName}\n💵 ${amount.toFixed(2)} บาท\n🔑 ${txnId.slice(0, 8)}...`;
+    let caption = `📎 อัปโหลดสลิป\n👤 ${email}\n📦 ${packageName}\n💵 ${amount.toFixed(2)} บาท`;
+    if (ocrAmount !== null && ocrAmount !== undefined) {
+      caption += `\n🤖 OCR: ${ocrAmount.toFixed(2)} บาท ✅`;
+    } else {
+      caption += `\n⚠️ OCR ไม่สำเร็จ — ตรวจสอบด้วยตา`;
+    }
+    caption += `\n🔑 ${txnId.slice(0, 8)}...`;
 
     const formData = new FormData();
     formData.append("chat_id", chatId);
