@@ -36,6 +36,13 @@ export default function DashboardClient({
   const [portList, setPortList] = useState(ports);
   const [usedCount, setUsedCount] = useState(portsUsed);
 
+  // Package display — updatable after payment
+  const [displayPkgLabel, setDisplayPkgLabel] = useState(packageLabel);
+  const [displayDaysLeft, setDisplayDaysLeft] = useState(daysLeft);
+  const [displayIsExpired, setDisplayIsExpired] = useState(isExpired);
+  const [displayPortsTotal, setDisplayPortsTotal] = useState(portsTotal);
+  const [displayExpiryDate, setDisplayExpiryDate] = useState(member.expiry_date);
+
   // Upload slip
   const [slipUploadTxnId, setSlipUploadTxnId] = useState<string | null>(null);
   const [slipFile, setSlipFile] = useState<File | null>(null);
@@ -72,9 +79,23 @@ export default function DashboardClient({
       const data = await res.json();
       if (data.success) {
         setSlipMsg({ ok: true, msg: data.message });
-        // auto-approval สำเร็จ → ลบรายการออกจาก pending list
+        // auto-approval สำเร็จ → อัปเดต UI
         if (data.expiry_date) {
           setPendingList((prev) => prev?.filter((p) => p.id !== slipUploadTxnId));
+          // อัปเดตแพคเกจที่แสดง
+          if (data.package) {
+            const pkg = PACKAGES[data.package as keyof typeof PACKAGES];
+            if (pkg) {
+              setDisplayPkgLabel(pkg.label);
+              setDisplayPortsTotal(pkg.max_ports);
+            }
+          }
+          const exp = new Date(data.expiry_date);
+          const now = new Date();
+          const left = Math.ceil((exp.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          setDisplayDaysLeft(left);
+          setDisplayIsExpired(left <= 0);
+          setDisplayExpiryDate(data.expiry_date);
         }
         setSlipUploadTxnId(null);
         setSlipFile(null);
@@ -163,14 +184,14 @@ export default function DashboardClient({
             <div className="flex-1 grid gap-4 sm:grid-cols-3">
               <div>
                 <p className="text-sm text-zinc-500">แพคเกจ</p>
-                <p className="font-semibold text-zinc-900">{packageLabel}</p>
+                <p className="font-semibold text-zinc-900">{displayPkgLabel}</p>
               </div>
               <div>
                 <p className="text-sm text-zinc-500">สถานะ</p>
-                {isExpired ? (
+                {displayIsExpired ? (
                   <p className="font-semibold text-red-600">❌ หมดอายุแล้ว</p>
-                ) : daysLeft > 0 ? (
-                  <p className="font-semibold text-green-600">✅ เหลือ {daysLeft} วัน</p>
+                ) : displayDaysLeft > 0 ? (
+                  <p className="font-semibold text-green-600">✅ เหลือ {displayDaysLeft} วัน</p>
                 ) : (
                   <p className="font-semibold text-zinc-500">ไม่มีแพคเกจ</p>
                 )}
@@ -178,10 +199,10 @@ export default function DashboardClient({
               <div>
                 <p className="text-sm text-zinc-500">โควต้าพอร์ต</p>
                 <p className="font-semibold text-zinc-900">
-                  {usedCount} / {portsTotal}
-                  {portsTotal > 0 && (
+                  {usedCount} / {displayPortsTotal}
+                  {displayPortsTotal > 0 && (
                     <span className="ml-2 text-xs text-zinc-400">
-                      ({portsTotal - usedCount} เหลือ)
+                      ({displayPortsTotal - usedCount} เหลือ)
                     </span>
                   )}
                 </p>
@@ -206,7 +227,7 @@ export default function DashboardClient({
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-zinc-800">🔌 พอร์ต MT5 ของคุณ</h2>
-            {portsTotal > 0 && usedCount < portsTotal && !isExpired && (
+            {displayPortsTotal > 0 && usedCount < displayPortsTotal && !displayIsExpired && (
               <button
                 onClick={() => setShowAddPort(!showAddPort)}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -214,10 +235,10 @@ export default function DashboardClient({
                 + เพิ่มพอร์ต
               </button>
             )}
-            {portsTotal === 0 && (
+            {displayPortsTotal === 0 && (
               <span className="text-xs text-zinc-400">ยังไม่มีแพคเกจ</span>
             )}
-            {isExpired && (
+            {displayIsExpired && (
               <span className="text-xs text-red-500">แพคเกจหมดอายุ — ติดต่อแอดมินเพื่อต่ออายุ</span>
             )}
           </div>
@@ -264,7 +285,7 @@ export default function DashboardClient({
           {/* Ports Table */}
           {portList.length === 0 ? (
             <p className="py-8 text-center text-sm text-zinc-400">
-              {portsTotal > 0 ? "ยังไม่มีพอร์ต — กด + เพิ่มพอร์ต เพื่อเพิ่ม" : "ยังไม่มีแพคเกจ — ติดต่อแอดมิน"}
+              {displayPortsTotal > 0 ? "ยังไม่มีพอร์ต — กด + เพิ่มพอร์ต เพื่อเพิ่ม" : "ยังไม่มีแพคเกจ — ติดต่อแอดมิน"}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -285,9 +306,9 @@ export default function DashboardClient({
                         {new Date(port.created_at).toLocaleDateString("en-GB")}
                       </td>
                       <td className="py-3">
-                        {member.expiry_date ? (
-                          <span className={isExpired ? "text-red-500 font-medium" : "text-zinc-600"}>
-                            {new Date(member.expiry_date).toLocaleDateString("en-GB")}
+                        {displayExpiryDate ? (
+                          <span className={displayIsExpired ? "text-red-500 font-medium" : "text-zinc-600"}>
+                            {new Date(displayExpiryDate).toLocaleDateString("en-GB")}
                           </span>
                         ) : (
                           <span className="text-zinc-400">-</span>
