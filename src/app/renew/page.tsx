@@ -30,6 +30,7 @@ export default function RenewPage() {
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [slipResult, setSlipResult] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [cancelling, setCancelling] = useState(false);
 
   // นับถอยหลัง
   useEffect(() => {
@@ -158,6 +159,29 @@ export default function RenewPage() {
     }
   }
 
+  async function handleCancelPayment() {
+    if (!txnId) return;
+    setCancelling(true);
+    try {
+      const res = await fetch("/api/payment/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txn_id: txnId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStep("select");
+        setError("");
+      } else {
+        setError(data.error || "ยกเลิกไม่สำเร็จ");
+      }
+    } catch {
+      setError("เกิดข้อผิดพลาด");
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   async function handleUploadSlip() {
     if (!slipFile || !txnId) return;
     setUploading(true);
@@ -224,12 +248,21 @@ export default function RenewPage() {
           {isExpired && !slipResult?.ok && (
             <div className="mb-4">
               {!showUploadSlip ? (
-                <button
-                  onClick={() => { setShowUploadSlip(true); setSlipResult(null); }}
-                  className="rounded-lg border-2 border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
-                >
-                  📎 อัปโหลดสลิปแทน
-                </button>
+                <div className="flex gap-2 justify-center">
+                  <button
+                    onClick={() => { setShowUploadSlip(true); setSlipResult(null); }}
+                    className="rounded-lg border-2 border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
+                  >
+                    📎 อัปโหลดสลิปแทน
+                  </button>
+                  <button
+                    onClick={handleCancelPayment}
+                    disabled={cancelling}
+                    className="rounded-lg border border-red-200 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {cancelling ? "กำลังยกเลิก..." : "❌ ยกเลิก"}
+                  </button>
+                </div>
               ) : (
                 <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left">
                   <p className="text-xs text-zinc-500 mb-2">ถ้าโอนเงินแล้ว — อัปโหลดรูปสลิป</p>
