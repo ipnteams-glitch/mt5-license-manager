@@ -4,12 +4,11 @@ import { canUpgrade, calculateNewExpiry } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
 
-// POST /api/telegram-webhook — รับ callback จาก Telegram Bot
+// POST /api/telegram-webhook
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // เฉพาะ callback_query (ปุ่มถูกกด)
     const cb = body.callback_query;
     if (!cb?.data) return NextResponse.json({ ok: true });
 
@@ -21,52 +20,71 @@ export async function POST(req: Request) {
     const chatId = msg?.chat?.id;
 
     if (!txnId || !chatId) {
-      await answerCallback(botToken, cb.id, "❌ ข้อมูลไม่ถูกต้อง");
+      await answerCallback(botToken, cb.id, "\u274c \u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25\u0e44\u0e21\u0e48\u0e16\u0e39\u0e01\u0e15\u0e49\u0e2d\u0e07");
       return NextResponse.json({ ok: true });
     }
 
     const payment = await getPaymentById(txnId);
-    if (!payment || payment.status !== "pending") {
-      await answerCallback(botToken, cb.id, "❌ รายการนี้ถูกดำเนินการแล้ว");
-      await editMessage(botToken, chatId, msg.message_id, msg.text + "\n\n✅ ดำเนินการแล้ว");
+
+    if (!payment) {
+      await answerCallback(botToken, cb.id, "\u274c \u0e44\u0e21\u0e48\u0e1e\u0e1a\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49");
       return NextResponse.json({ ok: true });
     }
 
-    if (action === "approve") {
-      // อนุมัติการจ่าย
-      await markPaymentPaid(txnId);
-      const member = await getMemberByEmail(payment.email);
-      let expiryDate = "";
-      if (member) {
-        const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
-        const { allowed } = canUpgrade(member.package, payment.package, isExpired);
-        if (allowed) {
-          const { expiry, maxPorts } = calculateNewExpiry(member, payment.package);
-          await updateMemberPackage(payment.email, payment.package, maxPorts, expiry);
-          expiryDate = expiry;
-        }
-      }
-      // ส่ง email แจ้งลูกค้า
-      if (member && expiryDate) {
-        const pkgInfo = PACKAGES[payment.package];
-        sendPaymentSuccessEmail(payment.email, member.name, pkgInfo.label, expiryDate).catch(() => {});
-      }
-      const newText = `✅ อนุมัติแล้ว\n${msg.text}`;
-      await editMessage(botToken, chatId, msg.message_id, newText);
-      await answerCallback(botToken, cb.id, "✅ อนุมัติสำเร็จ");
-    } else if (action === "cancel") {
-      // ยกเลิก
-      await markPaymentFailed(txnId);
-      const newText = `❌ ยกเลิกแล้ว\n${msg.text}`;
-      await editMessage(botToken, chatId, msg.message_id, newText);
-      await answerCallback(botToken, cb.id, "❌ ยกเลิกแล้ว");
+    if (payment.status === "paid") {
+      await answerCallback(botToken, cb.id, "\u2705 \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e44\u0e14\u0e49\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27");
+      return NextResponse.json({ ok: true });
     }
+
+    if (payment.status === "failed") {
+      await answerCallback(botToken, cb.id, "\u274c \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e16\u0e39\u0e01\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27");
+      return NextResponse.json({ ok: true });
+    }
+
+    processCallback(botToken, chatId, msg.message_id, cb.id, action, txnId, payment.email, payment.package).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     console.error("Webhook error:", e);
     return NextResponse.json({ ok: true });
   }
+}
+
+async function processCallback(
+  botToken: string,
+  chatId: number,
+  messageId: number,
+  callbackId: string,
+  action: string,
+  txnId: string,
+  email: string,
+  pkg: string,
+) {
+  const label = action === "approve" ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34" : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01";
+
+  if (action === "approve") {
+    await markPaymentPaid(txnId);
+    const member = await getMemberByEmail(email);
+    let expiryDate = "";
+    if (member) {
+      const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
+      const { allowed } = canUpgrade(member.package, pkg as any, isExpired);
+      if (allowed) {
+        const { expiry, maxPorts } = calculateNewExpiry(member, pkg as any);
+        await updateMemberPackage(email, pkg as any, maxPorts, expiry);
+        expiryDate = expiry;
+      }
+    }
+    if (member && expiryDate) {
+      const pkgInfo = PACKAGES[pkg as keyof typeof PACKAGES];
+      sendPaymentSuccessEmail(email, member.name, pkgInfo.label, expiryDate).catch(() => {});
+    }
+  } else if (action === "cancel") {
+    await markPaymentFailed(txnId);
+  }
+
+  await answerCallback(botToken, callbackId, label);
+  await editMessage(botToken, chatId, messageId, label);
 }
 
 async function answerCallback(token: string, callbackId: string, text: string) {
