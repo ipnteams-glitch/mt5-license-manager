@@ -292,9 +292,9 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
     }
   }
   let satang = 0;
-  for (let i = 1; i <= 99; i++) {
-    const val = parseFloat((i / 100).toFixed(2));
-    if (!usedSatangs.includes(val)) { satang = val; break; }
+  for (let attempt = 0; attempt < 50; attempt++) {
+    const val = parseFloat((Math.random() * 0.99).toFixed(2));
+    if (val > 0 && !usedSatangs.includes(val)) { satang = val; break; }
   }
   if (satang === 0) throw new Error("ระบบไม่ว่าง กรุณาลองใหม่");
 
