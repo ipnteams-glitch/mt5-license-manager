@@ -301,6 +301,19 @@ export default function RenewPage() {
           {qrBase64 && !isExpired && !error && (
             <img src={qrBase64} alt="PromptPay QR" className="mx-auto mb-4 rounded-lg" style={{ maxWidth: 250 }} />
           )}
+          {/* ปุ่ม ชำระแล้ว → ไปอัปโหลดสลิป */}
+          {!isExpired && (
+            <button
+              onClick={() => {
+                if (pollingRef.current) clearInterval(pollingRef.current);
+                router.push("/dashboard");
+              }}
+              className="mt-3 w-full rounded-lg bg-green-600 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-all"
+            >
+              ✅ ชำระแล้ว
+            </button>
+          )}
+
           {verifying && !isExpired && !error && (
             <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
               <span className="animate-spin">⏳</span> กำลังตรวจสอบการชำระเงิน...
