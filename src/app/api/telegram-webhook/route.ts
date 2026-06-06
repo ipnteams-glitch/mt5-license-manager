@@ -43,7 +43,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    processCallback(botToken, chatId, msg.message_id, cb.id, action, txnId, payment.email, payment.package).catch(() => {});
+    // หยุด loading spinner ทันที
+    await answerCallback(botToken, cb.id, "");
+
+    // ประมวลผลเบื้องหลัง
+    processCallback(botToken, chatId, msg.message_id, action, txnId, payment.email, payment.package).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
@@ -56,7 +60,6 @@ async function processCallback(
   botToken: string,
   chatId: number,
   messageId: number,
-  callbackId: string,
   action: string,
   txnId: string,
   email: string,
@@ -85,7 +88,6 @@ async function processCallback(
     await markPaymentFailed(txnId);
   }
 
-  await answerCallback(botToken, callbackId, label);
   await editMessage(botToken, chatId, messageId, label);
   await removeKeyboard(botToken, chatId, messageId);
 }
