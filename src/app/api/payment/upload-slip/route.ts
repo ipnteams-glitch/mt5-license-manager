@@ -39,18 +39,44 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString("base64");
 
-    // ลอง OCR (ไม่ block — ถ้าล้มเหลวก็ยังส่ง Telegram ต่อ)
+    // OCR สลิปผ่าน EasySlip — v2 ก่อน แล้ว v1 fallback
     let ocrAmount: number | null = null;
     try {
       const apiKey = await getEasySlipApiKey();
       if (apiKey) {
-        const urls = [
-          "https://api.easyslip.com/v1/verify",
-          "https://developer.easyslip.com/api/v1/verify",
-        ];
-        for (const url of urls) {
+        // API v2 (latest): POST /v2/verify/bank — รองรับ base64 + matchAmount
+        try {
+          const v2Res = await fetch("https://api.easyslip.com/v2/verify/bank", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              base64: `data:image/png;base64,${base64}`,
+              matchAmount: payment.amount,
+              checkDuplicate: true,
+            }),
+          });
+          const v2Data = await v2Res.json();
+          console.log("[EasySlip v2] success:", v2Data.success, "status:", v2Res.status, "isAmountMatched:", v2Data.data?.isAmountMatched);
+
+          if (v2Data.success) {
+            ocrAmount = v2Data.data?.amountInSlip
+              ?? v2Data.data?.rawSlip?.amount?.amount
+              ?? null;
+            if (ocrAmount !== null && ocrAmount !== undefined) {
+              ocrAmount = parseFloat(String(ocrAmount));
+            }
+          }
+        } catch (e) {
+          console.error("[EasySlip v2] failed:", e);
+        }
+
+        // API v1 (Legacy): POST /v1/verify — response ใช้ status แทน success
+        if (ocrAmount === null) {
           try {
-            const slipRes = await fetch(url, {
+            const v1Res = await fetch("https://api.easyslip.com/v1/verify", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -58,12 +84,15 @@ export async function POST(req: Request) {
               },
               body: JSON.stringify({ image: base64 }),
             });
-            const slipData = await slipRes.json();
-            if (slipData.success) {
-              ocrAmount = parseFloat(slipData.data?.amount?.amount || "0");
-              break;
+            const v1Data = await v1Res.json();
+            console.log("[EasySlip v1] status:", v1Data.status, "message:", v1Data.message);
+
+            if (v1Data.status === 200) {
+              ocrAmount = parseFloat(v1Data.data?.amount?.amount || "0");
             }
-          } catch {}
+          } catch (e) {
+            console.error("[EasySlip v1] failed:", e);
+          }
         }
       }
     } catch (e) {
