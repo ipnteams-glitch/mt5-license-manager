@@ -41,6 +41,20 @@ export default function DashboardClient({
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [slipUploading, setSlipUploading] = useState(false);
   const [slipMsg, setSlipMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [cancellingTxnId, setCancellingTxnId] = useState<string | null>(null);
+
+  async function handleCancelPayment(txnId: string) {
+    setCancellingTxnId(txnId);
+    try {
+      await fetch("/api/payment/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txn_id: txnId }),
+      });
+    } catch {} finally {
+      setCancellingTxnId(null);
+    }
+  }
 
   async function handleUploadSlip() {
     if (!slipFile || !slipUploadTxnId) return;
@@ -307,12 +321,21 @@ export default function DashboardClient({
                         </p>
                       </div>
                       {!isOpen ? (
-                        <button
-                          onClick={() => { setSlipUploadTxnId(p.id); setSlipFile(null); setSlipMsg(null); }}
-                          className="rounded-lg border-2 border-dashed border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
-                        >
-                          📎 อัปโหลดสลิป
-                        </button>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => { setSlipUploadTxnId(p.id); setSlipFile(null); setSlipMsg(null); }}
+                            className="rounded-lg border-2 border-dashed border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
+                          >
+                            📎 อัปโหลดสลิป
+                          </button>
+                          <button
+                            onClick={() => handleCancelPayment(p.id)}
+                            disabled={cancellingTxnId === p.id}
+                            className="rounded-lg border border-red-200 px-2.5 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {cancellingTxnId === p.id ? "..." : "❌"}
+                          </button>
+                        </div>
                       ) : null}
                     </div>
                     {isOpen && (
