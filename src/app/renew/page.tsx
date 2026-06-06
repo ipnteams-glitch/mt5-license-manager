@@ -310,7 +310,7 @@ export default function RenewPage() {
               }}
               className="mt-3 w-full rounded-lg bg-green-600 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-all"
             >
-              ✅ ชำระแล้ว
+              กดปุ่มเมื่อชำระแล้ว
             </button>
           )}
 
