@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { getPaymentById, markPaymentPaid, markPaymentFailed, getMemberByEmail, updateMemberPackage } from "@/lib/sheets";
-import { canUpgrade, calculateNewExpiry } from "@/lib/sheets";
+import { getPaymentById, markPaymentFailed, approvePaymentAndUpgrade } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
+import { retry } from "@/lib/retry";
 
 // POST /api/telegram-webhook
 export async function POST(req: Request) {
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     await removeKeyboard(botToken, chatId, msg.message_id);
 
     // ประมวลผลเบื้องหลัง
-    processCallback(botToken, chatId, msg.message_id, action, txnId, payment.email, payment.package).catch(() => {});
+    processCallback(botToken, chatId, msg.message_id, action, txnId).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
@@ -63,30 +63,37 @@ async function processCallback(
   messageId: number,
   action: string,
   txnId: string,
-  email: string,
-  pkg: string,
 ) {
   const label = action === "approve" ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27" : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27";
 
-  if (action === "approve") {
-    await markPaymentPaid(txnId);
-    const member = await getMemberByEmail(email);
-    let expiryDate = "";
-    if (member) {
-      const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
-      const { allowed } = canUpgrade(member.package, pkg as any, isExpired);
-      if (allowed) {
-        const { expiry, maxPorts } = calculateNewExpiry(member, pkg as any);
-        await updateMemberPackage(email, pkg as any, maxPorts, expiry);
-        expiryDate = expiry;
-      }
+  try {
+    if (action === "approve") {
+      // batch: markPaid + upgradeMember ใน 2 parallel reads + 2 parallel writes
+      const result = await retry(
+        () => approvePaymentAndUpgrade(txnId),
+        "approvePaymentAndUpgrade",
+        3,
+      );
+
+      // ส่ง email
+      sendPaymentSuccessEmail(
+        result.memberEmail,
+        result.memberName,
+        result.packageLabel,
+        result.expiryDate,
+      ).catch(() => {});
+    } else if (action === "cancel") {
+      await retry(
+        () => markPaymentFailed(txnId),
+        "markPaymentFailed",
+        3,
+      );
     }
-    if (member && expiryDate) {
-      const pkgInfo = PACKAGES[pkg as keyof typeof PACKAGES];
-      sendPaymentSuccessEmail(email, member.name, pkgInfo.label, expiryDate).catch(() => {});
-    }
-  } else if (action === "cancel") {
-    await markPaymentFailed(txnId);
+  } catch (err: any) {
+    console.error(`[webhook] processCallback failed: ${err.message}`);
+    label = action === "approve"
+      ? "\u274c \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e23\u0e38\u0e13\u0e32\u0e25\u0e2d\u0e07\u0e43\u0e2b\u0e21\u0e48"
+      : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e23\u0e38\u0e13\u0e32\u0e25\u0e2d\u0e07\u0e43\u0e2b\u0e21\u0e48";
   }
 
   await editMessage(botToken, chatId, messageId, label);

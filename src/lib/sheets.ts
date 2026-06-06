@@ -506,3 +506,69 @@ export function checkWhitelist(whitelist: { name: string; broker: string }[], na
     return nameMatch && brokerMatch;
   });
 }
+
+
+// ── Batch: อนุมัติ payment + อัปเกรด member ในขั้นตอนเดียว (ลด API calls) ──
+export async function approvePaymentAndUpgrade(txnId: string): Promise<{
+  memberEmail: string;
+  memberName: string;
+  packageLabel: string;
+  expiryDate: string;
+}> {
+  // อ่าน payments + members พร้อมกัน
+  const [payments, members, sheets] = await Promise.all([
+    getAllPayments(),
+    getAllMembers(),
+    getSheets(),
+  ]);
+
+  const sid = sheetId();
+
+  // 1) mark payment paid
+  const payIdx = payments.findIndex((p) => p.id === txnId);
+  if (payIdx < 0) throw new Error("Payment not found");
+  if (payments[payIdx].status !== "pending") throw new Error("Payment already processed");
+  payments[payIdx].status = "paid";
+  payments[payIdx].paid_at = new Date().toISOString();
+
+  // 2) upgrade member
+  const email = payments[payIdx].email;
+  const pkg = payments[payIdx].package;
+  const memIdx = members.findIndex((m) => m.email === email);
+  if (memIdx < 0) throw new Error("Member not found");
+
+  const member = members[memIdx];
+  const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
+  const { allowed, reason } = canUpgrade(member.package, pkg, isExpired);
+  if (!allowed) throw new Error(reason || "Cannot upgrade");
+
+  const { expiry, maxPorts } = calculateNewExpiry(member, pkg);
+  members[memIdx].package = pkg;
+  members[memIdx].max_ports = maxPorts;
+  members[memIdx].expiry_date = expiry;
+
+  const pkgInfo = PACKAGES[pkg];
+
+  // เขียนทั้งสองพร้อมกัน
+  await Promise.all([
+    sheets.spreadsheets.values.update({
+      spreadsheetId: sid,
+      range: `${PAYMENTS_SHEET}!A${payIdx + 2}:I${payIdx + 2}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [paymentToRow(payments[payIdx])] },
+    }),
+    sheets.spreadsheets.values.update({
+      spreadsheetId: sid,
+      range: `${MEMBERS_SHEET}!A${memIdx + 2}:G${memIdx + 2}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [memberToRow(members[memIdx])] },
+    }),
+  ]);
+
+  return {
+    memberEmail: email,
+    memberName: members[memIdx].name,
+    packageLabel: pkgInfo.label,
+    expiryDate: expiry,
+  };
+}
