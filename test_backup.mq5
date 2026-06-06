@@ -1,5 +1,5 @@
 #property copyright "Copyright 2025, Nateephanu"
-#property description "Line OA : @479ufnya"
+#property description "Line OA : @harvestfarm"
 #property description "https://www.facebook.com/harvestfarmea/"
 #property link      "https://goldscalping.biz/"
 #property icon      "\\Images\\hvf.ico"

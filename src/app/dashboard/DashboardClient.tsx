@@ -167,7 +167,7 @@ export default function DashboardClient({
             </div>
           </div>
           <div className="flex items-center justify-between mt-1.5">
-            <a href="https://line.me/R/ti/p/@479ufnya" target="_blank" className="rounded bg-green-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-600">Line: @479ufnya</a>
+            <a href="https://line.me/R/ti/p/@harvestfarm" target="_blank" className="rounded bg-green-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-600">Line: @harvestfarm</a>
             <div className="flex items-center gap-2">
               <span className="text-xs text-zinc-500">{member.email}</span>
               <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-xs text-zinc-500 hover:text-red-500">ออก</button>
