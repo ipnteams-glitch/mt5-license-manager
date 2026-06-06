@@ -33,11 +33,13 @@ export async function POST(req: Request) {
 
     if (payment.status === "paid") {
       await answerCallback(botToken, cb.id, "\u2705 \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e44\u0e14\u0e49\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27");
+      await removeKeyboard(botToken, chatId, msg.message_id);
       return NextResponse.json({ ok: true });
     }
 
     if (payment.status === "failed") {
       await answerCallback(botToken, cb.id, "\u274c \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23\u0e19\u0e35\u0e49\u0e16\u0e39\u0e01\u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27");
+      await removeKeyboard(botToken, chatId, msg.message_id);
       return NextResponse.json({ ok: true });
     }
 
@@ -60,7 +62,7 @@ async function processCallback(
   email: string,
   pkg: string,
 ) {
-  const label = action === "approve" ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34" : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01";
+  const label = action === "approve" ? "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27" : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e41\u0e25\u0e49\u0e27";
 
   if (action === "approve") {
     await markPaymentPaid(txnId);
@@ -85,6 +87,7 @@ async function processCallback(
 
   await answerCallback(botToken, callbackId, label);
   await editMessage(botToken, chatId, messageId, label);
+  await removeKeyboard(botToken, chatId, messageId);
 }
 
 async function answerCallback(token: string, callbackId: string, text: string) {
@@ -100,5 +103,13 @@ async function editMessage(token: string, chatId: number, messageId: number, tex
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, message_id: messageId, text }),
+  }).catch(() => {});
+}
+
+async function removeKeyboard(token: string, chatId: number, messageId: number) {
+  await fetch(`https://api.telegram.org/bot${token}/editMessageReplyMarkup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: chatId, message_id: messageId }),
   }).catch(() => {});
 }

@@ -1,9 +1,8 @@
 import { auth } from "@/lib/auth";
-import { createPayment, getMemberByEmail, canUpgrade, cleanupExpiredPayments } from "@/lib/sheets";
+import { createPayment, getMemberByEmail, canUpgrade } from "@/lib/sheets";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
-import { notifyNewPayment } from "@/lib/notify";
 
 
 // POST /api/payment/qr — สร้าง QR PromptPay
@@ -33,9 +32,6 @@ export async function POST(req: Request) {
 
     // สร้าง payment (จองสตางค์ในตัว)
     const payment = await createPayment(session.user.email, pkg as PackageType, pkgInfo.price);
-
-    // 📱 ส่ง Telegram ทันที (ก่อนสร้าง QR)
-    notifyNewPayment(session.user.email!, pkgInfo.name, payment.amount, payment.id).catch(() => {});
 
     // สร้าง QR ผ่าน EasySlip
     const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
