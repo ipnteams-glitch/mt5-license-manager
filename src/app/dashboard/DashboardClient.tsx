@@ -42,15 +42,19 @@ export default function DashboardClient({
   const [slipUploading, setSlipUploading] = useState(false);
   const [slipMsg, setSlipMsg] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cancellingTxnId, setCancellingTxnId] = useState<string | null>(null);
+  const [pendingList, setPendingList] = useState(pendingPayments);
 
   async function handleCancelPayment(txnId: string) {
     setCancellingTxnId(txnId);
     try {
-      await fetch("/api/payment/cancel", {
+      const res = await fetch("/api/payment/cancel", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ txn_id: txnId }),
       });
+      if (res.ok) {
+        setPendingList((prev) => prev?.filter((p) => p.id !== txnId));
+      }
     } catch {} finally {
       setCancellingTxnId(null);
     }
@@ -302,13 +306,13 @@ export default function DashboardClient({
         </div>
 
         {/* Pending Payments — อัปโหลดสลิป */}
-        {pendingPayments && pendingPayments.length > 0 && (
+        {pendingList && pendingList.length > 0 && (
           <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-lg font-bold text-zinc-800">📎 รายการรอชำระเงิน</h2>
             {slipMsg?.ok && <p className="mb-3 rounded-lg bg-green-50 p-3 text-sm text-green-600">{slipMsg.msg}</p>}
             {slipMsg && !slipMsg.ok && <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{slipMsg.msg}</p>}
             <div className="space-y-3">
-              {pendingPayments.map((p) => {
+              {pendingList.map((p) => {
                 const pkgInfo = PACKAGES[p.package];
                 const isOpen = slipUploadTxnId === p.id;
                 return (
