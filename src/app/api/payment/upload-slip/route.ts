@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
-import { getPaymentById, getEasySlipApiKey } from "@/lib/sheets";
+import { getPaymentById, getEasySlipApiKey, approvePaymentAndUpgrade } from "@/lib/sheets";
+import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { notifySlipUpload } from "@/lib/notify";
@@ -77,7 +78,44 @@ export async function POST(req: Request) {
       });
     }
 
-    // ส่ง Telegram พร้อมรูปสลิป
+    // OCR สำเร็จ + ยอดตรง → อนุมัติอัตโนมัติ (ไม่ต้องรอแอดมิน)
+    if (ocrAmount !== null) {
+      try {
+        const result = await approvePaymentAndUpgrade(txnId);
+        sendPaymentSuccessEmail(
+          result.memberEmail,
+          result.memberName,
+          result.packageLabel,
+          result.expiryDate,
+        ).catch(() => {});
+
+        return NextResponse.json({
+          success: true,
+          message: `✅ ชำระเงินสำเร็จ — ${result.packageLabel}`,
+          package: payment.package,
+          expiry_date: result.expiryDate,
+        });
+      } catch (e: any) {
+        console.error("Auto-approve failed:", e.message);
+        // Fallback → ส่ง Telegram ให้แอดมินตรวจเอง
+        const pkgInfo = PACKAGES[payment.package];
+        await notifySlipUpload(
+          payment.email,
+          pkgInfo?.name || payment.package,
+          payment.amount,
+          txnId,
+          base64,
+          ocrAmount,
+        ).catch((e2) => console.error("Notify slip failed:", e2));
+
+        return NextResponse.json({
+          success: true,
+          message: "ระบบตรวจสอบสลิปอัตโนมัติล้มเหลว — ส่งให้แอดมินตรวจสอบแล้ว รอการอนุมัติ",
+        });
+      }
+    }
+
+    // OCR ไม่สำเร็จ → ส่ง Telegram ให้แอดมินตรวจ
     const pkgInfo = PACKAGES[payment.package];
     await notifySlipUpload(
       payment.email,
@@ -85,7 +123,7 @@ export async function POST(req: Request) {
       payment.amount,
       txnId,
       base64,
-      ocrAmount,
+      null,
     ).catch((e) => console.error("Notify slip failed:", e));
 
     return NextResponse.json({
