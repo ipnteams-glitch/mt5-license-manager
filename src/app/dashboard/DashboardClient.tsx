@@ -52,6 +52,7 @@ export default function DashboardClient({
   const [slipMsg, setSlipMsg] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cancellingTxnId, setCancellingTxnId] = useState<string | null>(null);
   const [pendingList, setPendingList] = useState(pendingPayments);
+  const [showPaymentHistory, setShowPaymentHistory] = useState(false);
 
   async function handleCancelPayment(txnId: string) {
     setCancellingTxnId(txnId);
@@ -411,57 +412,71 @@ export default function DashboardClient({
 
         {/* ── Payment History ── */}
         {paymentHistory && paymentHistory.length > 0 && (
-          <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-zinc-800">📋 ประวัติการชำระเงิน</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left text-xs font-semibold text-zinc-500">
-                    <th className="pb-2 pr-2">วันที่</th>
-                    <th className="pb-2 pr-2">แพคเกจ</th>
-                    <th className="pb-2 pr-2">จำนวนเงิน</th>
-                    <th className="pb-2 text-right">สถานะ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paymentHistory.map((p) => {
-                    const pkgInfo = PACKAGES[p.package];
-                    const statusLabel =
-                      p.status === "paid"
-                        ? "✅ จ่ายแล้ว"
-                        : p.status === "failed"
-                        ? "❌ ยกเลิก"
-                        : "⏳ รอดำเนินการ";
-                    const statusColor =
-                      p.status === "paid"
-                        ? "text-green-600"
-                        : p.status === "failed"
-                        ? "text-red-500"
-                        : "text-yellow-600";
-                    return (
-                      <tr key={p.id} className="border-b border-zinc-100">
-                        <td className="py-2 pr-2 text-zinc-500 text-xs">
-                          {new Date(p.created_at).toLocaleDateString("th-TH", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </td>
-                        <td className="py-2 pr-2 font-medium text-zinc-800 text-xs">
-                          {pkgInfo?.name || p.package}
-                        </td>
-                        <td className="py-2 pr-2 text-zinc-600 text-xs">
-                          {p.amount.toFixed(2)} บาท
-                        </td>
-                        <td className={`py-2 text-right text-xs font-medium ${statusColor}`}>
-                          {statusLabel}
-                        </td>
+          <div className="mt-6">
+            <button
+              onClick={() => setShowPaymentHistory(!showPaymentHistory)}
+              className="flex w-full items-center justify-between rounded-xl bg-white p-4 shadow-sm hover:shadow-md transition-all"
+            >
+              <span className="text-sm font-semibold text-zinc-700">
+                📋 ประวัติการชำระเงิน ({paymentHistory.length} รายการ)
+              </span>
+              <span className={`text-zinc-400 transition-transform ${showPaymentHistory ? "rotate-180" : ""}`}>
+                ▼
+              </span>
+            </button>
+            {showPaymentHistory && (
+              <div className="mt-2 rounded-xl bg-white p-6 shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-xs font-semibold text-zinc-500">
+                        <th className="pb-2 pr-2">วันที่</th>
+                        <th className="pb-2 pr-2">แพคเกจ</th>
+                        <th className="pb-2 pr-2">จำนวนเงิน</th>
+                        <th className="pb-2 text-right">สถานะ</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {paymentHistory.map((p) => {
+                        const pkgInfo = PACKAGES[p.package];
+                        const statusLabel =
+                          p.status === "paid"
+                            ? "✅ จ่ายแล้ว"
+                            : p.status === "failed"
+                            ? "❌ ยกเลิก"
+                            : "⏳ รอดำเนินการ";
+                        const statusColor =
+                          p.status === "paid"
+                            ? "text-green-600"
+                            : p.status === "failed"
+                            ? "text-red-500"
+                            : "text-yellow-600";
+                        return (
+                          <tr key={p.id} className="border-b border-zinc-100">
+                            <td className="py-2 pr-2 text-zinc-500 text-xs">
+                              {new Date(p.created_at).toLocaleDateString("th-TH", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </td>
+                            <td className="py-2 pr-2 font-medium text-zinc-800 text-xs">
+                              {pkgInfo?.name || p.package}
+                            </td>
+                            <td className="py-2 pr-2 text-zinc-600 text-xs">
+                              {p.amount.toFixed(2)} บาท
+                            </td>
+                            <td className={`py-2 text-right text-xs font-medium ${statusColor}`}>
+                              {statusLabel}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>
