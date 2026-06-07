@@ -12,14 +12,19 @@ export default async function DashboardPage() {
   let member: Member | null = null;
   let ports: Port[] = [];
   let pendingPayments: Payment[] = [];
+  let paymentHistory: Payment[] = [];
 
   try {
     member = await getMemberByEmail(session.user.email);
     ports = await getPortsByEmail(session.user.email);
     const allPayments = await getAllPayments();
-    pendingPayments = allPayments
-      .filter((p) => p.email === session.user!.email && p.status === "pending")
+    const userPayments = allPayments.filter((p) => p.email === session.user!.email);
+    pendingPayments = userPayments
+      .filter((p) => p.status === "pending")
       .slice(0, 5); // เอา 5 รายการล่าสุด
+    paymentHistory = userPayments
+      .filter((p) => p.status !== "pending")
+      .slice(0, 20); // ประวัติล่าสุด 20 รายการ
   } catch (e) {
     console.error("Dashboard fetch failed:", e);
   }
@@ -65,6 +70,7 @@ export default async function DashboardPage() {
       isExpired={isExpired}
       isAdmin={isAdmin}
       pendingPayments={pendingPayments}
+      paymentHistory={paymentHistory}
     />
   );
 }

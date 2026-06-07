@@ -15,6 +15,7 @@ type Props = {
   isExpired: boolean;
   isAdmin: boolean;
   pendingPayments?: Payment[];
+  paymentHistory?: Payment[];
 };
 
 export default function DashboardClient({
@@ -27,6 +28,7 @@ export default function DashboardClient({
   isExpired,
   isAdmin,
   pendingPayments,
+  paymentHistory,
 }: Props) {
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
@@ -406,6 +408,62 @@ export default function DashboardClient({
           </div>
         )}
 
+
+        {/* ── Payment History ── */}
+        {paymentHistory && paymentHistory.length > 0 && (
+          <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-lg font-bold text-zinc-800">📋 ประวัติการชำระเงิน</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs font-semibold text-zinc-500">
+                    <th className="pb-2 pr-2">วันที่</th>
+                    <th className="pb-2 pr-2">แพคเกจ</th>
+                    <th className="pb-2 pr-2">จำนวนเงิน</th>
+                    <th className="pb-2 text-right">สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paymentHistory.map((p) => {
+                    const pkgInfo = PACKAGES[p.package];
+                    const statusLabel =
+                      p.status === "paid"
+                        ? "✅ จ่ายแล้ว"
+                        : p.status === "failed"
+                        ? "❌ ยกเลิก"
+                        : "⏳ รอดำเนินการ";
+                    const statusColor =
+                      p.status === "paid"
+                        ? "text-green-600"
+                        : p.status === "failed"
+                        ? "text-red-500"
+                        : "text-yellow-600";
+                    return (
+                      <tr key={p.id} className="border-b border-zinc-100">
+                        <td className="py-2 pr-2 text-zinc-500 text-xs">
+                          {new Date(p.created_at).toLocaleDateString("th-TH", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </td>
+                        <td className="py-2 pr-2 font-medium text-zinc-800 text-xs">
+                          {pkgInfo?.name || p.package}
+                        </td>
+                        <td className="py-2 pr-2 text-zinc-600 text-xs">
+                          {p.amount.toFixed(2)} บาท
+                        </td>
+                        <td className={`py-2 text-right text-xs font-medium ${statusColor}`}>
+                          {statusLabel}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
