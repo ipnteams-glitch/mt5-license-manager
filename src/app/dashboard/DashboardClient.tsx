@@ -437,7 +437,7 @@ export default function DashboardClient({
                       </tr>
                     </thead>
                     <tbody>
-                      {paymentHistory.map((p) => {
+                      {[...paymentHistory].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).map((p) => {
                         const pkgInfo = PACKAGES[p.package];
                         const statusLabel =
                           p.status === "paid"
@@ -454,10 +454,12 @@ export default function DashboardClient({
                         return (
                           <tr key={p.id} className="border-b border-zinc-100">
                             <td className="py-2 pr-2 text-zinc-500 text-xs">
-                              {new Date(p.created_at).toLocaleDateString("th-TH", {
+                              {new Date(p.created_at).toLocaleString("th-TH", {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })}
                             </td>
                             <td className="py-2 pr-2 font-medium text-zinc-800 text-xs">
