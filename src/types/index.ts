@@ -74,7 +74,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 990,
   },
   "2490_3m": {
-    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2290, duration_days: 90, max_ports: 7,
+    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2290, duration_days: 90, max_ports: 5,
     label: "2,290 บาท / 90 วัน", rank: 6,
     old_price: 2590,
   },
