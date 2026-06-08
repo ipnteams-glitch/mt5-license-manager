@@ -89,8 +89,8 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 5900,
   },
   "9990_1y": {
-    key: "9990_1y", name: "VIP+FreeVPS 1Y", name_en: "VIP+FreeVPS 1Y", price: 7100, duration_days: 365, max_ports: 10,
-    label: "7,100 บาท / 1 ปี + Free VPS", rank: 8,
+    key: "9990_1y", name: "VIP+VPS", name_en: "VIP+VPS", price: 7100, duration_days: 365, max_ports: 10,
+    label: "7,100 บาท / 1 ปี + VPS", rank: 8,
     old_price: 9990,
   },
 };
