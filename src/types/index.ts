@@ -33,7 +33,7 @@ export interface Payment {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "test_1" | "promo_69" | "1000_2m" | "2000_2m" | "2490_3m" | "4900_1y" | "9990_1y" | "none";
+export type PackageType = "free" | "free_ib" | "test_1" | "promo_69" | "1000_2m" | "2490_3m" | "4900_1y" | "9990_1y" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -73,11 +73,6 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "590 บาท / 30 วัน", rank: 4,
     old_price: 990,
   },
-  "2000_2m": {
-    key: "2000_2m", name: "Standard", name_en: "Standard", price: 1290, duration_days: 60, max_ports: 5,
-    label: "1,290 บาท / 60 วัน", rank: 5,
-    old_price: 1990,
-  },
   "2490_3m": {
     key: "2490_3m", name: "Premium", name_en: "Premium", price: 2290, duration_days: 90, max_ports: 7,
     label: "2,290 บาท / 90 วัน", rank: 6,
@@ -95,7 +90,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
 };
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "promo_69", "1000_2m", "2000_2m", "2490_3m", "4900_1y", "9990_1y"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "promo_69", "1000_2m", "2490_3m", "4900_1y", "9990_1y"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 
