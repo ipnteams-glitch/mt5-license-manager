@@ -24,6 +24,7 @@ export default async function DashboardPage() {
       .slice(0, 5); // เอา 5 รายการล่าสุด
     paymentHistory = userPayments
       .filter((p) => p.status !== "pending")
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       .slice(0, 20); // ประวัติล่าสุด 20 รายการ
   } catch (e) {
     console.error("Dashboard fetch failed:", e);

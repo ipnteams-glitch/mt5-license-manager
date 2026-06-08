@@ -582,21 +582,23 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
 
   const pkgInfo = PACKAGES[pkg];
 
-  // เขียนทั้งสองพร้อมกัน
-  await Promise.all([
-    sheets.spreadsheets.values.update({
-      spreadsheetId: sid,
-      range: `${PAYMENTS_SHEET}!A${payIdx + 2}:I${payIdx + 2}`,
+  // เขียนทั้งสองแผ่นใน call เดียว (atomic — ป้องกัน payment ไม่ถูกอัปเดต)
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId: sid,
+    requestBody: {
+      data: [
+        {
+          range: `${PAYMENTS_SHEET}!A${payIdx + 2}:I${payIdx + 2}`,
+          values: [paymentToRow(payments[payIdx])],
+        },
+        {
+          range: `${MEMBERS_SHEET}!A${memIdx + 2}:G${memIdx + 2}`,
+          values: [memberToRow(members[memIdx])],
+        },
+      ],
       valueInputOption: "RAW",
-      requestBody: { values: [paymentToRow(payments[payIdx])] },
-    }),
-    sheets.spreadsheets.values.update({
-      spreadsheetId: sid,
-      range: `${MEMBERS_SHEET}!A${memIdx + 2}:G${memIdx + 2}`,
-      valueInputOption: "RAW",
-      requestBody: { values: [memberToRow(members[memIdx])] },
-    }),
-  ]);
+    },
+  });
 
   return {
     memberEmail: email,

@@ -10,9 +10,19 @@ export default function RenewPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
-  const visiblePackages = isTestUser
+  const [hasPaid, setHasPaid] = useState(false);
+
+  // เช็คว่าเคยจ่ายสำเร็จหรือยัง → ถ้าเคย ซ่อน promo_69
+  useEffect(() => {
+    fetch("/api/payment/has-paid")
+      .then((r) => r.json())
+      .then((d) => setHasPaid(d.hasPaid))
+      .catch(() => {});
+  }, []);
+
+  const visiblePackages = (isTestUser
     ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES]
-    : BUYABLE_PACKAGES;
+    : BUYABLE_PACKAGES).filter((k) => k !== "promo_69" || !hasPaid);
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [step, setStep] = useState<"select" | "qr" | "done">("select");
   const [qrBase64, setQrBase64] = useState("");
@@ -95,6 +105,13 @@ export default function RenewPage() {
       } finally {
         setActivating(false);
       }
+      return;
+    }
+
+
+    // ฟรี+IB → ลิงค์ไป Line OA
+    if (selected === "free_ib") {
+      window.open("https://line.me/R/ti/p/@harvestfarm", "_blank");
       return;
     }
 
@@ -392,6 +409,25 @@ export default function RenewPage() {
               </button>
             );
           })}
+
+          {/* ฟรี+IB — ลิงค์ไป Line OA */}
+          <button
+            onClick={() => setSelected("free_ib")}
+            className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
+              selected === "free_ib" ? "border-green-500 bg-green-50 shadow-md" : "border-zinc-200 hover:border-zinc-300"
+            }`}
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-semibold text-zinc-800">ฟรี+IB</p>
+                <p className="text-xs text-zinc-500">ฟรี + IB ตลอดชีพ</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-green-600">ฟรี</p>
+                <p className="text-xs text-zinc-400">Unlimited</p>
+              </div>
+            </div>
+          </button>
         </div>
 
         <button
@@ -399,7 +435,7 @@ export default function RenewPage() {
           disabled={!selected || activating}
           className="mt-6 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {activating ? "กำลังดำเนินการ..." : selected === "free" ? "🎁 เปิดใช้งานฟรี" : "💳 สร้าง QR ชำระเงิน"}
+          {activating ? "กำลังดำเนินการ..." : selected === "free" ? "🎁 เปิดใช้งานฟรี" : selected === "free_ib" ? "📱 สมัครผ่าน Line OA" : "💳 สร้าง QR ชำระเงิน"}
         </button>
 
         <button onClick={() => router.push("/dashboard")} className="mt-3 w-full text-sm text-zinc-500 hover:underline">
