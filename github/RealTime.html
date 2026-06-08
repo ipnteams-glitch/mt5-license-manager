@@ -186,17 +186,6 @@
         return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // ⭐ คำนวณดาว (0-5) จาก % กำไรเทียบทุน
-    function getStars(profit7day, balance) {
-        if (balance <= 0 || profit7day <= 0) return 0;
-        const pct = (profit7day / balance) * 100;
-        if (pct <= 10) return 1;
-        if (pct <= 20) return 2;
-        if (pct <= 30) return 3;
-        if (pct <= 50) return 4;
-        return 5;
-    }
-
     // ⭐ สร้าง HTML ดาว
     function renderStars(count) {
         let html = '<div class="stars">';
@@ -228,13 +217,14 @@
                 if (row && row.c && row.c[0] && row.c[0].v !== null && String(row.c[0].v).toLowerCase() !== "acc") { 
                     const balance = row.c[2] && row.c[2].v !== null ? parseFloat(row.c[2].v) : 0;
                     const profit7day = row.c[6] && row.c[6].v !== null ? parseFloat(row.c[6].v) : 0;
-                    const lastWeekProfit = row.c[7] && row.c[7].v !== null ? parseFloat(row.c[7].v) : 0;
+                    // ⭐ ดึงค่าดาวโดยตรงจากคอลัมน์ I (index 8) — คำนวณฝั่ง server แล้ว
+                    const stars = row.c[8] && row.c[8].v !== null ? parseInt(row.c[8].v) : 0;
                     data.push({
                         name: row.c[1] && row.c[1].v !== null ? row.c[1].v : "-",
                         balance: balance,
                         profit: row.c[4] && row.c[4].v !== null ? parseFloat(row.c[4].v) : 0,
                         profit7day: profit7day,
-                        stars: getStars(lastWeekProfit, balance)
+                        stars: stars
                     });
                 }
             }

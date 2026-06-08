@@ -48,10 +48,12 @@ function doPost(e) {
       
       // ⭐ คอลัมน์ H: lastWeekProfit (สำหรับคำนวณดาว)
       sheet.getRange(foundRow, 8).setValue(lastWeekProfit);
-      
+
+      // ⭐ คอลัมน์ I: ดาว — ให้แอดมินกรอกเอง ห้ามเขียนทับ
+
     } else {
-      // 🎯 ถ้าเป็นพอร์ตใหม่ ให้สร้างแถวใหม่แบบ 7 คอลัมน์เป๊ะๆ (ใส่ Balance ให้แค่ครั้งแรก)
-      sheet.appendRow([acc_Number, nameEA, balance, equity, profit, margin_lv, profit7Day, lastWeekProfit]);
+      // 🎯 ถ้าเป็นพอร์ตใหม่ — คอลัมน์ I เว้นว่างไว้ให้กรอกดาวเอง
+      sheet.appendRow([acc_Number, nameEA, balance, equity, profit, margin_lv, profit7Day, lastWeekProfit, ""]);
     }
     
     return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
@@ -87,7 +89,8 @@ function doGet(e) {
         "profit": rows[i][4],      // คอลัมน์ E
         "margin_lv": rows[i][5],   // คอลัมน์ F
         "profit7day": rows[i][6],  // คอลัมน์ G
-        "lastWeekProfit": rows[i][7] // คอลัมน์ H ⭐
+        "lastWeekProfit": rows[i][7], // คอลัมน์ H ⭐
+        "stars": rows[i][8] || 0,  // คอลัมน์ I ⭐ ดาว (0-5)
       });
     }
   }
