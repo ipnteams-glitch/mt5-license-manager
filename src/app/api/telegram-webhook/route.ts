@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPaymentById, markPaymentFailed, approvePaymentAndUpgrade } from "@/lib/sheets";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { retry } from "@/lib/retry";
+import { notifyVpsOrder } from "@/lib/notify";
 
 // POST /api/telegram-webhook
 export async function POST(req: Request) {
@@ -51,6 +52,9 @@ export async function POST(req: Request) {
           result.memberEmail, result.memberName,
           result.packageLabel, result.expiryDate,
         ).catch(() => {});
+        if (payment.package === "9990_1y") {
+          notifyVpsOrder(result.memberEmail, result.memberName, result.packageLabel, result.expiryDate, txnId).catch(() => {});
+        }
         label = "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27";
       } else {
         await retry(() => markPaymentFailed(txnId), "markPaymentFailed", 3);

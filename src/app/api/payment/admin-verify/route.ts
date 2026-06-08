@@ -4,6 +4,7 @@ import { canUpgrade, calculateNewExpiry } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
+import { notifyVpsOrder } from "@/lib/notify";
 
 // POST /api/payment/admin-verify — แอดมินบังคับ verify การจ่าย (ข้าม EasySlip)
 export async function POST(req: Request) {
@@ -44,6 +45,9 @@ export async function POST(req: Request) {
     if (updatedMember) {
       sendPaymentSuccessEmail(payment.email, updatedMember.name, pkgInfo.label, expiry)
         .catch((e) => console.error("Email failed:", e));
+    }
+    if (payment.package === "9990_1y") {
+      notifyVpsOrder(payment.email, updatedMember?.name || "", pkgInfo?.label || "", expiry, txn_id).catch(() => {});
     }
 
     return NextResponse.json({

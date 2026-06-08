@@ -4,6 +4,7 @@ import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { notifySlipUpload } from "@/lib/notify";
+import { notifyVpsOrder } from "@/lib/notify";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -122,6 +123,10 @@ export async function POST(req: Request) {
           result.packageLabel,
           result.expiryDate,
         ).catch(() => {});
+        // แจ้งแอดมินสร้าง VPS ถ้าเป็นแพคเกจ VIP+VPS
+        if (payment.package === "9990_1y") {
+          notifyVpsOrder(result.memberEmail, result.memberName, result.packageLabel, result.expiryDate, txnId).catch(() => {});
+        }
 
         return NextResponse.json({
           success: true,

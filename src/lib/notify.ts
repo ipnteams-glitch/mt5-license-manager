@@ -72,3 +72,26 @@ export async function notifySlipUpload(
     console.error("Notify slip upload failed:", e);
   }
 }
+
+// 🖥️ แจ้งแอดมินเมื่อลูกค้าซื้อ VIP+VPS — ต้องสร้าง VPS ให้
+export async function notifyVpsOrder(
+  email: string,
+  name: string,
+  packageLabel: string,
+  expiryDate: string,
+  txnId: string,
+) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!botToken || !chatId) return;
+  try {
+    const text = `🖥️ ลูกค้าสั่ง VPS\n👤 ${name}\n📧 ${email}\n📦 ${packageLabel}\n📅 หมดอายุ ${new Date(expiryDate).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })}\n🔑 ${txnId.slice(0, 8)}...\n\n⚠️ รีบสร้าง VPS ส่งให้ลูกค้า!`;
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+  } catch (e) {
+    console.error("Notify VPS failed:", e);
+  }
+}
