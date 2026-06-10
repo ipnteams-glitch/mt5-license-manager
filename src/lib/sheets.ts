@@ -1,12 +1,13 @@
 import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
-import type { Member, Port, Payment, PackageType } from "@/types";
+import type { Member, Port, Payment, PackageType, PortfolioAccount } from "@/types";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 
 const MEMBERS_SHEET = "members";
 const PORTS_SHEET = "ports";
 const PAYMENTS_SHEET = "payments";
 const WHITELIST_SHEET = "whitelist";
+const PORTFOLIO_SHEET = "portfolio";
 
 // ── Auth ──
 function getAuth() {
@@ -606,4 +607,137 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
     packageLabel: pkgInfo.label,
     expiryDate: expiry,
   };
+}
+
+
+// ── Portfolio (MyPortfolio) ──
+
+function portfolioFromRow(row: string[]): PortfolioAccount {
+  return {
+    id: row[0] || "",
+    member_email: row[1] || "",
+    mt5_account: row[2] || "",
+    broker: row[3] || "",
+    balance: parseFloat(row[4]) || 0,
+    floating_pl: parseFloat(row[5]) || 0,
+    total_profit: parseFloat(row[6]) || 0,
+    last_updated: row[7] || "",
+    created_at: row[8] || "",
+  };
+}
+function portfolioToRow(p: PortfolioAccount): string[] {
+  return [p.id, p.member_email, p.mt5_account, p.broker, String(p.balance), String(p.floating_pl), String(p.total_profit), p.last_updated, p.created_at];
+}
+
+async function initPortfolioSheet(): Promise<void> {
+  const sheets = await getSheets();
+  const sid = sheetId();
+  try {
+    await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${PORTFOLIO_SHEET}!A1` });
+  } catch {
+    // Sheet doesn't exist yet — create with header
+    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: sid,
+      requestBody: {
+        requests: [{
+          addSheet: {
+            properties: { title: PORTFOLIO_SHEET },
+          },
+        }],
+      },
+    });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sid,
+      range: `${PORTFOLIO_SHEET}!A:I`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [["id", "member_email", "mt5_account", "broker", "balance", "floating_pl", "total_profit", "last_updated", "created_at"]],
+      },
+    });
+  }
+}
+
+export async function getPortfolioByEmail(email: string): Promise<PortfolioAccount[]> {
+  await initPortfolioSheet();
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${PORTFOLIO_SHEET}!A:I` });
+  const rows = res.data.values;
+  if (!rows || rows.length <= 1) return [];
+  return rows.slice(1).map(portfolioFromRow).filter((p) => p.member_email === email);
+}
+
+export async function addPortfolioAccount(email: string, mt5Account: string, broker: string): Promise<PortfolioAccount> {
+  await initPortfolioSheet();
+  const existing = await getPortfolioByEmail(email);
+  if (existing.some((p) => p.mt5_account === mt5Account)) {
+    throw new Error("หมายเลขพอร์ตนี้มีอยู่ในระบบแล้ว");
+  }
+  const now = new Date().toISOString();
+  const account: PortfolioAccount = {
+    id: uuidv4(),
+    member_email: email,
+    mt5_account: mt5Account,
+    broker: broker || "",
+    balance: 0,
+    floating_pl: 0,
+    total_profit: 0,
+    last_updated: now,
+    created_at: now,
+  };
+  const sheets = await getSheets();
+  const sid = sheetId();
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: sid,
+    range: `${PORTFOLIO_SHEET}!A:I`,
+    valueInputOption: "RAW",
+    requestBody: { values: [portfolioToRow(account)] },
+  });
+  return account;
+}
+
+export async function deletePortfolioAccount(id: string, email: string): Promise<void> {
+  await initPortfolioSheet();
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${PORTFOLIO_SHEET}!A:I` });
+  const rows = res.data.values;
+  if (!rows || rows.length <= 1) throw new Error("ไม่พบพอร์ตนี้");
+  const idx = rows.findIndex((r) => r[0] === id && r[1] === email);
+  if (idx < 0) throw new Error("ไม่พบพอร์ตนี้");
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
+  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PORTFOLIO_SHEET);
+  if (!sheet?.properties?.sheetId) throw new Error("Sheet not found");
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: sid,
+    requestBody: {
+      requests: [{
+        deleteDimension: {
+          range: { sheetId: sheet.properties.sheetId, dimension: "ROWS", startIndex: idx, endIndex: idx + 1 },
+        },
+      }],
+    },
+  });
+}
+
+export async function pushPortfolioData(mt5Account: string, data: { balance: number; floating_pl: number; total_profit: number }): Promise<void> {
+  await initPortfolioSheet();
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${PORTFOLIO_SHEET}!A:I` });
+  const rows = res.data.values;
+  if (!rows || rows.length <= 1) throw new Error("ไม่พบพอร์ตนี้");
+  const idx = rows.findIndex((r) => r[2] === mt5Account);
+  if (idx < 0) throw new Error("ไม่พบพอร์ตนี้");
+  rows[idx][4] = String(data.balance);
+  rows[idx][5] = String(data.floating_pl);
+  rows[idx][6] = String(data.total_profit);
+  rows[idx][7] = new Date().toISOString();
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: sid,
+    range: `${PORTFOLIO_SHEET}!A${idx + 1}:I${idx + 1}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [rows[idx]] },
+  });
 }

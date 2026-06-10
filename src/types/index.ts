@@ -127,4 +127,4 @@ export interface VerifyResponse {
   message: string;
   package?: string;
   expiry_date?: string;
-}
+}// Portfolio types 
