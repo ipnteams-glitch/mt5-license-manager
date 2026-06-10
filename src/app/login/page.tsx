@@ -1,10 +1,13 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 
-export default function LoginPage() {
+function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
@@ -22,7 +25,7 @@ export default function LoginPage() {
         <button
           onClick={() => {
             setLoading(true);
-            signIn("google", { callbackUrl: "/dashboard" });
+            signIn("google", { callbackUrl });
           }}
           disabled={loading}
           className="flex w-full items-center justify-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:shadow-md disabled:opacity-50"
@@ -54,5 +57,17 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-blue-600" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
