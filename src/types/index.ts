@@ -62,11 +62,11 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   test_1: {
     key: "test_1", name: "ทดสอบ", name_en: "Test", price: 1, duration_days: 3, max_ports: 3,
-    label: "🧪 1 บาท / 3 วัน", rank: 2,
+    label: "\uD83E\uDDEA 1 บาท / 3 วัน", rank: 2,
   },
   promo_69: {
     key: "promo_69", name: "โปรโมชั่นครั้งแรก", name_en: "First Promo", price: 69, duration_days: 30, max_ports: 1,
-    label: "🔥 69 บาท / 30 วัน (ครั้งแรก)", rank: 3,
+    label: "\uD83D\uDD25 69 บาท / 30 วัน (ครั้งแรก)", rank: 3,
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
@@ -89,6 +89,19 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 9990,
   },
 };
+
+// ── Portfolio (MyPortfolio) ──
+export interface PortfolioAccount {
+  id: string;
+  member_email: string;
+  mt5_account: string;
+  broker: string;
+  balance: number;
+  floating_pl: number;
+  total_profit: number;
+  last_updated: string;
+  created_at: string;
+}
 
 export const BUYABLE_PACKAGES: PackageType[] = ["free", "promo_69", "1000_2m", "2490_3m", "4900_1y", "9990_1y"];
 
@@ -127,4 +140,4 @@ export interface VerifyResponse {
   message: string;
   package?: string;
   expiry_date?: string;
-}// Portfolio types 
+}
