@@ -12,8 +12,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   const { data: session } = useSession();
   const [accounts, setAccounts] = useState<PortfolioAccount[]>(initialAccounts);
   const [mt5Account, setMt5Account] = useState("");
-  const [broker, setBroker] = useState("");
-  const [adding, setAdding] = useState(false);
+    const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -29,14 +28,13 @@ export default function PortfolioClient({ initialAccounts }: Props) {
       const res = await fetch("/api/portfolio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mt5_account: mt5Account.trim(), broker: broker.trim() }),
+        body: JSON.stringify({ mt5_account: mt5Account.trim() }),
       });
       const data = await res.json();
       if (data.success) {
         setAccounts([...accounts, data.account]);
         setMt5Account("");
-        setBroker("");
-        setShowAdd(false);
+                setShowAdd(false);
         setSuccess(`เพิ่ม ${mt5Account.trim()} แล้ว`);
       } else {
         setError(data.error || "เกิดข้อผิดพลาด");
@@ -140,13 +138,15 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                 className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
                 required
               />
-              <input
-                type="text"
-                value={broker}
-                onChange={(e) => setBroker(e.target.value)}
-                placeholder="Broker (เช่น XM, Exness)"
-                className="w-40 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
-              />
+              <button
+                type="submit"
+                disabled={adding || !mt5Account.trim()}
+                className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+              >
+                {adding ? "กำลังเพิ่ม..." : "เพิ่ม"}
+              </button>
+            </div>
+
               <button
                 type="submit"
                 disabled={adding || !mt5Account.trim()}
@@ -185,9 +185,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                         <span className="font-mono text-base font-bold text-zinc-900">{acc.mt5_account}</span>
                         <span className={`inline-block h-2 w-2 rounded-full ${isUpdated ? "bg-green-500" : "bg-yellow-400"}`} title={isUpdated ? "อัปเดตล่าสุด" : "รออัปเดต"} />
                       </div>
-                      {acc.broker && (
-                        <span className="text-xs text-zinc-500">{acc.broker}</span>
-                      )}
+                      
                     </div>
                     <button
                       onClick={() => handleDelete(acc.id)}
