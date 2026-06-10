@@ -201,7 +201,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                     {/* Floating P/L */}
                     <div className="rounded-lg bg-zinc-50 p-3">
                       <div className="text-xs text-zinc-500 mb-1">Float P/L</div>
-                      <div className={`text-sm font-bold ${floating.color}`}>${floating.text}</div>
+                      <div className={`text-sm font-bold ${pctColor}`}>{pctText}</div>
                     </div>
 
                     {/* Total Profit */}
