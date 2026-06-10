@@ -67,11 +67,12 @@ void OnTimer()
 
    // ส่ง HTTP POST
    char data[], result[];
+   string result_headers;
    string headers = "Content-Type: application/json\r\n";
-   StringToCharArray(json, data, 0, StringLen(json));
+   StringToCharArray(json, data, 0, WHOLE_ARRAY);
 
    string url = ServerURL + "/api/portfolio/push";
-   int res = WebRequest("POST", url, headers, 5000, data, result, NULL);
+   int res = WebRequest("POST", url, headers, NULL, 5000, data, ArraySize(data), result, result_headers);
 
    if(res == 200)
      {
