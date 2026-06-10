@@ -12,7 +12,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   const { data: session } = useSession();
   const [accounts, setAccounts] = useState<PortfolioAccount[]>(initialAccounts);
   const [mt5Account, setMt5Account] = useState("");
-    const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
       if (data.success) {
         setAccounts([...accounts, data.account]);
         setMt5Account("");
-                setShowAdd(false);
+        setShowAdd(false);
         setSuccess(`เพิ่ม ${mt5Account.trim()} แล้ว`);
       } else {
         setError(data.error || "เกิดข้อผิดพลาด");
@@ -146,15 +146,6 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                 {adding ? "กำลังเพิ่ม..." : "เพิ่ม"}
               </button>
             </div>
-
-              <button
-                type="submit"
-                disabled={adding || !mt5Account.trim()}
-                className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
-              >
-                {adding ? "กำลังเพิ่ม..." : "เพิ่ม"}
-              </button>
-            </div>
           </form>
         )}
 
@@ -185,7 +176,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                         <span className="font-mono text-base font-bold text-zinc-900">{acc.mt5_account}</span>
                         <span className={`inline-block h-2 w-2 rounded-full ${isUpdated ? "bg-green-500" : "bg-yellow-400"}`} title={isUpdated ? "อัปเดตล่าสุด" : "รออัปเดต"} />
                       </div>
-                      
+
                     </div>
                     <button
                       onClick={() => handleDelete(acc.id)}
