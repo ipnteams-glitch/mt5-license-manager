@@ -8,18 +8,19 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+  const isPortfolio = callbackUrl === "/portfolio";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
       <div className="w-full max-w-sm rounded-xl bg-white p-8 shadow-lg text-center">
         {/* Logo / Icon */}
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white text-2xl font-bold">
-          MT5
+        <div className={`mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full text-white text-2xl font-bold ${isPortfolio ? "bg-green-600" : "bg-blue-600"}`}>
+          {isPortfolio ? "📊" : "MT5"}
         </div>
 
-        <h1 className="mb-2 text-xl font-bold text-zinc-900">MT5 License Manager</h1>
+        <h1 className="mb-2 text-xl font-bold text-zinc-900">{isPortfolio ? "MyPortfolio" : "MT5 License Manager"}</h1>
         <p className="mb-8 text-sm text-zinc-500">
-          ล็อคอินด้วย Gmail เพื่อจัดการพอร์ตของคุณ
+          {isPortfolio ? "ล็อคอินด้วย Gmail เพื่อดูพอร์ตการลงทุนของคุณ" : "ล็อคอินด้วย Gmail เพื่อจัดการพอร์ต MT5 ของคุณ"}
         </p>
 
         <button
