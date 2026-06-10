@@ -1,6 +1,6 @@
 //+------------------------------------------------------------------+
 //|                                          test_portfolio.mq5       |
-//|  EA ส่งข้อมูลพอร์ตไปยัง MyPortfolio ทุก 1 ชั่วโมง                  |
+//|  EA ส่งข้อมูลพอร์ตไปยัง MyPortfolio ทุก 1 นาที                     |
 //|  ใช้ GrabWeb (WinInet) — ไม่ต้อง add URL ใน MT5                   |
 //+------------------------------------------------------------------+
 #property copyright "MT5 License Manager"
@@ -8,33 +8,14 @@
 #include <Grabweb.mqh>
 
 // ── Configuration ──
-input string   ServerURL = "https://mt5-license-manager.vercel.app";  // Server URL
-input int      UpdateIntervalMinutes = 60;                             // อัปเดตทุกกี่นาที
+string   ServerURL = "https://mt5-license-manager.vercel.app";  // Server URL
+input int      UpdateIntervalMinutes = 1;                         // อัปเดตทุกกี่นาที
 
 //+------------------------------------------------------------------+
-//| Expert initialization function                                     |
+//| ส่งข้อมูลพอร์ตขึ้น server                                         |
 //+------------------------------------------------------------------+
-int OnInit()
+void SendPortfolioData()
   {
-   int delaySeconds = MathRand() % 1800;
-   Print("[MyPortfolio] EA started. First update in ", delaySeconds, " seconds");
-   EventSetTimer(delaySeconds);
-   return(INIT_SUCCEEDED);
-  }
-//+------------------------------------------------------------------+
-//| Expert deinitialization function                                   |
-//+------------------------------------------------------------------+
-void OnDeinit(const int reason)
-  {
-   EventKillTimer();
-  }
-//+------------------------------------------------------------------+
-//| Timer function                                                     |
-//+------------------------------------------------------------------+
-void OnTimer()
-  {
-   EventSetTimer(UpdateIntervalMinutes * 60);
-
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
    double floating_pl = AccountInfoDouble(ACCOUNT_PROFIT);
 
@@ -56,7 +37,6 @@ void OnTimer()
 
    long mt5_account = AccountInfoInteger(ACCOUNT_LOGIN);
 
-   // สร้าง URL แบบ GET (ใช้ GrabWeb ได้)
    string url = ServerURL + "/api/portfolio/push"
               + "?mt5_account=" + IntegerToString(mt5_account)
               + "&balance=" + DoubleToString(balance, 2)
@@ -70,11 +50,41 @@ void OnTimer()
      {
       Print("[MyPortfolio] Data sent. Balance=", balance,
             " FloatPL=", floating_pl, " TotalProfit=", total_profit,
-            " Response=", webPage);
+            " Resp=", webPage);
      }
    else
      {
       Print("[MyPortfolio] Failed to send data");
      }
+  }
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                     |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   Print("[MyPortfolio] EA started. Sending first data now...");
+
+   // ส่งข้อมูลทันที 1 ครั้ง
+   SendPortfolioData();
+
+   // จากนั้นอัปเดตทุก 1 นาที
+   EventSetTimer(UpdateIntervalMinutes * 60);
+
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                   |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   EventKillTimer();
+  }
+//+------------------------------------------------------------------+
+//| Timer function — เรียกทุก 1 นาที                                   |
+//+------------------------------------------------------------------+
+void OnTimer()
+  {
+   SendPortfolioData();
   }
 //+------------------------------------------------------------------+
