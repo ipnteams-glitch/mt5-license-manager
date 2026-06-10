@@ -165,6 +165,9 @@ export default function PortfolioClient({ initialAccounts }: Props) {
             {accounts.map((acc) => {
               const floating = formatPL(acc.floating_pl);
               const profit = formatPL(acc.total_profit);
+              const floatingPct = acc.balance > 0 ? (acc.floating_pl / acc.balance) * 100 : 0;
+              const pctColor = floatingPct >= 0 ? "text-green-600" : "text-red-500";
+              const pctText = `${floatingPct >= 0 ? "+" : ""}${floatingPct.toFixed(2)}%`;
               const isUpdated = acc.last_updated && (Date.now() - new Date(acc.last_updated).getTime()) < 2 * 60 * 60 * 1000; // 2 ชม
 
               return (
