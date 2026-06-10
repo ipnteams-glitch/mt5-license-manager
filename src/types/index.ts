@@ -62,11 +62,11 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   test_1: {
     key: "test_1", name: "ทดสอบ", name_en: "Test", price: 1, duration_days: 3, max_ports: 3,
-    label: "\uD83E\uDDEA 1 บาท / 3 วัน", rank: 2,
+    label: "🧪 1 บาท / 3 วัน", rank: 2,
   },
   promo_69: {
     key: "promo_69", name: "โปรโมชั่นครั้งแรก", name_en: "First Promo", price: 69, duration_days: 30, max_ports: 1,
-    label: "\uD83D\uDD25 69 บาท / 30 วัน (ครั้งแรก)", rank: 3,
+    label: "🔥 69 บาท / 30 วัน (ครั้งแรก)", rank: 3,
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
