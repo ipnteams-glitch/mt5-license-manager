@@ -422,7 +422,7 @@ export default function DashboardClient({
                     <th className="pb-2">MT5 Account</th>
                     <th className="pb-2">วันที่เพิ่ม</th>
                     <th className="pb-2">หมดอายุ</th>
-                    <th className="pb-2 text-right">Systems</th>
+                    <th className="pb-2 text-right">ฝากรัน</th>
                     <th className="pb-2 text-right">จัดการ</th>
                   </tr>
                 </thead>
@@ -624,7 +624,7 @@ export default function DashboardClient({
                 ตั้งค่าระบบ — {systemsModalPort.mt5_account}
               </h3>
               <p className="text-xs text-zinc-500 mb-4">
-                ใส่รหัสเทรด (Investor Password) แล้วกด Login เพื่อทดสอบ
+                ใส่ Master Password แล้วกด Login เพื่อทดสอบ
               </p>
 
               {error && (
@@ -656,7 +656,7 @@ export default function DashboardClient({
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   disabled={loginStatus === "ok"}
-                  placeholder="รหัสเทรด (Investor Password)"
+                  placeholder="Master Password"
                   className="flex-1 rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
                 />
                 <button
