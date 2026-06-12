@@ -629,21 +629,17 @@ export default function DashboardClient({
                 <label className="block text-xs font-medium text-zinc-600 mb-1">
                   Broker Server
                 </label>
-                <input
-                  type="text"
+                <select
                   value={loginBroker}
                   onChange={(e) => setLoginBroker(e.target.value)}
-                  list="broker-list"
-                  autoComplete="off"
                   disabled={loginStatus === "ok"}
-                  placeholder="เช่น InterstellarFinancial-Demo"
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
-                />
-                <datalist id="broker-list">
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 bg-white focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
+                >
+                  <option value="">-- เลือก Broker --</option>
                   {brokerList.map(b => (
-                    <option key={b} value={b} />
+                    <option key={b} value={b}>{b}</option>
                   ))}
-                </datalist>
+                </select>
               </div>
 
               {/* ── Password + Login ── */}
