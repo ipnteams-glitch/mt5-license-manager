@@ -16,20 +16,41 @@ export async function GET(req: Request) {
   }
 
   try {
+    // Check port_systems FIRST (before verifying port ownership)
+    const ps = await getPortSystems(account);
+
+    // If already owned by someone else → block
+    if (ps && ps.member_email !== session.user.email) {
+      return NextResponse.json({
+        systems: "",
+        updated_at: ps.updated_at,
+        owned_by_other: true,
+        owner_email: ps.member_email,
+      });
+    }
+
+    // If owned by current user → return systems
+    if (ps && ps.member_email === session.user.email) {
+      return NextResponse.json({
+        systems: ps.systems,
+        updated_at: ps.updated_at,
+        owned_by_other: false,
+        owner_email: null,
+      });
+    }
+
+    // Not in port_systems → verify port belongs to user
     const ports = await getPortsByEmail(session.user.email);
     const port = ports.find((p) => p.mt5_account === account);
     if (!port) {
       return NextResponse.json({ error: "Port not found" }, { status: 404 });
     }
 
-    const ps = await getPortSystems(account);
-    // Check if port is owned by someone else
-    const ownedByOther = ps && ps.member_email !== session.user.email;
     return NextResponse.json({
-      systems: ownedByOther ? "" : (ps?.systems || ""),
-      updated_at: ps?.updated_at || null,
-      owned_by_other: ownedByOther,
-      owner_email: ownedByOther ? ps?.member_email : null,
+      systems: "",
+      updated_at: null,
+      owned_by_other: false,
+      owner_email: null,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
