@@ -823,13 +823,29 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
   });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) return null;
-  // O(1) lookup via Map keyed by mt5_account (column B)
-  const map = new Map<string, string[]>();
-  for (let i = 1; i < rows.length; i++) {
-    map.set(rows[i][1] || "", rows[i]);
-  }
-  const row = map.get(mt5Account);
-  return row ? portSystemFromRow(row) : null;
+  // Dynamic column lookup from header
+  const header = rows[0];
+  const cols = {
+    id: header.indexOf("id"),
+    mt5_account: header.indexOf("mt5_account"),
+    member_email: header.indexOf("member_email"),
+    port_id: header.indexOf("port_id"),
+    systems: header.indexOf("systems"),
+    updated_at: header.indexOf("updated_at"),
+    created_at: header.indexOf("created_at"),
+  };
+  const acctCol = cols.mt5_account >= 0 ? cols.mt5_account : 1;
+  const row = rows.slice(1).find(r => r[acctCol] === mt5Account);
+  if (!row) return null;
+  return {
+    id: cols.id >= 0 ? row[cols.id] : row[0],
+    port_id: cols.port_id >= 0 ? row[cols.port_id] : row[3],
+    member_email: cols.member_email >= 0 ? row[cols.member_email] : row[2],
+    mt5_account: acctCol >= 0 ? row[acctCol] : row[1],
+    systems: cols.systems >= 0 ? row[cols.systems] : row[4],
+    updated_at: cols.updated_at >= 0 ? row[cols.updated_at] : row[5],
+    created_at: cols.created_at >= 0 ? row[cols.created_at] : row[6],
+  };
 }
 
 
