@@ -571,32 +571,24 @@ export default function DashboardClient({
                 <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>
               )}
 
-              <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto mb-4">
-                {ALL_SYSTEMS.map(sys => (
-                  <label
-                    key={sys}
-                    className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs cursor-pointer transition-colors
-                      ${selectedSystems.includes(sys)
-                        ? "border-blue-400 bg-blue-50 text-blue-700 font-medium"
-                        : "border-zinc-200 hover:border-zinc-300 text-zinc-600"
-                      }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedSystems.includes(sys)}
-                      onChange={() => toggleSystem(sys)}
-                      className="h-3 w-3 rounded accent-blue-600"
-                    />
-                    {sys.replace("_", " ")}
-                  </label>
-                ))}
+              <div className="mb-4">
+                <select
+                  value={selectedSystems[0] || ""}
+                  onChange={(e) => setSelectedSystems(e.target.value ? [e.target.value] : [])}
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="">-- ไม่เลือก (ลูกค้าใช้ EA เอง) --</option>
+                  {ALL_SYSTEMS.map(sys => (
+                    <option key={sys} value={sys}>{sys.replace("_", " ")}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex gap-2 justify-between items-center">
                 <div className="text-xs text-zinc-400">
                   {selectedSystems.length > 0
-                    ? `เลือก ${selectedSystems.length} ระบบ: ${selectedSystems.join(", ")}`
-                    : "ยังไม่ได้เลือกระบบ"}
+                    ? `ระบบที่เลือก: ${selectedSystems[0]}`
+                    : "ยังไม่ได้เลือกระบบ (ลูกค้าจะใช้ EA เอง)"}
                 </div>
                 <div className="flex gap-2">
                   <button
