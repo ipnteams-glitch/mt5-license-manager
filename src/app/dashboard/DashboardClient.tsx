@@ -575,7 +575,7 @@ export default function DashboardClient({
                 <select
                   value={selectedSystems[0] || ""}
                   onChange={(e) => setSelectedSystems(e.target.value ? [e.target.value] : [])}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white text-blue-600 font-medium focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">-- ไม่เลือก (ลูกค้าใช้ EA เอง) --</option>
                   {ALL_SYSTEMS.map(sys => (
