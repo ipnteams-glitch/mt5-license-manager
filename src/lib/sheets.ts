@@ -845,13 +845,21 @@ export async function setPortSystems(
   });
   const rows = res.data.values;
   if (rows && rows.length > 1) {
-    const idx = rows.findIndex((r) => r[1] === mt5Account);
+    // Look up by mt5_account column (header may vary)
+    const header = rows[0];
+    const acctCol = header.findIndex((h: string) => h === "mt5_account");
+    const idx = rows.findIndex((r, i) => i > 0 && r[acctCol >= 0 ? acctCol : 1] === mt5Account);
     if (idx >= 0) {
+      // Update only systems + updated_at columns, preserve rest
+      const sysCol = header.findIndex((h: string) => h === "systems");
+      const updCol = header.findIndex((h: string) => h === "updated_at");
+      if (sysCol >= 0) rows[idx][sysCol] = systems;
+      if (updCol >= 0) rows[idx][updCol] = now;
       await sheets.spreadsheets.values.update({
         spreadsheetId: sid,
         range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:G${idx + 1}`,
         valueInputOption: "RAW",
-        requestBody: { values: [portSystemToRow(ps)] },
+        requestBody: { values: [rows[idx]] },
       });
       return ps;
     }
