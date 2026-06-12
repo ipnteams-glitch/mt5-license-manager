@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Member, Port, Payment } from "@/types";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
 
@@ -60,6 +60,13 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetch("/api/brokers")
+      .then(res => res.json())
+      .then(data => setBrokerList(data.brokers || []))
+      .catch(() => {});
+  }, []);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginBroker, setLoginBroker] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -204,7 +211,8 @@ export default function DashboardClient({
   async function openSystemsModal(port: Port) {
     setSystemsModalPort(port);
     setLoginBroker(port.mt5_broker || "");
-    // Fetch broker list if not loaded
+    setError("");
+    setSystemsModalOpen(true);
     if (brokerList.length === 0) {
       try {
         const res = await fetch("/api/brokers");
