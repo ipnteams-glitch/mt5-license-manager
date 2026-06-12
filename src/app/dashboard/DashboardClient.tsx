@@ -227,7 +227,7 @@ export default function DashboardClient({
         return;
       }
       if (data.owned_by_other) {
-        setError(`พอร์ตนี้ถูกใช้โดย ${data.owner_email} แล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้`);
+        setError("พอร์ตนี้ถูกใช้โดยสมาชิกอื่นแล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้");
         return;
       }
       const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
