@@ -59,6 +59,7 @@ export default function DashboardClient({
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
+  const [brokerList, setBrokerList] = useState<string[]>([]);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginBroker, setLoginBroker] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -203,6 +204,16 @@ export default function DashboardClient({
   async function openSystemsModal(port: Port) {
     setSystemsModalPort(port);
     setLoginBroker(port.mt5_broker || "");
+    // Fetch broker list if not loaded
+    if (brokerList.length === 0) {
+      try {
+        const res = await fetch("/api/brokers");
+        if (res.ok) {
+          const data = await res.json();
+          setBrokerList(data.brokers || []);
+        }
+      } catch {}
+    }
     const cached = systemsCache[port.id];
     if (cached !== undefined) {
       setSelectedSystems(cached ? cached.split(",").map(s => s.trim()) : []);
@@ -625,16 +636,9 @@ export default function DashboardClient({
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
                 />
                 <datalist id="broker-list">
-                  <option value="InterstellarFinancial-Demo" />
-                  <option value="InterstellarFinancial-Main" />
-                  <option value="TPTradesGroup-Demo" />
-                  <option value="VTMarkets-Demo" />
-                  <option value="VTMarkets-Live" />
-                  <option value="Exness-Real" />
-                  <option value="ICMarkets-Demo" />
-                  <option value="ICMarkets-Live" />
-                  <option value="Tickmill-Demo" />
-                  <option value="Pepperstone-Demo" />
+                  {brokerList.map(b => (
+                    <option key={b} value={b} />
+                  ))}
                 </datalist>
               </div>
 

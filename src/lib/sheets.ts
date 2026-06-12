@@ -865,3 +865,62 @@ export async function setPortSystems(
   });
   return ps;
 }
+
+// Brokers
+
+const BROKERS_SHEET = "brokers";
+
+async function initBrokersSheet(): Promise<void> {
+  const sheets = await getSheets();
+  const sid = sheetId();
+  try {
+    await sheets.spreadsheets.values.get({
+      spreadsheetId: sid,
+      range: `${BROKERS_SHEET}!A1`,
+    });
+  } catch {
+    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: sid,
+      requestBody: {
+        requests: [{
+          addSheet: {
+            properties: { title: BROKERS_SHEET },
+          },
+        }],
+      },
+    });
+    const defaults = [
+      ["Broker"],
+      ["InterstellarFinancial-Demo"],
+      ["InterstellarFinancial-Main"],
+      ["TPTradesGroup-Demo"],
+      ["VTMarkets-Demo"],
+      ["VTMarkets-Live"],
+      ["Exness-Real"],
+      ["ICMarkets-Demo"],
+      ["ICMarkets-Live"],
+      ["Tickmill-Demo"],
+      ["Pepperstone-Demo"],
+    ];
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sid,
+      range: `${BROKERS_SHEET}!A:A`,
+      valueInputOption: "RAW",
+      requestBody: { values: defaults },
+    });
+  }
+}
+
+export async function getAllBrokers(): Promise<string[]> {
+  await initBrokersSheet();
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid,
+    range: `${BROKERS_SHEET}!A:A`,
+  });
+  const rows = res.data.values;
+  if (!rows || rows.length <= 1) return [];
+  return rows.slice(1).map(r => r[0] || "").filter(Boolean);
+}
