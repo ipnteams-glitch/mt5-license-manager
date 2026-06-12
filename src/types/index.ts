@@ -150,6 +150,7 @@ export interface PortSystem {
   mt5_account: string;
   systems: string;
   password?: string;
+  broker?: string;
   vps_id?: string;
   status?: string;
   heartbeat?: string;

@@ -66,7 +66,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { account, systems, password } = body;
+    const { account, systems, password, broker } = body;
 
     if (!account) {
       return NextResponse.json({ error: "Missing account" }, { status: 400 });
@@ -99,6 +99,7 @@ export async function POST(req: Request) {
       account,
       items.join(","),
       password || undefined,
+      broker || undefined,
     );
 
     return NextResponse.json({ success: true, systems: result.systems });

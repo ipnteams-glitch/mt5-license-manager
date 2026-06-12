@@ -805,12 +805,12 @@ function portSystemToRow(ps: PortSystem): string[] {
 async function initPortSystemsSheet(): Promise<void> {
   const sheets = await getSheets();
   const sid = sheetId();
-  const NEW_HEADER = ["mt5_account", "member_email", "systems", "password", "vps_id", "status", "heartbeat", "updated_at"];
+  const NEW_HEADER = ["mt5_account", "member_email", "systems", "password", "broker", "vps_id", "status", "heartbeat", "updated_at"];
   try {
     // Check if sheet exists and has correct header
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A1:H1`,
+      range: `${PORT_SYSTEMS_SHEET}!A1:I1`,
     });
     const header = res.data.values?.[0] || [];
     if (header[0] !== "mt5_account") {
@@ -821,7 +821,7 @@ async function initPortSystemsSheet(): Promise<void> {
       });
       await sheets.spreadsheets.values.update({
         spreadsheetId: sid,
-        range: `${PORT_SYSTEMS_SHEET}!A1:H1`,
+        range: `${PORT_SYSTEMS_SHEET}!A1:I1`,
         valueInputOption: "RAW",
         requestBody: { values: [NEW_HEADER] },
       });
@@ -866,10 +866,11 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
     mt5_account: row[0] || "",
     systems: row[2] || "",
     password: row[3] || "",
-    vps_id: row[4] || "",
-    status: row[5] || "pending",
-    heartbeat: row[6] || "",
-    updated_at: row[7] || "",
+    broker: row[4] || "",
+    vps_id: row[5] || "",
+    status: row[6] || "pending",
+    heartbeat: row[7] || "",
+    updated_at: row[8] || "",
     created_at: "",
   };
 }
@@ -880,6 +881,7 @@ export async function setPortSystems(
   mt5Account: string,
   systems: string,
   password?: string,
+  broker?: string,
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
   const existing = await getPortSystems(mt5Account);
@@ -910,10 +912,11 @@ export async function setPortSystems(
     // Update
     rows[idx][2] = systems;
     if (password) rows[idx][3] = password;
-    rows[idx][7] = now;
+    if (broker) rows[idx][4] = broker;
+    rows[idx][8] = now;
     await sheets.spreadsheets.values.update({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:H${idx + 1}`,
+      range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:I${idx + 1}`,
       valueInputOption: "RAW",
       requestBody: { values: [rows[idx]] },
     });
@@ -923,7 +926,7 @@ export async function setPortSystems(
       spreadsheetId: sid,
       range: `${PORT_SYSTEMS_SHEET}!A:E`,
       valueInputOption: "RAW",
-      requestBody: { values: [[mt5Account, email, systems, password || "", "", "pending", "", now]] },
+      requestBody: { values: [[mt5Account, email, systems, password || "", broker || "", "", "pending", "", now]] },
     });
   }
   return ps;
