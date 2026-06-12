@@ -921,6 +921,14 @@ export async function getAllBrokers(): Promise<string[]> {
     range: `${BROKERS_SHEET}!A:A`,
   });
   const rows = res.data.values;
-  if (!rows || rows.length <= 1) return [];
+  if (!rows || rows.length <= 1) {
+    // Fallback defaults
+    return [
+      "InterstellarFinancial-Demo", "InterstellarFinancial-Main",
+      "TPTradesGroup-Demo", "VTMarkets-Demo", "VTMarkets-Live",
+      "Exness-Real", "ICMarkets-Demo", "ICMarkets-Live",
+      "Tickmill-Demo", "Pepperstone-Demo",
+    ];
+  }
   return rows.slice(1).map(r => r[0] || "").filter(Boolean);
 }
