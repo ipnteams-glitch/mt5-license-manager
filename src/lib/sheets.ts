@@ -259,6 +259,13 @@ export async function deletePort(portId: string, email: string): Promise<void> {
     spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A${idx + 2}:F${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [portToRow(all[idx])] },
   });
+  // Cascade: also remove from port_systems if exists
+  try {
+    const ps = await getPortSystems(all[idx].mt5_account);
+    if (ps && ps.member_email === email) {
+      await removePortSystems(all[idx].mt5_account);
+    }
+  } catch { /* ignore if port_systems sheet doesn't exist */ }
 }
 
 export async function findPortByAccount(mt5Account: string): Promise<Port | null> {
@@ -825,6 +832,35 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
   return row ? portSystemFromRow(row) : null;
 }
 
+
+async function removePortSystems(mt5Account: string): Promise<void> {
+  await initPortSystemsSheet();
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid,
+    range: `${PORT_SYSTEMS_SHEET}!A:G`,
+  });
+  const rows = res.data.values;
+  if (!rows || rows.length <= 1) return;
+  const col = rows[0].findIndex((h: string) => h === "mt5_account");
+  const idx = rows.findIndex((r, i) => i > 0 && r[col >= 0 ? col : 1] === mt5Account);
+  if (idx < 0) return;
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
+  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PORT_SYSTEMS_SHEET);
+  if (!sheet?.properties?.sheetId) return;
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: sid,
+    requestBody: {
+      requests: [{
+        deleteDimension: {
+          range: { sheetId: sheet.properties.sheetId, dimension: "ROWS", startIndex: idx, endIndex: idx + 1 },
+        },
+      }],
+    },
+  });
+}
+
 export async function setPortSystems(
   email: string,
   portId: string,
@@ -833,6 +869,10 @@ export async function setPortSystems(
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
   const existing = await getPortSystems(mt5Account);
+  // Prevent duplicate: if account exists under different email, reject
+  if (existing && existing.member_email !== email) {
+    throw new Error("หมายเลขพอร์ตนี้ถูกใช้โดยสมาชิกอื่นแล้ว");
+  }
   const now = new Date().toISOString();
   const ps: PortSystem = {
     id: existing?.id || uuidv4(),
