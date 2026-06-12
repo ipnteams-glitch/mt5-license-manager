@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Member, Port, Payment } from "@/types";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
 
@@ -62,6 +62,20 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>(brokers);
+
+  useEffect(() => {
+    fetch("/api/ports/status")
+      .then(res => res.json())
+      .then(data => {
+        if (data.ports) {
+          const map: Record<string, any> = {};
+          data.ports.forEach((p: any) => { map[p.mt5_account] = p; });
+          setPortStatuses(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
+  const [portStatuses, setPortStatuses] = useState<Record<string, any>>({});
   const [loginPassword, setLoginPassword] = useState("");
   const [loginBroker, setLoginBroker] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
@@ -423,6 +437,7 @@ export default function DashboardClient({
                     <th className="pb-2">วันที่เพิ่ม</th>
                     <th className="pb-2">หมดอายุ</th>
                     <th className="pb-2 text-right">ฝากรัน</th>
+                    <th className="pb-2 text-right">สถานะ</th>
                     <th className="pb-2 text-right">จัดการ</th>
                   </tr>
                 </thead>
