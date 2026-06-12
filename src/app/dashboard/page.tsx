@@ -15,20 +15,21 @@ export default async function DashboardPage() {
   let brokers: string[] = [];
   let paymentHistory: Payment[] = [];
 
+  // Fetch brokers independently (never block by other errors)
+  try {
+    brokers = await getAllBrokers();
+  } catch {
+    brokers = [
+      "InterstellarFinancial-Demo", "InterstellarFinancial-Main",
+      "TPTradesGroup-Demo", "VTMarkets-Demo", "VTMarkets-Live",
+      "Exness-Real", "ICMarkets-Demo", "ICMarkets-Live",
+      "Tickmill-Demo", "Pepperstone-Demo",
+    ];
+  }
+
   try {
     member = await getMemberByEmail(session.user.email);
     ports = await getPortsByEmail(session.user.email);
-    try {
-      brokers = await getAllBrokers();
-    } catch {
-      // Fallback if sheet not yet created
-      brokers = [
-        "InterstellarFinancial-Demo", "InterstellarFinancial-Main",
-        "TPTradesGroup-Demo", "VTMarkets-Demo", "VTMarkets-Live",
-        "Exness-Real", "ICMarkets-Demo", "ICMarkets-Live",
-        "Tickmill-Demo", "Pepperstone-Demo",
-      ];
-    }
     const allPayments = await getAllPayments();
     const userPayments = allPayments.filter((p) => p.email === session.user!.email);
     pendingPayments = userPayments

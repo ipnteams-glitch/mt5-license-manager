@@ -634,6 +634,7 @@ export default function DashboardClient({
                   value={loginBroker}
                   onChange={(e) => setLoginBroker(e.target.value)}
                   list="broker-list"
+                  autoComplete="off"
                   disabled={loginStatus === "ok"}
                   placeholder="เช่น InterstellarFinancial-Demo"
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
