@@ -263,9 +263,32 @@ export async function deletePort(portId: string, email: string): Promise<void> {
   try {
     const ps = await getPortSystems(all[idx].mt5_account);
     if (ps && ps.member_email === email) {
-      await removePortSystems(all[idx].mt5_account);
+      const sheets2 = await getSheets();
+      const sid2 = sheetId();
+      const res2 = await sheets2.spreadsheets.values.get({
+        spreadsheetId: sid2,
+        range: `${PORT_SYSTEMS_SHEET}!A:D`,
+      });
+      const rows2 = res2.data.values || [];
+      const idx2 = rows2.findIndex((r, i) => i > 0 && r[0] === all[idx].mt5_account);
+      if (idx2 >= 0) {
+        const spreadsheet = await sheets2.spreadsheets.get({ spreadsheetId: sid2 });
+        const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PORT_SYSTEMS_SHEET);
+        if (sheet?.properties?.sheetId) {
+          await sheets2.spreadsheets.batchUpdate({
+            spreadsheetId: sid2,
+            requestBody: {
+              requests: [{
+                deleteDimension: {
+                  range: { sheetId: sheet.properties.sheetId, dimension: "ROWS", startIndex: idx2, endIndex: idx2 + 1 },
+                },
+              }],
+            },
+          });
+        }
+      }
     }
-  } catch { /* ignore if port_systems sheet doesn't exist */ }
+  } catch { /* ignore */ }
 }
 
 export async function findPortByAccount(mt5Account: string): Promise<Port | null> {
@@ -782,33 +805,43 @@ function portSystemToRow(ps: PortSystem): string[] {
 async function initPortSystemsSheet(): Promise<void> {
   const sheets = await getSheets();
   const sid = sheetId();
+  const NEW_HEADER = ["mt5_account", "member_email", "systems", "updated_at"];
   try {
-    await sheets.spreadsheets.values.get({
+    // Check if sheet exists and has correct header
+    const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A1`,
+      range: `${PORT_SYSTEMS_SHEET}!A1:D1`,
     });
+    const header = res.data.values?.[0] || [];
+    if (header[0] !== "mt5_account") {
+      // Wrong header — clear and rewrite
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: sid,
+        range: `${PORT_SYSTEMS_SHEET}!A:Z`,
+      });
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sid,
+        range: `${PORT_SYSTEMS_SHEET}!A1:D1`,
+        valueInputOption: "RAW",
+        requestBody: { values: [NEW_HEADER] },
+      });
+    }
   } catch {
+    // Sheet doesn't exist — create
     const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: sid,
       requestBody: {
         requests: [{
-          addSheet: {
-            properties: { title: PORT_SYSTEMS_SHEET },
-          },
+          addSheet: { properties: { title: PORT_SYSTEMS_SHEET } },
         }],
       },
     });
     await sheets.spreadsheets.values.append({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A:G`,
+      range: `${PORT_SYSTEMS_SHEET}!A:D`,
       valueInputOption: "RAW",
-      requestBody: {
-        values: [[
-          "id", "mt5_account", "member_email", "port_id",
-          "systems", "updated_at", "created_at",
-        ]],
-      },
+      requestBody: { values: [NEW_HEADER] },
     });
   }
 }
@@ -819,80 +852,39 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:G`,
+    range: `${PORT_SYSTEMS_SHEET}!A:D`,
   });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) return null;
-  // Dynamic column lookup from header
-  const header = rows[0];
-  const cols = {
-    id: header.indexOf("id"),
-    mt5_account: header.indexOf("mt5_account"),
-    member_email: header.indexOf("member_email"),
-    port_id: header.indexOf("port_id"),
-    systems: header.indexOf("systems"),
-    updated_at: header.indexOf("updated_at"),
-    created_at: header.indexOf("created_at"),
-  };
-  const acctCol = cols.mt5_account >= 0 ? cols.mt5_account : 1;
-  const row = rows.slice(1).find(r => r[acctCol] === mt5Account);
+  // Simple lookup: column A = mt5_account
+  const row = rows.slice(1).find(r => r[0] === mt5Account);
   if (!row) return null;
   return {
-    id: cols.id >= 0 ? row[cols.id] : row[0],
-    port_id: cols.port_id >= 0 ? row[cols.port_id] : row[3],
-    member_email: cols.member_email >= 0 ? row[cols.member_email] : row[2],
-    mt5_account: acctCol >= 0 ? row[acctCol] : row[1],
-    systems: cols.systems >= 0 ? row[cols.systems] : row[4],
-    updated_at: cols.updated_at >= 0 ? row[cols.updated_at] : row[5],
-    created_at: cols.created_at >= 0 ? row[cols.created_at] : row[6],
+    id: "",
+    port_id: "",
+    member_email: row[1] || "",
+    mt5_account: row[0] || "",
+    systems: row[2] || "",
+    updated_at: row[3] || "",
+    created_at: "",
   };
-}
-
-
-async function removePortSystems(mt5Account: string): Promise<void> {
-  await initPortSystemsSheet();
-  const sheets = await getSheets();
-  const sid = sheetId();
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:G`,
-  });
-  const rows = res.data.values;
-  if (!rows || rows.length <= 1) return;
-  const col = rows[0].findIndex((h: string) => h === "mt5_account");
-  const idx = rows.findIndex((r, i) => i > 0 && r[col >= 0 ? col : 1] === mt5Account);
-  if (idx < 0) return;
-  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
-  const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PORT_SYSTEMS_SHEET);
-  if (!sheet?.properties?.sheetId) return;
-  await sheets.spreadsheets.batchUpdate({
-    spreadsheetId: sid,
-    requestBody: {
-      requests: [{
-        deleteDimension: {
-          range: { sheetId: sheet.properties.sheetId, dimension: "ROWS", startIndex: idx, endIndex: idx + 1 },
-        },
-      }],
-    },
-  });
 }
 
 export async function setPortSystems(
   email: string,
-  portId: string,
+  _portId: string,
   mt5Account: string,
   systems: string,
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
   const existing = await getPortSystems(mt5Account);
-  // Prevent duplicate: if account exists under different email, reject
   if (existing && existing.member_email !== email) {
     throw new Error("หมายเลขพอร์ตนี้ถูกใช้โดยสมาชิกอื่นแล้ว");
   }
   const now = new Date().toISOString();
   const ps: PortSystem = {
-    id: existing?.id || uuidv4(),
-    port_id: portId,
+    id: "",
+    port_id: "",
     member_email: email,
     mt5_account: mt5Account,
     systems,
@@ -903,44 +895,34 @@ export async function setPortSystems(
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:G`,
+    range: `${PORT_SYSTEMS_SHEET}!A:D`,
   });
-  const rows = res.data.values;
-  if (rows && rows.length > 1) {
-    // O(1) lookup via Map keyed by mt5_account
-    const header = rows[0];
-    const acctCol = header.findIndex((h: string) => h === "mt5_account");
-    const col = acctCol >= 0 ? acctCol : 1;
-    const map = new Map<string, number>();
-    for (let i = 1; i < rows.length; i++) {
-      map.set(rows[i][col] || "", i);
-    }
-    const idx = map.get(mt5Account);
-    if (idx !== undefined) {
-      // Update only systems + updated_at columns, preserve rest
-      const sysCol = header.findIndex((h: string) => h === "systems");
-      const updCol = header.findIndex((h: string) => h === "updated_at");
-      if (sysCol >= 0) rows[idx][sysCol] = systems;
-      if (updCol >= 0) rows[idx][updCol] = now;
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: sid,
-        range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:G${idx + 1}`,
-        valueInputOption: "RAW",
-        requestBody: { values: [rows[idx]] },
-      });
-      return ps;
-    }
+  const rows = res.data.values || [];
+  // Find existing row by mt5_account (column A)
+  const idx = rows.findIndex((r, i) => i > 0 && r[0] === mt5Account);
+  if (idx >= 0) {
+    // Update
+    rows[idx][2] = systems;
+    rows[idx][3] = now;
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: sid,
+      range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:D${idx + 1}`,
+      valueInputOption: "RAW",
+      requestBody: { values: [rows[idx]] },
+    });
+  } else {
+    // Append
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sid,
+      range: `${PORT_SYSTEMS_SHEET}!A:D`,
+      valueInputOption: "RAW",
+      requestBody: { values: [[mt5Account, email, systems, now]] },
+    });
   }
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:G`,
-    valueInputOption: "RAW",
-    requestBody: { values: [portSystemToRow(ps)] },
-  });
   return ps;
 }
 
-// // Brokers
+// Brokers
 
 const BROKERS_SHEET = "brokers";
 
