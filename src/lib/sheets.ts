@@ -805,12 +805,12 @@ function portSystemToRow(ps: PortSystem): string[] {
 async function initPortSystemsSheet(): Promise<void> {
   const sheets = await getSheets();
   const sid = sheetId();
-  const NEW_HEADER = ["mt5_account", "member_email", "systems", "password", "updated_at"];
+  const NEW_HEADER = ["mt5_account", "member_email", "systems", "password", "vps_id", "status", "heartbeat", "updated_at"];
   try {
     // Check if sheet exists and has correct header
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A1:E1`,
+      range: `${PORT_SYSTEMS_SHEET}!A1:H1`,
     });
     const header = res.data.values?.[0] || [];
     if (header[0] !== "mt5_account") {
@@ -821,7 +821,7 @@ async function initPortSystemsSheet(): Promise<void> {
       });
       await sheets.spreadsheets.values.update({
         spreadsheetId: sid,
-        range: `${PORT_SYSTEMS_SHEET}!A1:E1`,
+        range: `${PORT_SYSTEMS_SHEET}!A1:H1`,
         valueInputOption: "RAW",
         requestBody: { values: [NEW_HEADER] },
       });
@@ -865,9 +865,12 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
     member_email: row[1] || "",
     mt5_account: row[0] || "",
     systems: row[2] || "",
-    updated_at: row[4] || "",
-    created_at: "",
     password: row[3] || "",
+    vps_id: row[4] || "",
+    status: row[5] || "pending",
+    heartbeat: row[6] || "",
+    updated_at: row[7] || "",
+    created_at: "",
   };
 }
 
@@ -905,12 +908,12 @@ export async function setPortSystems(
   const idx = rows.findIndex((r, i) => i > 0 && r[0] === mt5Account);
   if (idx >= 0) {
     // Update
-    if (password) rows[idx][3] = password;
     rows[idx][2] = systems;
-    rows[idx][4] = now;
+    if (password) rows[idx][3] = password;
+    rows[idx][7] = now;
     await sheets.spreadsheets.values.update({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:D${idx + 1}`,
+      range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:H${idx + 1}`,
       valueInputOption: "RAW",
       requestBody: { values: [rows[idx]] },
     });
@@ -920,7 +923,7 @@ export async function setPortSystems(
       spreadsheetId: sid,
       range: `${PORT_SYSTEMS_SHEET}!A:E`,
       valueInputOption: "RAW",
-      requestBody: { values: [[mt5Account, email, systems, password || "", now]] },
+      requestBody: { values: [[mt5Account, email, systems, password || "", "", "pending", "", now]] },
     });
   }
   return ps;
