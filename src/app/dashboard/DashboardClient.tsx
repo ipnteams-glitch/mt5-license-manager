@@ -217,23 +217,23 @@ export default function DashboardClient({
         }
       } catch {}
     }
-    const cached = systemsCache[port.id];
-    if (cached !== undefined) {
-      setSelectedSystems(cached ? cached.split(",").map(s => s.trim()) : []);
-    } else {
-      try {
-        const res = await fetch(`/api/ports/systems?account=${port.mt5_account}`);
-        if (res.ok) {
-          const data = await res.json();
-          const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
-          setSelectedSystems(items);
-          setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
+    // Check ownership first
+    try {
+      const res = await fetch(`/api/ports/systems?account=${port.mt5_account}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Block if owned by another member
+        if (data.owned_by_other) {
+          setError(`พอร์ตนี้ถูกใช้โดย ${data.owner_email} แล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้`);
+          return;
         }
-      } catch {
-        setSelectedSystems([]);
+        const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
+        setSelectedSystems(items);
+        setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
       }
+    } catch {
+      setSelectedSystems([]);
     }
-    setSystemsModalOpen(true);
   }
 
   function toggleSystem(sys: string) {

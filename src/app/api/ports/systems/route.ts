@@ -23,9 +23,13 @@ export async function GET(req: Request) {
     }
 
     const ps = await getPortSystems(account);
+    // Check if port is owned by someone else
+    const ownedByOther = ps && ps.member_email !== session.user.email;
     return NextResponse.json({
-      systems: ps?.systems || "",
+      systems: ownedByOther ? "" : (ps?.systems || ""),
       updated_at: ps?.updated_at || null,
+      owned_by_other: ownedByOther,
+      owner_email: ownedByOther ? ps?.member_email : null,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
