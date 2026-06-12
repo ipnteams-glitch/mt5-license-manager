@@ -257,7 +257,7 @@ export default function DashboardClient({
       const res = await fetch("/api/ports/systems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account: systemsModalPort.mt5_account, systems }),
+        body: JSON.stringify({ account: systemsModalPort.mt5_account, systems, password: loginPassword }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");

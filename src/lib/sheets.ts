@@ -267,7 +267,7 @@ export async function deletePort(portId: string, email: string): Promise<void> {
       const sid2 = sheetId();
       const res2 = await sheets2.spreadsheets.values.get({
         spreadsheetId: sid2,
-        range: `${PORT_SYSTEMS_SHEET}!A:D`,
+        range: `${PORT_SYSTEMS_SHEET}!A:E`,
       });
       const rows2 = res2.data.values || [];
       const idx2 = rows2.findIndex((r, i) => i > 0 && r[0] === all[idx].mt5_account);
@@ -805,12 +805,12 @@ function portSystemToRow(ps: PortSystem): string[] {
 async function initPortSystemsSheet(): Promise<void> {
   const sheets = await getSheets();
   const sid = sheetId();
-  const NEW_HEADER = ["mt5_account", "member_email", "systems", "updated_at"];
+  const NEW_HEADER = ["mt5_account", "member_email", "systems", "password", "updated_at"];
   try {
     // Check if sheet exists and has correct header
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A1:D1`,
+      range: `${PORT_SYSTEMS_SHEET}!A1:E1`,
     });
     const header = res.data.values?.[0] || [];
     if (header[0] !== "mt5_account") {
@@ -821,7 +821,7 @@ async function initPortSystemsSheet(): Promise<void> {
       });
       await sheets.spreadsheets.values.update({
         spreadsheetId: sid,
-        range: `${PORT_SYSTEMS_SHEET}!A1:D1`,
+        range: `${PORT_SYSTEMS_SHEET}!A1:E1`,
         valueInputOption: "RAW",
         requestBody: { values: [NEW_HEADER] },
       });
@@ -839,7 +839,7 @@ async function initPortSystemsSheet(): Promise<void> {
     });
     await sheets.spreadsheets.values.append({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A:D`,
+      range: `${PORT_SYSTEMS_SHEET}!A:E`,
       valueInputOption: "RAW",
       requestBody: { values: [NEW_HEADER] },
     });
@@ -852,7 +852,7 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:D`,
+    range: `${PORT_SYSTEMS_SHEET}!A:E`,
   });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) return null;
@@ -865,8 +865,9 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
     member_email: row[1] || "",
     mt5_account: row[0] || "",
     systems: row[2] || "",
-    updated_at: row[3] || "",
+    updated_at: row[4] || "",
     created_at: "",
+    password: row[3] || "",
   };
 }
 
@@ -875,6 +876,7 @@ export async function setPortSystems(
   _portId: string,
   mt5Account: string,
   systems: string,
+  password?: string,
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
   const existing = await getPortSystems(mt5Account);
@@ -888,6 +890,7 @@ export async function setPortSystems(
     member_email: email,
     mt5_account: mt5Account,
     systems,
+    password: password || existing?.password || "",
     updated_at: now,
     created_at: existing?.created_at || now,
   };
@@ -895,15 +898,16 @@ export async function setPortSystems(
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:D`,
+    range: `${PORT_SYSTEMS_SHEET}!A:E`,
   });
   const rows = res.data.values || [];
   // Find existing row by mt5_account (column A)
   const idx = rows.findIndex((r, i) => i > 0 && r[0] === mt5Account);
   if (idx >= 0) {
     // Update
+    if (password) rows[idx][3] = password;
     rows[idx][2] = systems;
-    rows[idx][3] = now;
+    rows[idx][4] = now;
     await sheets.spreadsheets.values.update({
       spreadsheetId: sid,
       range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:D${idx + 1}`,
@@ -914,9 +918,9 @@ export async function setPortSystems(
     // Append
     await sheets.spreadsheets.values.append({
       spreadsheetId: sid,
-      range: `${PORT_SYSTEMS_SHEET}!A:D`,
+      range: `${PORT_SYSTEMS_SHEET}!A:E`,
       valueInputOption: "RAW",
-      requestBody: { values: [[mt5Account, email, systems, now]] },
+      requestBody: { values: [[mt5Account, email, systems, password || "", now]] },
     });
   }
   return ps;

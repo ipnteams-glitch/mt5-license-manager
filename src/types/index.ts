@@ -149,6 +149,7 @@ export interface PortSystem {
   member_email: string;
   mt5_account: string;
   systems: string;
+  password?: string;
   updated_at: string;
   created_at: string;
 }
