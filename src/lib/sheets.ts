@@ -751,9 +751,9 @@ const PORT_SYSTEMS_SHEET = "port_systems";
 function portSystemFromRow(row: string[]): PortSystem {
   return {
     id: row[0] || "",
-    port_id: row[1] || "",
+    port_id: row[3] || "",
     member_email: row[2] || "",
-    mt5_account: row[3] || "",
+    mt5_account: row[1] || "",
     systems: row[4] || "",
     updated_at: row[5] || "",
     created_at: row[6] || "",
@@ -763,9 +763,9 @@ function portSystemFromRow(row: string[]): PortSystem {
 function portSystemToRow(ps: PortSystem): string[] {
   return [
     ps.id,
-    ps.port_id,
-    ps.member_email,
     ps.mt5_account,
+    ps.member_email,
+    ps.port_id,
     ps.systems,
     ps.updated_at,
     ps.created_at,
@@ -798,7 +798,7 @@ async function initPortSystemsSheet(): Promise<void> {
       valueInputOption: "RAW",
       requestBody: {
         values: [[
-          "id", "port_id", "member_email", "mt5_account",
+          "id", "mt5_account", "member_email", "port_id",
           "systems", "updated_at", "created_at",
         ]],
       },
@@ -806,7 +806,7 @@ async function initPortSystemsSheet(): Promise<void> {
   }
 }
 
-export async function getPortSystems(portId: string): Promise<PortSystem | null> {
+export async function getPortSystems(mt5Account: string): Promise<PortSystem | null> {
   await initPortSystemsSheet();
   const sheets = await getSheets();
   const sid = sheetId();
@@ -816,7 +816,7 @@ export async function getPortSystems(portId: string): Promise<PortSystem | null>
   });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) return null;
-  return rows.slice(1).map(portSystemFromRow).find(ps => ps.port_id === portId) || null;
+  return rows.slice(1).map(portSystemFromRow).find(ps => ps.mt5_account === mt5Account) || null;
 }
 
 export async function setPortSystems(
@@ -826,7 +826,7 @@ export async function setPortSystems(
   systems: string,
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
-  const existing = await getPortSystems(portId);
+  const existing = await getPortSystems(mt5Account);
   const now = new Date().toISOString();
   const ps: PortSystem = {
     id: existing?.id || uuidv4(),
@@ -837,7 +837,6 @@ export async function setPortSystems(
     updated_at: now,
     created_at: existing?.created_at || now,
   };
-  // Write back to sheet (overwrite by port_id if exists, otherwise append)
   const sheets = await getSheets();
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({
@@ -846,7 +845,7 @@ export async function setPortSystems(
   });
   const rows = res.data.values;
   if (rows && rows.length > 1) {
-    const idx = rows.findIndex((r) => r[1] === portId);
+    const idx = rows.findIndex((r) => r[1] === mt5Account);
     if (idx >= 0) {
       await sheets.spreadsheets.values.update({
         spreadsheetId: sid,
@@ -866,7 +865,7 @@ export async function setPortSystems(
   return ps;
 }
 
-// Brokers
+// // Brokers
 
 const BROKERS_SHEET = "brokers";
 

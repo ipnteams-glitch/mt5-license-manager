@@ -2,9 +2,7 @@ import { auth } from "@/lib/auth";
 import { getPortsByEmail, getPortSystems, setPortSystems } from "@/lib/sheets";
 import { NextResponse } from "next/server";
 
-// GET  /api/ports/systems?port_id=xxx
-// POST /api/ports/systems
-
+// GET  /api/ports/systems?account=12345678
 export async function GET(req: Request) {
   const session = await auth();
   if (!session?.user?.email) {
@@ -12,19 +10,19 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const portId = searchParams.get("port_id");
-  if (!portId) {
-    return NextResponse.json({ error: "Missing port_id" }, { status: 400 });
+  const account = searchParams.get("account");
+  if (!account) {
+    return NextResponse.json({ error: "Missing account" }, { status: 400 });
   }
 
   try {
     const ports = await getPortsByEmail(session.user.email);
-    const port = ports.find((p) => p.id === portId);
+    const port = ports.find((p) => p.mt5_account === account);
     if (!port) {
       return NextResponse.json({ error: "Port not found" }, { status: 404 });
     }
 
-    const ps = await getPortSystems(portId);
+    const ps = await getPortSystems(account);
     return NextResponse.json({
       systems: ps?.systems || "",
       updated_at: ps?.updated_at || null,
@@ -34,6 +32,7 @@ export async function GET(req: Request) {
   }
 }
 
+// POST /api/ports/systems  { account, systems }
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.email) {
@@ -42,22 +41,21 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { port_id, systems } = body;
+    const { account, systems } = body;
 
-    if (!port_id) {
-      return NextResponse.json({ error: "Missing port_id" }, { status: 400 });
+    if (!account) {
+      return NextResponse.json({ error: "Missing account" }, { status: 400 });
     }
     if (typeof systems !== "string") {
       return NextResponse.json({ error: "systems must be a string" }, { status: 400 });
     }
 
     const ports = await getPortsByEmail(session.user.email);
-    const port = ports.find((p) => p.id === port_id);
+    const port = ports.find((p) => p.mt5_account === account);
     if (!port) {
       return NextResponse.json({ error: "Port not found" }, { status: 404 });
     }
 
-    // Validate: Sys_1,Sys_3 (1-20)
     const items = systems.split(",").map(s => s.trim()).filter(Boolean);
     const validPattern = /^Sys_\d+$/;
     for (const item of items) {
@@ -72,8 +70,8 @@ export async function POST(req: Request) {
 
     const result = await setPortSystems(
       session.user.email,
-      port_id,
-      port.mt5_account,
+      port.id,
+      account,
       items.join(","),
     );
 

@@ -222,7 +222,7 @@ export default function DashboardClient({
       setSelectedSystems(cached ? cached.split(",").map(s => s.trim()) : []);
     } else {
       try {
-        const res = await fetch(`/api/ports/systems?port_id=${port.id}`);
+        const res = await fetch(`/api/ports/systems?account=${port.mt5_account}`);
         if (res.ok) {
           const data = await res.json();
           const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
@@ -250,7 +250,7 @@ export default function DashboardClient({
       const res = await fetch("/api/ports/systems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ port_id: systemsModalPort.id, systems }),
+        body: JSON.stringify({ account: systemsModalPort.mt5_account, systems }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
