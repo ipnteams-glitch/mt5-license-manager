@@ -3,7 +3,7 @@ import { getPortsByEmail } from "@/lib/sheets";
 import { NextResponse } from "next/server";
 
 // VPS Python test-login server
-const VPS_TEST_LOGIN_URL = process.env.VPS_TEST_LOGIN_URL || "http://13.212.175.12:5001/test-login";
+const VPS_TEST_LOGIN_URL = process.env.VPS_TEST_LOGIN_URL || "http://165.154.247.243:5001/test-login";
 
 // POST /api/ports/test-login
 // Proxy: web app → VPS Python server → MT5 login test
