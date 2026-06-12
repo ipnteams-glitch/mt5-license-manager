@@ -218,21 +218,27 @@ export default function DashboardClient({
       } catch {}
     }
     // Check ownership BEFORE opening modal
+    let canOpen = false;
     try {
       const res = await fetch(`/api/ports/systems?account=${port.mt5_account}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.owned_by_other) {
-          setError(`พอร์ตนี้ถูกใช้โดย ${data.owner_email} แล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้`);
-          return;
-        }
-        const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
-        setSelectedSystems(items);
-        setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "ไม่สามารถตรวจสอบสถานะพอร์ตได้");
+        return;
       }
-    } catch {
-      setSelectedSystems([]);
+      if (data.owned_by_other) {
+        setError(`พอร์ตนี้ถูกใช้โดย ${data.owner_email} แล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้`);
+        return;
+      }
+      const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
+      setSelectedSystems(items);
+      setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
+      canOpen = true;
+    } catch (err: any) {
+      setError("ไม่สามารถเชื่อมต่อเพื่อตรวจสอบสถานะพอร์ตได้");
+      return;
     }
+    if (!canOpen) return;
     // Only open modal after checks pass
     setSystemsModalOpen(true);
   }
