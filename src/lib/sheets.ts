@@ -816,7 +816,13 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
   });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) return null;
-  return rows.slice(1).map(portSystemFromRow).find(ps => ps.mt5_account === mt5Account) || null;
+  // O(1) lookup via Map keyed by mt5_account (column B)
+  const map = new Map<string, string[]>();
+  for (let i = 1; i < rows.length; i++) {
+    map.set(rows[i][1] || "", rows[i]);
+  }
+  const row = map.get(mt5Account);
+  return row ? portSystemFromRow(row) : null;
 }
 
 export async function setPortSystems(
@@ -845,11 +851,16 @@ export async function setPortSystems(
   });
   const rows = res.data.values;
   if (rows && rows.length > 1) {
-    // Look up by mt5_account column (header may vary)
+    // O(1) lookup via Map keyed by mt5_account
     const header = rows[0];
     const acctCol = header.findIndex((h: string) => h === "mt5_account");
-    const idx = rows.findIndex((r, i) => i > 0 && r[acctCol >= 0 ? acctCol : 1] === mt5Account);
-    if (idx >= 0) {
+    const col = acctCol >= 0 ? acctCol : 1;
+    const map = new Map<string, number>();
+    for (let i = 1; i < rows.length; i++) {
+      map.set(rows[i][col] || "", i);
+    }
+    const idx = map.get(mt5Account);
+    if (idx !== undefined) {
       // Update only systems + updated_at columns, preserve rest
       const sysCol = header.findIndex((h: string) => h === "systems");
       const updCol = header.findIndex((h: string) => h === "updated_at");
