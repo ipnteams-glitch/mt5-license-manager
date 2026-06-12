@@ -59,6 +59,11 @@ export default function DashboardClient({
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginStatus, setLoginStatus] = useState<null | "ok" | "fail">(null);
+  const [loginMsg, setLoginMsg] = useState("");
+
 
 
   async function handleCancelPayment(txnId: string) {
@@ -162,6 +167,38 @@ export default function DashboardClient({
   }
 
   // ── Systems management ──
+  async function testLogin() {
+    if (!systemsModalPort || !loginPassword) return;
+    setLoginLoading(true);
+    setLoginStatus(null);
+    setLoginMsg("");
+    setError("");
+    try {
+      const res = await fetch("/api/ports/test-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          account: systemsModalPort.mt5_account,
+          broker: systemsModalPort.mt5_broker,
+          password: loginPassword,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLoginStatus("ok");
+        setLoginMsg(data.message || "Login สำเร็จ");
+      } else {
+        setLoginStatus("fail");
+        setLoginMsg(data.error || "Login ไม่สำเร็จ");
+      }
+    } catch (err: any) {
+      setLoginStatus("fail");
+      setLoginMsg(err.message || "เชื่อมต่อ VPS ไม่ได้");
+    } finally {
+      setLoginLoading(false);
+    }
+  }
+
   async function openSystemsModal(port: Port) {
     setSystemsModalPort(port);
     const cached = systemsCache[port.id];
@@ -564,18 +601,53 @@ export default function DashboardClient({
                 ตั้งค่าระบบ — {systemsModalPort.mt5_account}
               </h3>
               <p className="text-xs text-zinc-500 mb-4">
-                เลือกระบบที่ต้องการให้พอร์ตนี้ Copy Trade (Sys_1 - Sys_20)
+                ใส่รหัสเทรด (Investor Password) แล้วกด Login เพื่อทดสอบ
               </p>
 
               {error && (
                 <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>
               )}
 
+              {/* ── Password + Login ── */}
+              <div className="mb-4 flex gap-2">
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  disabled={loginStatus === "ok"}
+                  placeholder="รหัสเทรด (Investor Password)"
+                  className="flex-1 rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
+                />
+                <button
+                  onClick={testLogin}
+                  disabled={loginLoading || loginStatus === "ok" || !loginPassword}
+                  className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 whitespace-nowrap"
+                >
+                  {loginLoading ? "กำลังทดสอบ..." : loginStatus === "ok" ? "✓ ผ่าน" : "Login"}
+                </button>
+              </div>
+
+              {loginStatus === "ok" && (
+                <p className="mb-4 text-xs text-emerald-600 font-medium">
+                  ✓ Login สำเร็จ — รหัสเทรดถูกต้อง
+                </p>
+              )}
+              {loginStatus === "fail" && (
+                <p className="mb-4 text-xs text-red-500 font-medium">
+                  ✗ {loginMsg || "Login ไม่สำเร็จ — ตรวจสอบรหัสเทรด"}
+                </p>
+              )}
+
+              {/* ── System Dropdown (disabled until login passes) ── */}
               <div className="mb-4">
+                <label className="block text-xs font-medium text-zinc-600 mb-1">
+                  เลือกระบบ Copy Trade
+                </label>
                 <select
                   value={selectedSystems[0] || ""}
                   onChange={(e) => setSelectedSystems(e.target.value ? [e.target.value] : [])}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white text-blue-600 font-medium focus:border-blue-500 focus:outline-none"
+                  disabled={loginStatus !== "ok"}
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white text-blue-600 font-medium focus:border-blue-500 focus:outline-none disabled:bg-zinc-100 disabled:text-zinc-400"
                 >
                   <option value="">-- ไม่เลือก (ลูกค้าใช้ EA เอง) --</option>
                   {ALL_SYSTEMS.map(sys => (
@@ -586,7 +658,9 @@ export default function DashboardClient({
 
               <div className="flex gap-2 justify-between items-center">
                 <div className="text-xs text-zinc-400">
-                  {selectedSystems.length > 0
+                  {loginStatus !== "ok"
+                    ? "กรุณา Login ก่อน"
+                    : selectedSystems.length > 0
                     ? `ระบบที่เลือก: ${selectedSystems[0]}`
                     : "ยังไม่ได้เลือกระบบ (ลูกค้าจะใช้ EA เอง)"}
                 </div>
@@ -596,6 +670,9 @@ export default function DashboardClient({
                       setSystemsModalOpen(false);
                       setSystemsModalPort(null);
                       setError("");
+                      setLoginPassword("");
+                      setLoginStatus(null);
+                      setLoginMsg("");
                     }}
                     className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-200"
                   >
@@ -603,7 +680,7 @@ export default function DashboardClient({
                   </button>
                   <button
                     onClick={saveSystems}
-                    disabled={savingSystems}
+                    disabled={savingSystems || loginStatus !== "ok"}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                   >
                     {savingSystems ? "กำลังบันทึก..." : "บันทึก"}
@@ -612,9 +689,7 @@ export default function DashboardClient({
               </div>
             </div>
           </div>
-        )}
-
-      </main>
+        )}      </main>
     </div>
   );
 }
