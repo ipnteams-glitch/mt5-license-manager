@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import type { Member, Port, Payment } from "@/types";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
 
@@ -16,6 +16,7 @@ type Props = {
   isAdmin: boolean;
   pendingPayments?: Payment[];
   paymentHistory?: Payment[];
+  brokers: string[];
 };
 
 export default function DashboardClient({
@@ -29,6 +30,7 @@ export default function DashboardClient({
   isAdmin,
   pendingPayments,
   paymentHistory,
+  brokers,
 }: Props) {
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
@@ -59,14 +61,7 @@ export default function DashboardClient({
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
-  const [brokerList, setBrokerList] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetch("/api/brokers")
-      .then(res => res.json())
-      .then(data => setBrokerList(data.brokers || []))
-      .catch(() => {});
-  }, []);
+  const [brokerList, setBrokerList] = useState<string[]>(brokers);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginBroker, setLoginBroker] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);

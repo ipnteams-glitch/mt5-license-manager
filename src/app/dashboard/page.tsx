@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/sheets";
+import { getMemberByEmail, getPortsByEmail, getAllPayments, getAllBrokers } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
@@ -12,11 +12,13 @@ export default async function DashboardPage() {
   let member: Member | null = null;
   let ports: Port[] = [];
   let pendingPayments: Payment[] = [];
+  let brokers: string[] = [];
   let paymentHistory: Payment[] = [];
 
   try {
     member = await getMemberByEmail(session.user.email);
     ports = await getPortsByEmail(session.user.email);
+    brokers = await getAllBrokers();
     const allPayments = await getAllPayments();
     const userPayments = allPayments.filter((p) => p.email === session.user!.email);
     pendingPayments = userPayments
@@ -72,6 +74,7 @@ export default async function DashboardPage() {
       isAdmin={isAdmin}
       pendingPayments={pendingPayments}
       paymentHistory={paymentHistory}
+      brokers={brokers}
     />
   );
 }
