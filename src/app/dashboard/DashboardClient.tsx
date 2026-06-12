@@ -207,7 +207,7 @@ export default function DashboardClient({
     setSystemsModalPort(port);
     setLoginBroker(port.mt5_broker || "");
     setError("");
-    setSystemsModalOpen(true);
+    // Fetch brokers in background
     if (brokerList.length === 0) {
       try {
         const res = await fetch("/api/brokers");
@@ -217,12 +217,11 @@ export default function DashboardClient({
         }
       } catch {}
     }
-    // Check ownership first
+    // Check ownership BEFORE opening modal
     try {
       const res = await fetch(`/api/ports/systems?account=${port.mt5_account}`);
       if (res.ok) {
         const data = await res.json();
-        // Block if owned by another member
         if (data.owned_by_other) {
           setError(`พอร์ตนี้ถูกใช้โดย ${data.owner_email} แล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้`);
           return;
@@ -234,6 +233,8 @@ export default function DashboardClient({
     } catch {
       setSelectedSystems([]);
     }
+    // Only open modal after checks pass
+    setSystemsModalOpen(true);
   }
 
   function toggleSystem(sys: string) {
