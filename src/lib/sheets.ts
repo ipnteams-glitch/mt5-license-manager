@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
-import type { Member, Port, Payment, PackageType, PortfolioAccount } from "@/types";
+import type { Member, Port, Payment, PackageType, PortfolioAccount, PortSystem } from "@/types";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 
 const MEMBERS_SHEET = "members";
@@ -740,4 +740,128 @@ export async function pushPortfolioData(mt5Account: string, data: { balance: num
     valueInputOption: "RAW",
     requestBody: { values: [rows[idx]] },
   });
+}
+
+// ══════════════════════════════════════════════════════════
+//  Port Systems (OneComplete — แยก sheet ไม่กระทบของเดิม)
+// ══════════════════════════════════════════════════════════
+
+const PORT_SYSTEMS_SHEET = "port_systems";
+
+function portSystemFromRow(row: string[]): PortSystem {
+  return {
+    id: row[0] || "",
+    port_id: row[1] || "",
+    member_email: row[2] || "",
+    mt5_account: row[3] || "",
+    systems: row[4] || "",
+    updated_at: row[5] || "",
+    created_at: row[6] || "",
+  };
+}
+
+function portSystemToRow(ps: PortSystem): string[] {
+  return [
+    ps.id,
+    ps.port_id,
+    ps.member_email,
+    ps.mt5_account,
+    ps.systems,
+    ps.updated_at,
+    ps.created_at,
+  ];
+}
+
+async function initPortSystemsSheet(): Promise<void> {
+  const sheets = await getSheets();
+  const sid = sheetId();
+  try {
+    await sheets.spreadsheets.values.get({
+      spreadsheetId: sid,
+      range: `${PORT_SYSTEMS_SHEET}!A1`,
+    });
+  } catch {
+    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId: sid,
+      requestBody: {
+        requests: [{
+          addSheet: {
+            properties: { title: PORT_SYSTEMS_SHEET },
+          },
+        }],
+      },
+    });
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: sid,
+      range: `${PORT_SYSTEMS_SHEET}!A:G`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[
+          "id", "port_id", "member_email", "mt5_account",
+          "systems", "updated_at", "created_at",
+        ]],
+      },
+    });
+  }
+}
+
+export async function getPortSystems(portId: string): Promise<PortSystem | null> {
+  await initPortSystemsSheet();
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid,
+    range: `${PORT_SYSTEMS_SHEET}!A:G`,
+  });
+  const rows = res.data.values;
+  if (!rows || rows.length <= 1) return null;
+  return rows.slice(1).map(portSystemFromRow).find(ps => ps.port_id === portId) || null;
+}
+
+export async function setPortSystems(
+  email: string,
+  portId: string,
+  mt5Account: string,
+  systems: string,
+): Promise<PortSystem> {
+  await initPortSystemsSheet();
+  const existing = await getPortSystems(portId);
+  const now = new Date().toISOString();
+  const ps: PortSystem = {
+    id: existing?.id || uuidv4(),
+    port_id: portId,
+    member_email: email,
+    mt5_account: mt5Account,
+    systems,
+    updated_at: now,
+    created_at: existing?.created_at || now,
+  };
+  // Write back to sheet (overwrite by port_id if exists, otherwise append)
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid,
+    range: `${PORT_SYSTEMS_SHEET}!A:G`,
+  });
+  const rows = res.data.values;
+  if (rows && rows.length > 1) {
+    const idx = rows.findIndex((r) => r[1] === portId);
+    if (idx >= 0) {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: sid,
+        range: `${PORT_SYSTEMS_SHEET}!A${idx + 1}:G${idx + 1}`,
+        valueInputOption: "RAW",
+        requestBody: { values: [portSystemToRow(ps)] },
+      });
+      return ps;
+    }
+  }
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: sid,
+    range: `${PORT_SYSTEMS_SHEET}!A:G`,
+    valueInputOption: "RAW",
+    requestBody: { values: [portSystemToRow(ps)] },
+  });
+  return ps;
 }

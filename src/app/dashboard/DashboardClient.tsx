@@ -3,7 +3,7 @@
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
 import type { Member, Port, Payment } from "@/types";
-import { PACKAGES } from "@/types";
+import { PACKAGES, ALL_SYSTEMS } from "@/types";
 
 type Props = {
   member: Member;
@@ -53,6 +53,13 @@ export default function DashboardClient({
   const [cancellingTxnId, setCancellingTxnId] = useState<string | null>(null);
   const [pendingList, setPendingList] = useState(pendingPayments);
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
+  // Systems config (OneComplete)
+  const [systemsModalPort, setSystemsModalPort] = useState<Port | null>(null);
+  const [systemsModalOpen, setSystemsModalOpen] = useState(false);
+  const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
+  const [savingSystems, setSavingSystems] = useState(false);
+  const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
+
 
   async function handleCancelPayment(txnId: string) {
     setCancellingTxnId(txnId);
@@ -150,8 +157,64 @@ export default function DashboardClient({
       setPortList(portList.filter((p) => p.id !== portId));
       setUsedCount(usedCount - 1);
     } catch (err: any) {
-      setError(err.message);
+        setError(err.message);
     }
+  }
+
+  // ── Systems management ──
+  async function openSystemsModal(port: Port) {
+    setSystemsModalPort(port);
+    const cached = systemsCache[port.id];
+    if (cached !== undefined) {
+      setSelectedSystems(cached ? cached.split(",").map(s => s.trim()) : []);
+    } else {
+      try {
+        const res = await fetch(`/api/ports/systems?port_id=${port.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
+          setSelectedSystems(items);
+          setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
+        }
+      } catch {
+        setSelectedSystems([]);
+      }
+    }
+    setSystemsModalOpen(true);
+  }
+
+  function toggleSystem(sys: string) {
+    setSelectedSystems(prev =>
+      prev.includes(sys) ? prev.filter(s => s !== sys) : [...prev, sys]
+    );
+  }
+
+  async function saveSystems() {
+    if (!systemsModalPort) return;
+    setSavingSystems(true);
+    try {
+      const systems = selectedSystems.join(",");
+      const res = await fetch("/api/ports/systems", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ port_id: systemsModalPort.id, systems }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Save failed");
+      setSystemsCache(prev => ({ ...prev, [systemsModalPort.id]: systems }));
+      setSystemsModalOpen(false);
+      setSystemsModalPort(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSavingSystems(false);
+    }
+  }
+
+  function getSystemsDisplay(portId: string): string {
+    const s = systemsCache[portId];
+    if (s === undefined) return "...";
+    return s || "-";
   }
 
   return (
@@ -299,6 +362,7 @@ export default function DashboardClient({
                     <th className="pb-2">MT5 Account</th>
                     <th className="pb-2">วันที่เพิ่ม</th>
                     <th className="pb-2">หมดอายุ</th>
+                    <th className="pb-2 text-right">Systems</th>
                     <th className="pb-2 text-right">จัดการ</th>
                   </tr>
                 </thead>
@@ -317,6 +381,15 @@ export default function DashboardClient({
                         ) : (
                           <span className="text-zinc-400">-</span>
                         )}
+                      </td>
+                      <td className="py-3 text-right">
+                        <span className="text-xs text-zinc-500 mr-2">
+                          {getSystemsDisplay(port.id)}
+                        </span>
+                        <button
+                          onClick={() => openSystemsModal(port)}
+                          className="text-xs text-blue-500 hover:text-blue-700"
+                        >⚙️</button>
                       </td>
                       <td className="py-3 text-right">
                         <button
@@ -482,6 +555,73 @@ export default function DashboardClient({
             )}
           </div>
         )}
+
+        {/* ── Systems Config Modal ── */}
+        {systemsModalOpen && systemsModalPort && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+              <h3 className="text-lg font-bold text-zinc-800 mb-1">
+                ตั้งค่าระบบ — {systemsModalPort.mt5_account}
+              </h3>
+              <p className="text-xs text-zinc-500 mb-4">
+                เลือกระบบที่ต้องการให้พอร์ตนี้ Copy Trade (Sys_1 - Sys_20)
+              </p>
+
+              {error && (
+                <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>
+              )}
+
+              <div className="grid grid-cols-4 gap-2 max-h-64 overflow-y-auto mb-4">
+                {ALL_SYSTEMS.map(sys => (
+                  <label
+                    key={sys}
+                    className={`flex items-center gap-1.5 rounded-lg border px-2 py-1.5 text-xs cursor-pointer transition-colors
+                      ${selectedSystems.includes(sys)
+                        ? "border-blue-400 bg-blue-50 text-blue-700 font-medium"
+                        : "border-zinc-200 hover:border-zinc-300 text-zinc-600"
+                      }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedSystems.includes(sys)}
+                      onChange={() => toggleSystem(sys)}
+                      className="h-3 w-3 rounded accent-blue-600"
+                    />
+                    {sys.replace("_", " ")}
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex gap-2 justify-between items-center">
+                <div className="text-xs text-zinc-400">
+                  {selectedSystems.length > 0
+                    ? `เลือก ${selectedSystems.length} ระบบ: ${selectedSystems.join(", ")}`
+                    : "ยังไม่ได้เลือกระบบ"}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSystemsModalOpen(false);
+                      setSystemsModalPort(null);
+                      setError("");
+                    }}
+                    className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-200"
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    onClick={saveSystems}
+                    disabled={savingSystems}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {savingSystems ? "กำลังบันทึก..." : "บันทึก"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
     </div>
   );

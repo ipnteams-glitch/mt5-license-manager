@@ -141,3 +141,19 @@ export interface VerifyResponse {
   package?: string;
   expiry_date?: string;
 }
+
+// ── Port Systems (OneComplete) ──
+export interface PortSystem {
+  id: string;
+  port_id: string;
+  member_email: string;
+  mt5_account: string;
+  systems: string;
+  updated_at: string;
+  created_at: string;
+}
+
+export const ALL_SYSTEMS: string[] = Array.from(
+  { length: 20 },
+  (_, i) => `Sys_${i + 1}`
+);
