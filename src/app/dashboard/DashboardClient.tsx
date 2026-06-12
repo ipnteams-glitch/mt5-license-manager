@@ -60,6 +60,7 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [loginPassword, setLoginPassword] = useState("");
+  const [loginBroker, setLoginBroker] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginStatus, setLoginStatus] = useState<null | "ok" | "fail">(null);
   const [loginMsg, setLoginMsg] = useState("");
@@ -179,7 +180,7 @@ export default function DashboardClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           account: systemsModalPort.mt5_account,
-          broker: systemsModalPort.mt5_broker,
+          broker: loginBroker,
           password: loginPassword,
         }),
       });
@@ -201,6 +202,7 @@ export default function DashboardClient({
 
   async function openSystemsModal(port: Port) {
     setSystemsModalPort(port);
+    setLoginBroker(port.mt5_broker || "");
     const cached = systemsCache[port.id];
     if (cached !== undefined) {
       setSelectedSystems(cached ? cached.split(",").map(s => s.trim()) : []);
@@ -608,6 +610,34 @@ export default function DashboardClient({
                 <p className="mb-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>
               )}
 
+              {/* ── Broker ── */}
+              <div className="mb-3">
+                <label className="block text-xs font-medium text-zinc-600 mb-1">
+                  Broker Server
+                </label>
+                <input
+                  type="text"
+                  value={loginBroker}
+                  onChange={(e) => setLoginBroker(e.target.value)}
+                  list="broker-list"
+                  disabled={loginStatus === "ok"}
+                  placeholder="เช่น InterstellarFinancial-Demo"
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
+                />
+                <datalist id="broker-list">
+                  <option value="InterstellarFinancial-Demo" />
+                  <option value="InterstellarFinancial-Main" />
+                  <option value="TPTradesGroup-Demo" />
+                  <option value="VTMarkets-Demo" />
+                  <option value="VTMarkets-Live" />
+                  <option value="Exness-Real" />
+                  <option value="ICMarkets-Demo" />
+                  <option value="ICMarkets-Live" />
+                  <option value="Tickmill-Demo" />
+                  <option value="Pepperstone-Demo" />
+                </datalist>
+              </div>
+
               {/* ── Password + Login ── */}
               <div className="mb-4 flex gap-2">
                 <input
@@ -616,11 +646,11 @@ export default function DashboardClient({
                   onChange={(e) => setLoginPassword(e.target.value)}
                   disabled={loginStatus === "ok"}
                   placeholder="รหัสเทรด (Investor Password)"
-                  className="flex-1 rounded-lg border border-zinc-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
+                  className="flex-1 rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
                 />
                 <button
                   onClick={testLogin}
-                  disabled={loginLoading || loginStatus === "ok" || !loginPassword}
+                  disabled={loginLoading || loginStatus === "ok" || !loginPassword || !loginBroker}
                   className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 whitespace-nowrap"
                 >
                   {loginLoading ? "กำลังทดสอบ..." : loginStatus === "ok" ? "✓ ผ่าน" : "Login"}
@@ -671,6 +701,7 @@ export default function DashboardClient({
                       setSystemsModalPort(null);
                       setError("");
                       setLoginPassword("");
+                      setLoginBroker("");
                       setLoginStatus(null);
                       setLoginMsg("");
                     }}
