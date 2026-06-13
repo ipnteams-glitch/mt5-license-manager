@@ -33,7 +33,7 @@ export interface Payment {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "4900_1y" | "none";
+export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "4900_1y" | "ib_vps_2200" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -70,14 +70,18 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 990,
   },
   "2490_3m": {
-    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2990, duration_days: 90, max_ports: 5,
-    label: "2,990 บาท / 90 วัน + ฝากรัน", rank: 6,
+    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2990, duration_days: 60, max_ports: 5,
+    label: "2,990 บาท / 60 วัน + ฝากรัน", rank: 6,
     old_price: 3900,
   },
   "4900_1y": {
     key: "4900_1y", name: "VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 9,
     label: "6,900 บาท / 1 ปี + ฝากรัน", rank: 7,
-    old_price: 9900,
+    old_price: 15600,
+  },
+  ib_vps_2200: {
+    key: "ib_vps_2200", name: "IB+VPS", name_en: "IB+VPS", price: 2200, duration_days: 365, max_ports: 999,
+    label: "2,200 บาท / 1 ปี", rank: 8,
   },
 };
 
@@ -94,7 +98,7 @@ export interface PortfolioAccount {
   created_at: string;
 }
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "ib_vps_2200"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 
