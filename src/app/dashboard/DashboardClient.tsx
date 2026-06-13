@@ -386,6 +386,14 @@ export default function DashboardClient({
             {displayPortsTotal === 0 && (
               <span className="text-xs text-zinc-400">ยังไม่มีแพคเกจ</span>
             )}
+            {addonIbVpsExpiry && (
+              <div className="mt-3 rounded-lg bg-purple-50 px-3 py-2 border border-purple-200">
+                <p className="text-sm font-medium text-purple-700">
+                  IB+VPS 2200 — หมดอายุ {new Date(addonIbVpsExpiry).toLocaleDateString("th-TH")}
+                  {" "}({Math.ceil((new Date(addonIbVpsExpiry).getTime() - Date.now()) / 86400000)} วัน)
+                </p>
+              </div>
+            )}
             {displayIsExpired && (
               <span className="text-xs text-red-500">แพคเกจหมดอายุ — ติดต่อแอดมินเพื่อต่ออายุ</span>
             )}
