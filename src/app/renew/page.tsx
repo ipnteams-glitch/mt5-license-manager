@@ -12,13 +12,6 @@ export default function RenewPage() {
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
 
 
-  // เช็คว่าเคยจ่ายสำเร็จหรือยัง → ถ้าเคย ซ่อน promo_69
-  useEffect(() => {
-    fetch("/api/payment/has-paid")
-      .then((r) => r.json())
-      .then((d) => // removed)
-      .catch(() => {});
-  }, []);
 
   const visiblePackages = (isTestUser
     ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES]
