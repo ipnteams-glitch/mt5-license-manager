@@ -700,7 +700,7 @@ export default function DashboardClient({
               {/* ── System Dropdown (disabled until login passes) ── */}
               <div className="mb-4">
                 <label className="block text-xs font-medium text-zinc-600 mb-1">
-                  เลือกระบบ Copy Trade
+                  เลือกระบบ
                 </label>
                 <select
                   value={selectedSystems[0] || ""}
