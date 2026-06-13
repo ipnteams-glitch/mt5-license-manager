@@ -16,7 +16,7 @@ export default function RenewPage() {
   useEffect(() => {
     fetch("/api/payment/has-paid")
       .then((r) => r.json())
-      .then((d) => setHasPaid(d.hasPaid))
+      .then((d) => // removed)
       .catch(() => {});
   }, []);
 
