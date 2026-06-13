@@ -367,7 +367,7 @@ export default function RenewPage() {
           {visiblePackages.map((key) => {
             const pkg = PACKAGES[key];
             const isSelected = selected === key;
-            const isFree = key === "free";
+            const isFree = key === "free_ib" || key === "test_1";
             return (
               <button
                 key={key}
