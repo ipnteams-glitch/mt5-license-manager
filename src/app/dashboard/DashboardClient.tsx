@@ -283,6 +283,14 @@ export default function DashboardClient({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
       setSystemsCache(prev => ({ ...prev, [systemsModalPort.id]: systems }));
+      // Update portStatuses immediately for table display
+      setPortStatuses(prev => ({
+        ...prev,
+        [systemsModalPort.mt5_account]: {
+          ...(prev[systemsModalPort.mt5_account] || {}),
+          systems,
+        }
+      }));
       setSystemsModalOpen(false);
       setSystemsModalPort(null);
     } catch (err: any) {
