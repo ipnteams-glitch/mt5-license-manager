@@ -84,7 +84,7 @@ function paymentToRow(p: Payment): string[] {
 
 export async function getAllMembers(): Promise<Member[]> {
   const sheets = await getSheets();
-  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:G` });
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
   return rows.slice(1).map(memberFromRow);
 }
@@ -118,7 +118,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
     };
     const sheets = await getSheets();
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:G`,
+      spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H`,
       valueInputOption: "RAW", requestBody: { values: [memberToRow(member)] },
     });
     return member;
