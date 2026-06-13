@@ -174,6 +174,10 @@ export function canUpgrade(currentPkg: PackageType, newPkg: PackageType, isExpir
   }
 
   // แพคเกจเท่าเดิม → อนุญาต (เพิ่มวัน)
+  // promo_69 → ซื้อได้ครั้งเดียว (ไม่ให้ต่ออายุ)
+  if (currentPkg === "promo_69" && newPkg === "promo_69") {
+    return { allowed: false, reason: "โปรโมชั่น 69 บาท ซื้อได้ครั้งเดียว — กรุณาเลือกแพคเกจอื่น" };
+  }
 
   if (currentPkg === newPkg) {
     return { allowed: true };

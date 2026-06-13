@@ -123,7 +123,9 @@ export async function POST(req: Request) {
           result.packageLabel,
           result.expiryDate,
         ).catch(() => {});
-        // แจ้งแอดมินสร้าง VPS ถ้าเป็นแพคเกจ VIP+VPS);
+        // แจ้งแอดมินสร้าง VPS ถ้าเป็นแพคเกจ VIP+VPS
+        if (payment.package === "9990_1y") {
+          notifyVpsOrder(result.memberEmail, result.memberName, result.packageLabel, result.expiryDate, txnId).catch(() => {});
         }
 
         return NextResponse.json({
