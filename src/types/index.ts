@@ -7,6 +7,7 @@ export interface Member {
   expiry_date: string;
   role: "user" | "admin";
   created_at: string;
+  addon_ib_vps_expiry?: string;
 }
 
 // ── Port (พอร์ต MT5) ──

@@ -40,6 +40,7 @@ export default async function DashboardPage() {
       expiry_date: "",
       role: "user",
       created_at: "",
+      addon_ib_vps_expiry: "",
     };
   }
 
@@ -70,6 +71,7 @@ export default async function DashboardPage() {
       daysLeft={daysLeft}
       isExpired={isExpired}
       isAdmin={isAdmin}
+      addonIbVpsExpiry={member?.addon_ib_vps_expiry || ""}
       pendingPayments={pendingPayments}
       paymentHistory={paymentHistory}
     />

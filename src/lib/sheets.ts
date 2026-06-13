@@ -49,10 +49,11 @@ function memberFromRow(row: string[]): Member {
     package: (row[2] as PackageType) || "none",
     max_ports: parseInt(row[3]) || 0, expiry_date: row[4] || "",
     role: (row[5] as "user" | "admin") || "user", created_at: row[6] || "",
+    addon_ib_vps_expiry: row[7] || "",
   };
 }
 function memberToRow(m: Member): string[] {
-  return [m.email, m.name, m.package, String(m.max_ports), m.expiry_date, m.role, m.created_at];
+  return [m.email, m.name, m.package, String(m.max_ports), m.expiry_date, m.role, m.created_at, m.addon_ib_vps_expiry || ""];
 }
 
 function portFromRow(row: string[]): Port {
@@ -494,6 +495,25 @@ export async function reserveSatang(): Promise<number | null> {
     if (!usedSatangs.includes(val)) return val;
   }
   return null;
+}
+
+export async function setAddonIbVpsExpiry(email: string): Promise<string> {
+  const members = await getAllMembers();
+  const idx = members.findIndex((m) => m.email === email);
+  if (idx < 0) throw new Error("Member not found");
+  const expiry = new Date();
+  expiry.setFullYear(expiry.getFullYear() + 1);
+  const expiryStr = expiry.toISOString();
+  members[idx].addon_ib_vps_expiry = expiryStr;
+  const sheets = await getSheets();
+  const sid = sheetId();
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: sid,
+    range: `${MEMBERS_SHEET}!H${idx + 2}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [[expiryStr]] },
+  });
+  return expiryStr;
 }
 
 // ── Whitelist (VIP ไม่จำกัดพอร์ต ไม่งดอายุ) ──

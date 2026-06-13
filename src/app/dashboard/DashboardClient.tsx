@@ -15,6 +15,7 @@ type Props = {
   daysLeft: number;
   isExpired: boolean;
   isAdmin: boolean;
+  addonIbVpsExpiry?: string;
   pendingPayments?: Payment[];
   paymentHistory?: Payment[];
 };
@@ -28,6 +29,7 @@ export default function DashboardClient({
   daysLeft,
   isExpired,
   isAdmin,
+  addonIbVpsExpiry,
   pendingPayments,
   paymentHistory,
 }: Props) {
