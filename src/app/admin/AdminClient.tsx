@@ -72,7 +72,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
     }
   }
 
-  const pkgOptions: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "9990_1y", "none"];
+  const pkgOptions: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "none"];
 
   function startEdit(m: Member) {
     setEditing(m.email);
