@@ -437,8 +437,8 @@ export default function DashboardClient({
                     <th className="pb-2">MT5 Account</th>
                     <th className="pb-2">วันที่เพิ่ม</th>
                     <th className="pb-2">หมดอายุ</th>
-                    <th className="pb-2 text-right">ฝากรัน</th>
                     <th className="pb-2 text-right">สถานะ</th>
+                    <th className="pb-2 text-right">ฝากรัน</th>
                     <th className="pb-2 text-right">จัดการ</th>
                   </tr>
                 </thead>
@@ -458,16 +458,15 @@ export default function DashboardClient({
                           <span className="text-zinc-400">-</span>
                         )}
                       </td>
-                      <td className="py-3 text-xs text-blue-600 font-medium text-right">
-                        {portStatuses[port.mt5_account]?.systems || "-"}
-                      </td>
                       <td className="py-3 text-right">
-                        <span className="text-xs text-zinc-500 mr-2">
-                        </span>
                         <button
                           onClick={() => openSystemsModal(port)}
                           className="text-xs text-blue-500 hover:text-blue-700"
                         >⚙️</button>
+                      </td>
+                      <td className="py-3 text-right">
+                      <td className="py-3 text-xs text-blue-600 font-medium text-right">
+                        {portStatuses[port.mt5_account]?.systems || "-"}
                       </td>
                       <td className="py-3 text-right">
                         <button
