@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getMemberByEmail, getPortsByEmail, getAllPayments, getAllBrokers } from "@/lib/sheets";
+import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
@@ -12,20 +12,7 @@ export default async function DashboardPage() {
   let member: Member | null = null;
   let ports: Port[] = [];
   let pendingPayments: Payment[] = [];
-  let brokers: string[] = [];
   let paymentHistory: Payment[] = [];
-
-  // Fetch brokers independently (never block by other errors)
-  try {
-    brokers = await getAllBrokers();
-  } catch {
-    brokers = [
-      "InterstellarFinancial-Demo", "InterstellarFinancial-Main",
-      "TPTradesGroup-Demo", "VTMarkets-Demo", "VTMarkets-Live",
-      "Exness-Real", "ICMarkets-Demo", "ICMarkets-Live",
-      "Tickmill-Demo", "Pepperstone-Demo",
-    ];
-  }
 
   try {
     member = await getMemberByEmail(session.user.email);
@@ -85,7 +72,6 @@ export default async function DashboardPage() {
       isAdmin={isAdmin}
       pendingPayments={pendingPayments}
       paymentHistory={paymentHistory}
-      brokers={brokers}
     />
   );
 }

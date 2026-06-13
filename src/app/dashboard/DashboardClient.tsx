@@ -4,6 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import type { Member, Port, Payment } from "@/types";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
+import BROKERS from "@/../brokers.json";
 
 type Props = {
   member: Member;
@@ -16,7 +17,6 @@ type Props = {
   isAdmin: boolean;
   pendingPayments?: Payment[];
   paymentHistory?: Payment[];
-  brokers: string[];
 };
 
 export default function DashboardClient({
@@ -30,7 +30,6 @@ export default function DashboardClient({
   isAdmin,
   pendingPayments,
   paymentHistory,
-  brokers,
 }: Props) {
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
@@ -62,7 +61,7 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
-  const [brokerList, setBrokerList] = useState<string[]>(brokers);
+  const [brokerList, setBrokerList] = useState<string[]>(BROKERS);
 
   useEffect(() => {
     fetch("/api/ports/status")
