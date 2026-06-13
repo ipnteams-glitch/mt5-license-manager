@@ -442,7 +442,7 @@ export default function DashboardClient({
                     <th className="pb-2">วันที่เพิ่ม</th>
                     <th className="pb-2 text-red-600 font-bold">หมดอายุ</th>
                     <th className="pb-2 text-right">สถานะ</th>
-                    <th className="pb-2 text-right">ฝากรัน</th>
+                    <th className="pb-2 text-right text-yellow-600 font-bold">ฝากรัน</th>
                     <th className="pb-2 text-right">จัดการ</th>
                   </tr>
                 </thead>
