@@ -59,7 +59,7 @@ export default function DashboardClient({
   const [systemsModalOpen, setSystemsModalOpen] = useState(false);
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
-  const [multiplier, setMultiplier] = useState("1");
+  const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>(BROKERS);
 
@@ -225,7 +225,7 @@ export default function DashboardClient({
     setLoginStatus(null);
     setLoginMsg("");
     setLoginPassword("");
-    setMultiplier("1");
+    setMultiplier("1.0");
     // Fetch brokers in background
     if (brokerList.length === 0) {
       try {
@@ -753,7 +753,7 @@ export default function DashboardClient({
                       setLoginBroker("");
                       setLoginStatus(null);
                       setLoginMsg("");
-                      setMultiplier("1");
+                      setMultiplier("1.0");
                     }}
                     className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-200"
                   >
