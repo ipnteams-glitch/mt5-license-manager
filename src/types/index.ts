@@ -53,8 +53,8 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "ไม่มีแพคเกจ", rank: 0,
   },
   free_ib: {
-    key: "free_ib", name: "ฟรี+IB", name_en: "Free+IB", price: 0, duration_days: 99999, max_ports: 999,
-    label: "ฟรี + IB ตลอดชีพ", rank: -1,
+    key: "free_ib", name: "⭐ ฟรี+IB", name_en: "Free+IB", price: 0, duration_days: 99999, max_ports: 999,
+    label: "⭐ ฟรี + IB ตลอดชีพ (Unlimited)", rank: -1,
   },
   free: {
     key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 7, max_ports: 1,
@@ -75,8 +75,8 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 3900,
   },
   "4900_1y": {
-    key: "4900_1y", name: "VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 9,
-    label: "6,900 บาท / 1 ปี + ฝากรัน", rank: 7,
+    key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 9,
+    label: "💎 6,900 บาท / 1 ปี + ฝากรัน", rank: 7,
     old_price: 15600,
   },
   ib_vps_2200: {
