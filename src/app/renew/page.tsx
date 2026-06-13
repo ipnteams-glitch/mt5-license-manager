@@ -396,7 +396,7 @@ export default function RenewPage() {
                         {isFree ? "ฟรี" : `฿${pkg.price.toLocaleString()}`}
                       </p>
                     )}
-                    <p className="text-xs text-zinc-400">{pkg.max_ports} พอร์ต</p>
+                    <p className="text-xs text-zinc-400">{pkg.max_ports >= 999 ? "Unlimited" : `${pkg.max_ports} พอร์ต`}</p>
                   </div>
                 </div>
               </button>
