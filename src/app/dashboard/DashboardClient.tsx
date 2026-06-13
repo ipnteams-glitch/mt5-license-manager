@@ -588,7 +588,7 @@ export default function DashboardClient({
                         <th className="pb-2 pr-2">วันที่</th>
                         <th className="pb-2 pr-2">แพคเกจ</th>
                         <th className="pb-2 pr-2">จำนวนเงิน</th>
-                        <th className="pb-2 text-right">เลือก</th>
+                        <th className="pb-2 text-right">สถานะ</th>
                       </tr>
                     </thead>
                     <tbody>
