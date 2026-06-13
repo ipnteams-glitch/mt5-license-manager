@@ -721,18 +721,19 @@ export default function DashboardClient({
               {/* ── Multiplier ── */}
               <div className="mb-4">
                 <label className="block text-xs font-medium text-zinc-600 mb-1">
-                  คูณ (x1 - x20)
+                  ตัวคูณ
                 </label>
-                <select
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="99"
                   value={multiplier}
                   onChange={(e) => setMultiplier(e.target.value)}
                   disabled={loginStatus !== "ok"}
-                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white text-blue-600 font-medium focus:border-blue-500 focus:outline-none disabled:bg-zinc-100 disabled:text-zinc-400"
-                >
-                  {Array.from({length: 20}, (_, i) => i + 1).map(n => (
-                    <option key={n} value={String(n)}>x{n}</option>
-                  ))}
-                </select>
+                  placeholder="1.0"
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-blue-600 font-medium focus:border-blue-500 focus:outline-none disabled:bg-zinc-100 disabled:text-zinc-400"
+                />
               </div>
 
               <div className="flex gap-2 justify-between items-center">
