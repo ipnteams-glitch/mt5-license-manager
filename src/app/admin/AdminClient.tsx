@@ -299,6 +299,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                         </td>
                         <td className="px-2 py-1 text-right">
                           {isPending && (
+                            <>
                             <button
                               onClick={() => handleAdminVerify(p.id)}
                               disabled={verifyingPayId === p.id}
@@ -313,6 +314,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                             >
                               {cancellingPayId === p.id ? "..." : "❌ ยกเลิก"}
                             </button>
+                            </>
                           )}
                         </td>
                       </tr>
