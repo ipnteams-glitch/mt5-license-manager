@@ -440,7 +440,7 @@ export default function DashboardClient({
                   <tr className="border-b text-left text-xs font-medium text-zinc-500">
                     <th className="pb-2">MT5 Account</th>
                     <th className="pb-2">วันที่เพิ่ม</th>
-                    <th className="pb-2">หมดอายุ</th>
+                    <th className="pb-2 text-red-600 font-bold">หมดอายุ</th>
                     <th className="pb-2 text-right">สถานะ</th>
                     <th className="pb-2 text-right">ฝากรัน</th>
                     <th className="pb-2 text-right">จัดการ</th>
