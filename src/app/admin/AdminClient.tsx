@@ -48,6 +48,32 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
     } catch { setMsg("❌ ลบไม่สำเร็จ"); }
   }
 
+  const [cancellingPayId, setCancellingPayId] = useState<string | null>(null);
+
+  async function handleCancelPayment(txnId: string) {
+    setCancellingPayId(txnId);
+    try {
+      const res = await fetch("/api/payment/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txn_id: txnId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPaymentList((prev) =>
+          prev.map((p) => (p.id === txnId ? { ...p, status: "failed" as const } : p))
+        );
+        setMsg("ยกเลิกรายการแล้ว");
+      } else {
+        setMsg(data.error || "ยกเลิกไม่สำเร็จ");
+      }
+    } catch (err: any) {
+      setMsg(err.message);
+    } finally {
+      setCancellingPayId(null);
+    }
+  }
+
   async function handleAdminVerify(txnId: string) {
     setVerifyingPayId(txnId);
     try {
@@ -279,6 +305,13 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                               className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
                             >
                               {verifyingPayId === p.id ? "..." : "✅ ยืนยัน"}
+                            </button>
+                            <button
+                              onClick={() => handleCancelPayment(p.id)}
+                              disabled={cancellingPayId === p.id}
+                              className="rounded bg-red-500 px-3 py-1 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50 ml-1"
+                            >
+                              {cancellingPayId === p.id ? "..." : "❌ ยกเลิก"}
                             </button>
                           )}
                         </td>

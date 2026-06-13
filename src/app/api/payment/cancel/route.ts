@@ -18,7 +18,9 @@ export async function POST(req: Request) {
     if (!payment) {
       return NextResponse.json({ error: "ไม่พบรายการ" }, { status: 404 });
     }
-    if (payment.email !== session.user.email) {
+    const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
+    const isAdmin = adminEmails.includes(session.user.email);
+    if (payment.email !== session.user.email && !isAdmin) {
       return NextResponse.json({ error: "ไม่ใช่รายการของคุณ" }, { status: 403 });
     }
     if (payment.status !== "pending") {
