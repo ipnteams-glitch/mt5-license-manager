@@ -81,6 +81,7 @@ export default function DashboardClient({
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginStatus, setLoginStatus] = useState<null | "ok" | "fail">(null);
   const [loginMsg, setLoginMsg] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<Port | null>(null);
 
 
 
@@ -472,7 +473,7 @@ export default function DashboardClient({
                       </td>
                       <td className="py-3 text-right">
                         <button
-                          onClick={() => { if (confirm("ยืนยันลบพอร์ตนี้?")) handleDeletePort(port.id); }}
+                          onClick={() => setDeleteConfirm(port)}
                           className="text-xs text-red-500 hover:text-red-700"
                         >
                           🗑 ลบ
@@ -768,7 +769,26 @@ export default function DashboardClient({
               </div>
             </div>
           </div>
-        )}      </main>
+        )}      {/* Custom Delete Confirm Modal */}
+        {deleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl text-center">
+              <p className="text-lg font-medium text-zinc-800 mb-2">ต้องการลบพอร์ตนี้?</p>
+              <p className="text-3xl font-bold text-red-500 mb-6">{deleteConfirm.mt5_account}</p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  className="rounded-lg px-6 py-2 text-sm text-zinc-600 hover:bg-zinc-100 border"
+                >ไม่</button>
+                <button
+                  onClick={() => { handleDeletePort(deleteConfirm.id); setDeleteConfirm(null); }}
+                  className="rounded-lg px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600"
+                >ใช่ ลบเลย</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
