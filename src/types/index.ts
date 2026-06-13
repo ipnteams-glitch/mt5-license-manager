@@ -33,7 +33,7 @@ export interface Payment {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "test_1" | "promo_69" | "1000_2m" | "2490_3m" | "4900_1y" | "9990_1y" | "none";
+export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "4900_1y" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -64,29 +64,20 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     key: "test_1", name: "ทดสอบ", name_en: "Test", price: 1, duration_days: 3, max_ports: 3,
     label: "🧪 1 บาท / 3 วัน", rank: 2,
   },
-  promo_69: {
-    key: "promo_69", name: "โปรโมชั่นครั้งแรก", name_en: "First Promo", price: 69, duration_days: 30, max_ports: 1,
-    label: "🔥 69 บาท / 30 วัน (ครั้งแรก)", rank: 3,
-  },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
     label: "590 บาท / 30 วัน", rank: 4,
     old_price: 990,
   },
   "2490_3m": {
-    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2290, duration_days: 90, max_ports: 5,
-    label: "2,290 บาท / 90 วัน", rank: 6,
-    old_price: 2590,
+    key: "2490_3m", name: "Premium", name_en: "Premium", price: 2990, duration_days: 90, max_ports: 5,
+    label: "2,990 บาท / 90 วัน + ฝากรัน", rank: 6,
+    old_price: 3900,
   },
   "4900_1y": {
-    key: "4900_1y", name: "VIP", name_en: "VIP", price: 4900, duration_days: 365, max_ports: 10,
-    label: "4,900 บาท / 1 ปี", rank: 7,
-    old_price: 5900,
-  },
-  "9990_1y": {
-    key: "9990_1y", name: "VIP+VPS", name_en: "VIP+VPS", price: 7100, duration_days: 365, max_ports: 10,
-    label: "7,100 บาท / 1 ปี + VPS", rank: 8,
-    old_price: 9990,
+    key: "4900_1y", name: "VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 9,
+    label: "6,900 บาท / 1 ปี + ฝากรัน", rank: 7,
+    old_price: 9900,
   },
 };
 
@@ -103,7 +94,7 @@ export interface PortfolioAccount {
   created_at: string;
 }
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "promo_69", "1000_2m", "2490_3m", "4900_1y", "9990_1y"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 
