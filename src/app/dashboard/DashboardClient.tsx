@@ -72,14 +72,6 @@ export default function DashboardClient({
           const map: Record<string, any> = {};
           data.ports.forEach((p: any) => { map[p.mt5_account] = p; });
           setPortStatuses(map);
-          // Also fetch systems for each port
-          const cache: Record<string, string> = {};
-          Promise.all(data.ports.map((p: any) =>
-            fetch(`/api/ports/systems?account=${p.mt5_account}`)
-              .then(r => r.json())
-              .then(d => { if (d.systems !== undefined) cache[p.id] = d.systems || ""; })
-              .catch(() => {})
-          )).then(() => setSystemsCache(prev => ({ ...prev, ...cache })));
         }
       })
       .catch(() => {});
@@ -466,9 +458,11 @@ export default function DashboardClient({
                           <span className="text-zinc-400">-</span>
                         )}
                       </td>
+                      <td className="py-3 text-xs text-blue-600 font-medium text-right">
+                        {portStatuses[port.mt5_account]?.systems || "-"}
+                      </td>
                       <td className="py-3 text-right">
                         <span className="text-xs text-zinc-500 mr-2">
-                          {getSystemsDisplay(port.id)}
                         </span>
                         <button
                           onClick={() => openSystemsModal(port)}
