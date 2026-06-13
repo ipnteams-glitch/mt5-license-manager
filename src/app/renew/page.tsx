@@ -10,7 +10,7 @@ export default function RenewPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
-  const [hasPaid, setHasPaid] = useState(false);
+
 
   // เช็คว่าเคยจ่ายสำเร็จหรือยัง → ถ้าเคย ซ่อน promo_69
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function RenewPage() {
 
   const visiblePackages = (isTestUser
     ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES]
-    : BUYABLE_PACKAGES).filter((k) => k !== "promo_69" || !hasPaid);
+    : BUYABLE_PACKAGES);
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [step, setStep] = useState<"select" | "qr" | "done">("select");
   const [qrBase64, setQrBase64] = useState("");
