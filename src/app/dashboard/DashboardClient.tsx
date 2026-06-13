@@ -773,7 +773,7 @@ export default function DashboardClient({
         {deleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl text-center">
-              <p className="text-lg font-medium text-zinc-800 mb-2">ต้องการลบพอร์ตนี้?</p>
+              <p className="text-lg font-medium text-zinc-800 mb-2">ต้องการลบพอร์ตที่กำลังรันอยู่ออกหรือไม่?</p>
               <p className="text-3xl font-bold text-red-500 mb-6">{deleteConfirm.mt5_account}</p>
               <div className="flex gap-3 justify-center">
                 <button
@@ -781,7 +781,17 @@ export default function DashboardClient({
                   className="rounded-lg px-6 py-2 text-sm text-zinc-600 hover:bg-zinc-100 border"
                 >ไม่</button>
                 <button
-                  onClick={() => { handleDeletePort(deleteConfirm.id); setDeleteConfirm(null); }}
+                  onClick={async () => {
+                    const account = deleteConfirm.mt5_account;
+                    await handleDeletePort(deleteConfirm.id);
+                    // Notify admin to close terminal
+                    fetch("/api/ports/notify-delete", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ account, vps_id: portStatuses[account]?.vps_id || "" }),
+                    }).catch(() => {});
+                    setDeleteConfirm(null);
+                  }}
                   className="rounded-lg px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600"
                 >ใช่ ลบเลย</button>
               </div>
