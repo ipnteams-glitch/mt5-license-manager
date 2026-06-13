@@ -151,6 +151,7 @@ export interface PortSystem {
   systems: string;
   password?: string;
   broker?: string;
+  multiplier?: string;
   vps_id?: string;
   status?: string;
   heartbeat?: string;

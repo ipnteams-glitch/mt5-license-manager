@@ -60,6 +60,7 @@ export default function DashboardClient({
   const [systemsModalOpen, setSystemsModalOpen] = useState(false);
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
+  const [multiplier, setMultiplier] = useState("1");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>(brokers);
 
@@ -271,7 +272,7 @@ export default function DashboardClient({
       const res = await fetch("/api/ports/systems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ account: systemsModalPort.mt5_account, systems, password: loginPassword, broker: loginBroker }),
+        body: JSON.stringify({ account: systemsModalPort.mt5_account, systems, password: loginPassword, broker: loginBroker, multiplier }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Save failed");
@@ -712,6 +713,23 @@ export default function DashboardClient({
                 </select>
               </div>
 
+              {/* ── Multiplier ── */}
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-zinc-600 mb-1">
+                  คูณ (x1 - x20)
+                </label>
+                <select
+                  value={multiplier}
+                  onChange={(e) => setMultiplier(e.target.value)}
+                  disabled={loginStatus !== "ok"}
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white text-blue-600 font-medium focus:border-blue-500 focus:outline-none disabled:bg-zinc-100 disabled:text-zinc-400"
+                >
+                  {Array.from({length: 20}, (_, i) => i + 1).map(n => (
+                    <option key={n} value={String(n)}>x{n}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="flex gap-2 justify-between items-center">
                 <div className="text-xs text-zinc-400">
                   {loginStatus !== "ok"
@@ -730,6 +748,7 @@ export default function DashboardClient({
                       setLoginBroker("");
                       setLoginStatus(null);
                       setLoginMsg("");
+                      setMultiplier("1");
                     }}
                     className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-200"
                   >
