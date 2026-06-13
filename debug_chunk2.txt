@@ -1,0 +1,18 @@
+// แพคเกจฟรี → เปิดใช้งานทันที ไม่ต้องจ่าย
+    if (selected === "free") {
+      setActivating(true);
+      try {
+        const res = await fetch("/api/payment/activate-free", { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาด");
+        setStep("done");
+        setTimeout(() => router.push("/dashboard"), 3000);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setActivating(false);
+      }
+      return;
+    }
+
+    

@@ -1,0 +1,5 @@
+free_ib: {
+    key: "free_ib", name: "ฟรี+IB", name_en: "Free+IB", price: 0, duration_days: 99999, max_ports: 5,
+    label: "ฟรี + IB ตลอดชีพ", rank: 0,
+  },
+  

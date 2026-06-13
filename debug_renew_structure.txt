@@ -1,0 +1,31 @@
+80:   async function handleActivate() {
+214:           <div className="text-5xl mb-4">✅</div>
+217:         </div>
+218:       </div>
+246:           </div>
+253:                   <button
+259:                   <button
+266:                 </div>
+283:                     <button
+290:                     <button
+296:                   </div>
+297:                 </div>
+299:             </div>
+307:             <button
+321:             </div>
+324:             <button
+341:           <button onClick={() => { setStep("select"); setError(""); }} className="mt-2 text-sm text-blue-600 hover:underline">
+342:             ← เลือกแพคเกจใหม่
+344:         </div>
+345:       </div>
+358:           {visiblePackages.map((key) => {
+363:               <button
+374:                   </div>
+391:                   </div>
+392:                 </div>
+396:         </div>
+398:         <button
+399:           onClick={handleActivate}
+406:         <button onClick={() => router.push("/dashboard")} className="mt-3 w-full text-sm text-zinc-500 hover:underline">
+409:       </div>
+410:     </div>

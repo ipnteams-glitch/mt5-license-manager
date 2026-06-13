@@ -72,6 +72,14 @@ export default function DashboardClient({
           const map: Record<string, any> = {};
           data.ports.forEach((p: any) => { map[p.mt5_account] = p; });
           setPortStatuses(map);
+          // Also fetch systems for each port
+          const cache: Record<string, string> = {};
+          Promise.all(data.ports.map((p: any) =>
+            fetch(`/api/ports/systems?account=${p.mt5_account}`)
+              .then(r => r.json())
+              .then(d => { if (d.systems !== undefined) cache[p.id] = d.systems || ""; })
+              .catch(() => {})
+          )).then(() => setSystemsCache(prev => ({ ...prev, ...cache })));
         }
       })
       .catch(() => {});
