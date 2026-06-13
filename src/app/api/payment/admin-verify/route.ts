@@ -46,9 +46,6 @@ export async function POST(req: Request) {
       sendPaymentSuccessEmail(payment.email, updatedMember.name, pkgInfo.label, expiry)
         .catch((e) => console.error("Email failed:", e));
     }
-    if (payment.package === "9990_1y") {
-      notifyVpsOrder(payment.email, updatedMember?.name || "", pkgInfo?.label || "", expiry, txn_id).catch(() => {});
-    }
 
     return NextResponse.json({
       success: true,

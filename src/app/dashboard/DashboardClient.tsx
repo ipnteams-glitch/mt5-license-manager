@@ -468,7 +468,7 @@ export default function DashboardClient({
                           className="text-xs text-blue-500 hover:text-blue-700"
                         >⚙️</button>
                       </td>
-                      <td className="py-3 text-xs font-bold text-right bg-yellow-100">
+                      <td className="py-3 text-xs font-bold text-right text-blue-600">
                         {portStatuses[port.mt5_account]?.systems || "-"}
                       </td>
                       <td className="py-3 text-right">
