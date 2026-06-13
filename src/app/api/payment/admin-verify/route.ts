@@ -27,6 +27,16 @@ export async function POST(req: Request) {
     // Mark as paid (ข้าม EasySlip)
     await markPaymentPaid(txn_id);
 
+    // IB+VPS is an add-on — handle before main package logic
+    if (payment.package === "ib_vps_2200") {
+      const addonExpiry = await setAddonIbVpsExpiry(payment.email);
+      return NextResponse.json({
+        success: true,
+        message: "✅ IB+VPS อนุมัติ — เพิ่ม VPS 1 ปี",
+        addon_ib_vps_expiry: addonExpiry,
+      });
+    }
+
     // Upgrade member package
     const member = await getMemberByEmail(payment.email);
     if (!member) return NextResponse.json({ success: false, message: "ไม่พบสมาชิก" });
@@ -39,17 +49,6 @@ export async function POST(req: Request) {
     await updateMemberPackage(payment.email, payment.package, maxPorts, expiry);
 
     const pkgInfo = PACKAGES[payment.package];
-
-    // Send email
-    // IB+VPS is an add-on, not a main package
-    if (payment.package === "ib_vps_2200") {
-      const addonExpiry = await setAddonIbVpsExpiry(payment.email);
-      return NextResponse.json({
-        success: true,
-        message: "✅ IB+VPS อนุมัติ — เพิ่ม VPS 1 ปี",
-        addon_ib_vps_expiry: addonExpiry,
-      });
-    }
 
     const updatedMember = await getMemberByEmail(payment.email);
     if (updatedMember) {
