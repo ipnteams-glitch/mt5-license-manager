@@ -222,6 +222,10 @@ export default function DashboardClient({
     setSystemsModalPort(port);
     setLoginBroker(port.mt5_broker || "");
     setError("");
+    setLoginStatus(null);
+    setLoginMsg("");
+    setLoginPassword("");
+    setMultiplier("1");
     // Fetch brokers in background
     if (brokerList.length === 0) {
       try {
@@ -469,7 +473,7 @@ export default function DashboardClient({
                       </td>
                       <td className="py-3 text-right">
                         <button
-                          onClick={() => handleDeletePort(port.id)}
+                          onClick={() => { if (confirm("ยืนยันลบพอร์ตนี้?")) handleDeletePort(port.id); }}
                           className="text-xs text-red-500 hover:text-red-700"
                         >
                           🗑 ลบ
