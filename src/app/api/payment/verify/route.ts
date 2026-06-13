@@ -71,8 +71,6 @@ async function completePayment(txnId: string, email: string, pkg: string, amount
   if (updatedMember && pkgInfo) {
     sendPaymentSuccessEmail(email, updatedMember.name, pkgInfo.label, expiry)
       .catch((e) => console.error("Email failed:", e));
-  }
-  if (pkg === "9990_1y") {
-    notifyVpsOrder(email, updatedMember?.name || "", pkgInfo?.label || "", expiry, txnId).catch(() => {});
+  });
   }
 }
