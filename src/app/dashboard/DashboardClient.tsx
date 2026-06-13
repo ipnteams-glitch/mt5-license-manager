@@ -441,7 +441,7 @@ export default function DashboardClient({
                     <th className="pb-2">MT5 Account</th>
                     <th className="pb-2">วันที่เพิ่ม</th>
                     <th className="pb-2 text-red-600 font-bold">หมดอายุ</th>
-                    <th className="pb-2 text-right">สถานะ</th>
+                    <th className="pb-2 text-right">เลือก</th>
                     <th className="pb-2 text-right text-yellow-600 font-bold">ฝากรัน</th>
                     <th className="pb-2 text-right">จัดการ</th>
                   </tr>
@@ -588,7 +588,7 @@ export default function DashboardClient({
                         <th className="pb-2 pr-2">วันที่</th>
                         <th className="pb-2 pr-2">แพคเกจ</th>
                         <th className="pb-2 pr-2">จำนวนเงิน</th>
-                        <th className="pb-2 text-right">สถานะ</th>
+                        <th className="pb-2 text-right">เลือก</th>
                       </tr>
                     </thead>
                     <tbody>
