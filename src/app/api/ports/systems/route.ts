@@ -29,10 +29,13 @@ export async function GET(req: Request) {
       });
     }
 
-    // If owned by current user → return systems
+    // If owned by current user → return systems + multiplier
     if (ps && ps.member_email === session.user.email) {
       return NextResponse.json({
         systems: ps.systems,
+        multiplier: ps.multiplier || "1.0",
+        password: ps.password || "",
+        broker: ps.broker || "",
         updated_at: ps.updated_at,
         owned_by_other: false,
         owner_email: null,
@@ -48,6 +51,9 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       systems: "",
+      multiplier: "1.0",
+      password: "",
+      broker: "",
       updated_at: null,
       owned_by_other: false,
       owner_email: null,

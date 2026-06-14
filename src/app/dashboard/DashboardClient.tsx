@@ -253,6 +253,9 @@ export default function DashboardClient({
       }
       const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
       setSelectedSystems(items);
+      setMultiplier(data.multiplier || "1.0");
+      setLoginPassword(data.password || "");
+      setLoginBroker(data.broker || port.mt5_broker || "");
       setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
       canOpen = true;
     } catch (err: any) {
