@@ -790,6 +790,13 @@ export async function deletePortfolioAccount(id: string, email: string): Promise
   if (!rows || rows.length <= 1) throw new Error("ไม่พบพอร์ตนี้");
   const idx = rows.findIndex((r) => r[0] === id && r[1] === email);
   if (idx < 0) throw new Error("ไม่พบพอร์ตนี้");
+
+  // ตรวจสอบ port_system ก่อนลบ — ต้องมีพอร์ตใน port_system และอีเมลตรงกัน
+  const mt5Account = rows[idx][2];
+  const ps = await getPortSystems(mt5Account);
+  if (!ps) throw new Error("ไม่พบพอร์ตนี้ใน port_system — กรุณาลงทะเบียนพอร์ตก่อนลบ");
+  if (ps.member_email !== email) throw new Error("อีเมลไม่ตรงกับเจ้าของพอร์ตใน port_system — ไม่สามารถลบได้");
+
   const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
   const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PORTFOLIO_SHEET);
   if (!sheet?.properties?.sheetId) throw new Error("Sheet not found");
