@@ -64,6 +64,21 @@
 
         .new-version-link:hover { text-decoration: underline; color: #fff176 !important; }
 
+        /* ── Language Switch ── */
+        .lang-switch {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .lang-switch:hover { background: rgba(255,255,255,0.2); }
+
         /* ── ปุ่มสมัครสมาชิก ── */
         .register-section {
             text-align: center;
@@ -442,7 +457,8 @@
                 <img src="https://img1.pic.in.th/images/logo14f5db31c2bca372.th.png" alt="EA Atlantis Logo" class="header-logo">
                 <h4 class="fw-bold">HARVEST FARM</h4>
             </div>
-            <a href="https://drive.google.com/drive/folders/16l_45ZJOdT-qAtkU2gB9S5eWrVlHf_J9" target="_blank" class="new-version-link">New Version + Preset</a>
+            <a href="https://drive.google.com/drive/folders/16l_45ZJOdT-qAtkU2gB9S5eWrVlHf_J9" target="_blank" class="new-version-link" data-i18n="new_version">New Version + Preset</a>
+            <button id="lang-switch" class="lang-switch" onclick="toggleLang()">EN</button>
         </div>
         <div class="status-online">
             <span class="dot"></span>Live Update
@@ -452,7 +468,7 @@
     <!-- 🔐 ปุ่มสมัครสมาชิก / จัดการพอร์ต -->
     <div class="register-section">
         <a href="https://mt5-license-manager.vercel.app" target="_blank" class="register-btn">
-            🔐 สมัครสมาชิก / จัดการพอร์ต MT5
+            <span data-i18n="register_btn">🔐 สมัครสมาชิก / จัดการพอร์ต MT5</span>
         </a>
     </div>
 
@@ -471,8 +487,8 @@
 
 
     <div class="hero-section text-center">
-        <h1 class="hero-title">FOREX บน METATRADE 5</h1>
-        <h2 class="hero-subtitle">เทรดคู่ทองและค่าเงินอัจฉริยะด้วยแนวคิด <span class="highlight-text">"ฟาร์ม EA"</span></h2>
+        <h1 class="hero-title" data-i18n="hero_title">FOREX บน METATRADE 5</h1>
+        <h2 class="hero-subtitle" data-i18n="html" data-i18n-html="hero_subtitle">เทรดคู่ทองและค่าเงินอัจฉริยะด้วยแนวคิด <span class="highlight-text">"ฟาร์ม EA"</span></h2>
         <p class="hero-desc">
             กระจายความเสี่ยงผ่านกองทัพ EA ที่เชี่ยวชาญหลากหลายกลยุทธ์ ทำงานตลอด 24 ชม.<br>
             ลด Drawdown ชดเชยความเสี่ยง เพื่อการเติบโตของพอร์ตอย่างยั่งยืน โดยไม่ต้องเฝ้ากราฟ
@@ -486,18 +502,18 @@
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
             
             <a href="https://mt5-license-manager.vercel.app" target="_blank" style="background: linear-gradient(90deg, #10b981 0%, #ef4444 100%); color: #ffffff; padding: 12px 30px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); display: inline-block; transition: 0.3s; border: 2px solid transparent;">
-                🎁 ทดลองฟรี 1 สัปดาห์
+                <span data-i18n="trial_btn">🎁 ทดลองฟรี 1 สัปดาห์</span>
             </a>
             
             <a href="RealTime.html" style="background: linear-gradient(90deg, #D4AF37 0%, #FFDF73 100%); color: #000; padding: 12px 30px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4); display: inline-block; transition: 0.3s; border: 2px solid transparent;">
-                📊 ดูแบบ Real-Time
+                <span data-i18n="realtime_btn">📊 ดูแบบ Real-Time</span>
             </a>
             
         </div>
     </div>
 
     <div style="text-align:center; padding: 5px 20px 15px 20px;">
-        <p style="color:#ef4444; font-size:0.8rem; margin:0; opacity:0.85;">*การลงทุนมีความเสี่ยง ผู้ใช้ควรศึกษาข้อมูลก่อนตัดสินใจ เราเป็นเพียงผู้ให้บริการซอฟแวร์เท่านั้น ไม่รับผิดชอบต่อความเสียหายทุกกรณี</p>
+        <p style="color:#ef4444; font-size:0.8rem; margin:0; opacity:0.85;" data-i18n="disclaimer">*การลงทุนมีความเสี่ยง ผู้ใช้ควรศึกษาข้อมูลก่อนตัดสินใจ เราเป็นเพียงผู้ให้บริการซอฟแวร์เท่านั้น ไม่รับผิดชอบต่อความเสียหายทุกกรณี</p>
     </div>
 
     <div class="info-box">
@@ -523,7 +539,7 @@
                 </div>
             </div>
             
-            <h4 class="instruction-text">เลือกรันกลยุทธได้ตามต้องการ</h4>
+            <h4 class="instruction-text" data-i18n="instruction">เลือกรันกลยุทธได้ตามต้องการ</h4>
         </div>
     </div>
 
@@ -567,6 +583,7 @@
     // 🟢 2. คงคำสั่ง &headers=1 ไว้ เพื่อบังคับให้ Google ไม่กลืน Sys_1 และ Sys_2 หายไป
     const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=0&headers=1`;
     
+    async function renderAllCards() { await fetchIndexData(); }
     document.addEventListener('DOMContentLoaded', fetchIndexData);
 
     async function fetchIndexData() {
@@ -580,7 +597,7 @@
             const rows = jsonData.table.rows;
 
             if (!rows || rows.length === 0) {
-                showError('<div class="alert alert-warning mx-3 text-center w-100">ไม่พบข้อมูลในระบบ</div>');
+                showError('<div class="alert alert-warning mx-3 text-center w-100">'+t('no_data')+'</div>');
                 return;
             }
 
@@ -611,7 +628,7 @@
 
         } catch (error) {
             console.error('Error:', error);
-            showError('<div class="alert alert-danger mx-3 text-center w-100">เกิดข้อผิดพลาดในการดึงข้อมูล</div>');
+            showError('<div class="alert alert-danger mx-3 text-center w-100">'+t('error_fetch')+'</div>');
         }
     }
 
@@ -632,7 +649,7 @@
         if (loader) loader.style.display = 'none';
 
         if (!data || data.length === 0) {
-            showError('<div class="alert alert-warning mx-3 text-center w-100">ไม่พบข้อมูลในระบบ</div>');
+            showError('<div class="alert alert-warning mx-3 text-center w-100">'+t('no_data')+'</div>');
             return;
         }
 
