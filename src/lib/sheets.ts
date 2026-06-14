@@ -259,20 +259,24 @@ export async function addPort(email: string, mt5Account: string, mt5Broker: stri
   return port;
 }
 
-export async function deletePort(portId: string, email: string): Promise<void> {
+export async function deletePort(portId: string, email: string): Promise<{ deletedFromPortSystems: boolean; vpsId?: string; mt5Account: string }> {
   const all = await getAllPorts();
   const idx = all.findIndex((p) => p.id === portId && p.member_email === email);
   if (idx === -1) throw new Error("Port not found");
+  const mt5Account = all[idx].mt5_account;
   all[idx].status = "removed";
   const sheets = await getSheets();
   await sheets.spreadsheets.values.update({
     spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A${idx + 2}:F${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [portToRow(all[idx])] },
   });
-  // Cascade: also remove from port_systems if exists
+  // Cascade: also remove from port_systems if exists AND email matches
+  let deletedFromPortSystems = false;
+  let vpsId: string | undefined;
   try {
-    const ps = await getPortSystems(all[idx].mt5_account);
+    const ps = await getPortSystems(mt5Account);
     if (ps && ps.member_email === email) {
+      vpsId = ps.vps_id;
       const sheets2 = await getSheets();
       const sid2 = sheetId();
       const res2 = await sheets2.spreadsheets.values.get({
@@ -280,7 +284,7 @@ export async function deletePort(portId: string, email: string): Promise<void> {
         range: `${PORT_SYSTEMS_SHEET}!A:J`,
       });
       const rows2 = res2.data.values || [];
-      const idx2 = rows2.findIndex((r, i) => i > 0 && r[0] === all[idx].mt5_account);
+      const idx2 = rows2.findIndex((r, i) => i > 0 && r[0] === mt5Account);
       if (idx2 >= 0) {
         const spreadsheet = await sheets2.spreadsheets.get({ spreadsheetId: sid2 });
         const sheet = spreadsheet.data.sheets?.find((s) => s.properties?.title === PORT_SYSTEMS_SHEET);
@@ -295,12 +299,14 @@ export async function deletePort(portId: string, email: string): Promise<void> {
               }],
             },
           });
+          deletedFromPortSystems = true;
         }
       }
     }
   } catch { /* ignore */ }
   invalidateCache("ports");
   invalidateCachePrefix("port_systems");
+  return { deletedFromPortSystems, vpsId, mt5Account };
 }
 
 export async function findPortByAccount(mt5Account: string): Promise<Port | null> {

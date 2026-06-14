@@ -802,14 +802,7 @@ export default function DashboardClient({
                 >ไม่</button>
                 <button
                   onClick={async () => {
-                    const account = deleteConfirm.mt5_account;
                     await handleDeletePort(deleteConfirm.id);
-                    // Notify admin to close terminal
-                    fetch("/api/ports/notify-delete", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ account, vps_id: portStatuses[account]?.vps_id || "" }),
-                    }).catch(() => {});
                     setDeleteConfirm(null);
                   }}
                   className="rounded-lg px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600"

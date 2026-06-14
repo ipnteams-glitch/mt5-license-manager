@@ -63,7 +63,22 @@ export async function DELETE(req: Request) {
   }
 
   try {
-    await deletePort(portId, session.user.email);
+    const result = await deletePort(portId, session.user.email);
+
+    // แจ้ง Telegram เฉพาะเมื่อลบจาก port_systems สำเร็จ
+    if (result.deletedFromPortSystems) {
+      const token = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (token && chatId) {
+        const msg = `🗑 <b>Port Removed</b>\n\nUser: ${session.user.email}\nAccount: <code>${result.mt5Account}</code>\nVPS: ${result.vpsId || "?"}\n\n🔧 Please close terminal on VPS`;
+        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "HTML" }),
+        }).catch(() => {});
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });
