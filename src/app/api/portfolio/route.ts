@@ -2,8 +2,7 @@ import { auth } from "@/lib/auth";
 import { getPortfolioByEmail, addPortfolioAccount, deletePortfolioAccount } from "@/lib/sheets";
 import { NextResponse } from "next/server";
 
-// Cache ใน memory 30 วิ
-const cache = new Map<string, { data: any; ts: number }>();
+// Cache จัดการโดย sheets.ts (in-memory, 10s TTL) — ไม่ต้อง cache ซ้ำที่นี่
 
 // GET /api/portfolio — session auth
 // GET /api/portfolio?email=xxx@gmail.com — public (for All_System)
@@ -27,16 +26,8 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "กรุณาล็อคอินก่อน" }, { status: 401 });
   }
 
-  const email = session.user.email;
-  const now = Date.now();
-  const cached = cache.get(email);
-  if (cached && now - cached.ts < 30000) {
-    return NextResponse.json({ accounts: cached.data });
-  }
-
   try {
-    const accounts = await getPortfolioByEmail(email);
-    cache.set(email, { data: accounts, ts: now });
+    const accounts = await getPortfolioByEmail(session.user.email);
     return NextResponse.json({ accounts });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
@@ -54,7 +45,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "กรุณากรอกหมายเลขพอร์ต MT5" }, { status: 400 });
       }
       const account = await addPortfolioAccount(session.user.email, mt5_account, broker || "");
-      cache.delete(session.user.email);
       return NextResponse.json({ success: true, account });
     } catch (err: any) {
       return NextResponse.json({ error: err.message }, { status: 400 });
@@ -90,7 +80,6 @@ export async function DELETE(req: Request) {
 
   try {
     await deletePortfolioAccount(id, session.user.email);
-    cache.delete(session.user.email);
     return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 });

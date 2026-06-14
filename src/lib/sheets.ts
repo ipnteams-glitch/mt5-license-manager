@@ -2,6 +2,7 @@ import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
 import type { Member, Port, Payment, PackageType, PortfolioAccount, PortSystem } from "@/types";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
+import { getCache, setCache, invalidateCache, invalidateCachePrefix } from "./cache";
 
 const MEMBERS_SHEET = "members";
 const PORTS_SHEET = "ports";
@@ -83,10 +84,14 @@ function paymentToRow(p: Payment): string[] {
 // ── Members ──
 
 export async function getAllMembers(): Promise<Member[]> {
+  const cached = getCache<Member[]>("members");
+  if (cached) return cached;
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
-  return rows.slice(1).map(memberFromRow);
+  const members = rows.slice(1).map(memberFromRow);
+  setCache("members", members);
+  return members;
 }
 
 export async function getMemberByEmail(email: string): Promise<Member | null> {
@@ -104,6 +109,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
       spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:H${idx + 2}`,
       valueInputOption: "RAW", requestBody: { values: [memberToRow(members[idx])] },
     });
+    invalidateCache("members");
     return members[idx];
   } else {
     // สมาชิกใหม่ → ให้แพคเกจฟรี 7 วัน
@@ -121,6 +127,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
       spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H`,
       valueInputOption: "RAW", requestBody: { values: [memberToRow(member)] },
     });
+    invalidateCache("members");
     return member;
   }
 }
@@ -139,6 +146,7 @@ export async function updateMemberPackage(
     spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:H${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [memberToRow(members[idx])] },
   });
+  invalidateCache("members");
 }
 
 // ── Upgrade Logic ──
@@ -223,10 +231,14 @@ export async function getPortsByEmail(email: string): Promise<Port[]> {
 }
 
 export async function getAllPorts(): Promise<Port[]> {
+  const cached = getCache<Port[]>("ports");
+  if (cached) return cached;
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A:F` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
-  return rows.slice(1).map(portFromRow);
+  const ports = rows.slice(1).map(portFromRow);
+  setCache("ports", ports);
+  return ports;
 }
 
 export async function addPort(email: string, mt5Account: string, mt5Broker: string, maxPorts: number): Promise<Port> {
@@ -243,6 +255,7 @@ export async function addPort(email: string, mt5Account: string, mt5Broker: stri
     spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A:F`,
     valueInputOption: "RAW", requestBody: { values: [portToRow(port)] },
   });
+  invalidateCache("ports");
   return port;
 }
 
@@ -286,6 +299,8 @@ export async function deletePort(portId: string, email: string): Promise<void> {
       }
     }
   } catch { /* ignore */ }
+  invalidateCache("ports");
+  invalidateCachePrefix("port_systems");
 }
 
 export async function findPortByAccount(mt5Account: string): Promise<Port | null> {
@@ -296,13 +311,17 @@ export async function findPortByAccount(mt5Account: string): Promise<Port | null
 // ── Payments ──
 
 export async function getAllPayments(): Promise<Payment[]> {
+  const cached = getCache<Payment[]>("payments");
+  if (cached) return cached;
   const sheets = await getSheets();
   try {
     const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I` });
     const rows = res.data.values; if (!rows || rows.length <= 1) return [];
     // ดึงเฉพาะ 200 รายการล่าสุด (ข้าม header แถวแรก)
     const dataRows = rows.slice(1);
-    return dataRows.slice(-200).map(paymentFromRow);
+    const payments = dataRows.slice(-200).map(paymentFromRow);
+    setCache("payments", payments);
+    return payments;
   } catch {
     // Sheet payments ยังไม่มี → return empty
     return [];
@@ -396,6 +415,7 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
       requestBody: { values: [paymentToRow(payment)] },
     });
   }
+  invalidateCache("payments");
 
   return payment;
 }
@@ -416,6 +436,7 @@ export async function markPaymentPaid(txnId: string): Promise<Payment> {
     spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:I${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [paymentToRow(all[idx])] },
   });
+  invalidateCache("payments");
   return all[idx];
 }
 
@@ -429,6 +450,7 @@ export async function markPaymentFailed(txnId: string): Promise<Payment> {
     spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:I${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [paymentToRow(all[idx])] },
   });
+  invalidateCache("payments");
   return all[idx];
 }
 
@@ -472,6 +494,7 @@ export async function cleanupExpiredPayments(minutesOld: number = 10080): Promis
     requestBody: { requests },
   });
 
+  invalidateCache("payments");
   return toDelete.length;
 }
 
@@ -513,17 +536,22 @@ export async function setAddonIbVpsExpiry(email: string): Promise<string> {
     valueInputOption: "RAW",
     requestBody: { values: [[expiryStr]] },
   });
+  invalidateCache("members");
   return expiryStr;
 }
 
 // ── Whitelist (VIP ไม่จำกัดพอร์ต ไม่งดอายุ) ──
 
 export async function getAllWhitelist(): Promise<{ name: string; broker: string; created_at: string }[]> {
+  const cached = getCache<{ name: string; broker: string; created_at: string }[]>("whitelist");
+  if (cached) return cached;
   const sheets = await getSheets();
   try {
     const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${WHITELIST_SHEET}!A:C` });
     const rows = res.data.values; if (!rows || rows.length <= 1) return [];
-    return rows.slice(1).slice(-100).map((r) => ({ name: r[0] || "", broker: r[1] || "", created_at: r[2] || "" }));
+    const whitelist = rows.slice(1).slice(-100).map((r) => ({ name: r[0] || "", broker: r[1] || "", created_at: r[2] || "" }));
+    setCache("whitelist", whitelist);
+    return whitelist;
   } catch {
     return [];
   }
@@ -554,6 +582,7 @@ export async function addWhitelist(name: string, broker: string): Promise<void> 
       requestBody: { values: [[name, broker, new Date().toISOString()]] },
     });
   }
+  invalidateCache("whitelist");
 }
 
 export async function removeWhitelist(index: number): Promise<void> {
@@ -573,6 +602,7 @@ export async function removeWhitelist(index: number): Promise<void> {
       }],
     },
   });
+  invalidateCache("whitelist");
 }
 
 export function checkWhitelist(whitelist: { name: string; broker: string }[], name: string, broker: string): boolean {
@@ -646,6 +676,8 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
       valueInputOption: "RAW",
     },
   });
+  invalidateCache("payments");
+  invalidateCache("members");
 
   return {
     memberEmail: email,
@@ -705,13 +737,18 @@ async function initPortfolioSheet(): Promise<void> {
 }
 
 export async function getPortfolioByEmail(email: string): Promise<PortfolioAccount[]> {
+  const cacheKey = `portfolio:${email}`;
+  const cached = getCache<PortfolioAccount[]>(cacheKey);
+  if (cached) return cached;
   await initPortfolioSheet();
   const sheets = await getSheets();
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${PORTFOLIO_SHEET}!A:I` });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) return [];
-  return rows.slice(1).map(portfolioFromRow).filter((p) => p.member_email === email);
+  const accounts = rows.slice(1).map(portfolioFromRow).filter((p) => p.member_email === email);
+  setCache(cacheKey, accounts);
+  return accounts;
 }
 
 export async function addPortfolioAccount(email: string, mt5Account: string, broker: string): Promise<PortfolioAccount> {
@@ -740,6 +777,7 @@ export async function addPortfolioAccount(email: string, mt5Account: string, bro
     valueInputOption: "RAW",
     requestBody: { values: [portfolioToRow(account)] },
   });
+  invalidateCache(`portfolio:${email}`);
   return account;
 }
 
@@ -765,6 +803,7 @@ export async function deletePortfolioAccount(id: string, email: string): Promise
       }],
     },
   });
+  invalidateCache(`portfolio:${email}`);
 }
 
 export async function pushPortfolioData(mt5Account: string, data: { balance: number; floating_pl: number; total_profit: number }): Promise<void> {
@@ -786,6 +825,7 @@ export async function pushPortfolioData(mt5Account: string, data: { balance: num
     valueInputOption: "RAW",
     requestBody: { values: [rows[idx]] },
   });
+  invalidateCachePrefix("portfolio");
 }
 
 // ══════════════════════════════════════════════════════════
@@ -863,14 +903,20 @@ async function initPortSystemsSheet(): Promise<void> {
 }
 
 export async function getPortSystems(mt5Account: string): Promise<PortSystem | null> {
-  await initPortSystemsSheet();
-  const sheets = await getSheets();
-  const sid = sheetId();
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: sid,
-    range: `${PORT_SYSTEMS_SHEET}!A:J`,
-  });
-  const rows = res.data.values;
+  // Read all port_systems, cache the full data
+  const CACHE_KEY = "port_systems";
+  let rows: string[][] | null = getCache<string[][]>(CACHE_KEY);
+  if (!rows) {
+    await initPortSystemsSheet();
+    const sheets = await getSheets();
+    const sid = sheetId();
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId: sid,
+      range: `${PORT_SYSTEMS_SHEET}!A:J`,
+    });
+    rows = res.data.values || [];
+    setCache(CACHE_KEY, rows);
+  }
   if (!rows || rows.length <= 1) return null;
   // Simple lookup: column A = mt5_account
   const row = rows.slice(1).find(r => r[0] === mt5Account);
@@ -948,6 +994,7 @@ export async function setPortSystems(
       requestBody: { values: [[mt5Account, email, systems, password || "", broker || "", "", "pending", "", now, multiplier || "1"]] },
     });
   }
+  invalidateCache("port_systems");
   return ps;
 }
 
@@ -998,6 +1045,8 @@ async function initBrokersSheet(): Promise<void> {
 }
 
 export async function getAllBrokers(): Promise<string[]> {
+  const cached = getCache<string[]>("brokers");
+  if (cached) return cached;
   await initBrokersSheet();
   const sheets = await getSheets();
   const sid = sheetId();
@@ -1006,14 +1055,18 @@ export async function getAllBrokers(): Promise<string[]> {
     range: `${BROKERS_SHEET}!A:A`,
   });
   const rows = res.data.values;
+  let brokers: string[];
   if (!rows || rows.length <= 1) {
     // Fallback defaults
-    return [
+    brokers = [
       "InterstellarFinancial-Demo", "InterstellarFinancial-Main",
       "TPTradesGroup-Demo", "VTMarkets-Demo", "VTMarkets-Live",
       "Exness-Real", "ICMarkets-Demo", "ICMarkets-Live",
       "Tickmill-Demo", "Pepperstone-Demo",
     ];
+  } else {
+    brokers = rows.slice(1).map(r => r[0] || "").filter(Boolean);
   }
-  return rows.slice(1).map(r => r[0] || "").filter(Boolean);
+  setCache("brokers", brokers);
+  return brokers;
 }
