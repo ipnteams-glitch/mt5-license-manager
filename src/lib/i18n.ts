@@ -249,10 +249,10 @@ export const translations = {
   pkg_label_free: { th: "ฟรี 7 วัน", en: "Free 7 Days" },
   pkg_label_free_ib: { th: "⭐ ฟรี + IB ตลอดชีพ (Unlimited)", en: "⭐ Free + IB Lifetime (Unlimited)" },
   pkg_label_test_1: { th: "🧪 1 บาท / 3 วัน", en: "🧪 1 THB / 3 Days" },
-  pkg_label_basic: { th: "30 วัน (2 พอร์ต) | ไม่จำกัดโบรค", en: "30 Days (2 Ports) | Any Broker" },
-  pkg_label_premium: { th: "90 วัน + ฝากรัน (5 พอร์ต) | ไม่จำกัดโบรค", en: "90 Days + VPS (5 Ports) | Any Broker" },
-  pkg_label_vip: { th: "💎 1 ปี + ฝากรัน (9 พอร์ต) | ไม่จำกัดโบรค", en: "💎 1 Year + VPS (9 Ports) | Any Broker" },
-  pkg_label_ib_vps: { th: "vCPU 2 / RAM 4 GB / 1 ปี", en: "vCPU 2 / RAM 4 GB / 1 Year" },
+  pkg_label_basic: { th: "30 วัน + VPS (2 พอร์ต) | ใช้ได้ทุกโบรค", en: "30d + VPS (2 Ports) | Any Broker" },
+  pkg_label_premium: { th: "90 วัน + VPS (5 พอร์ต) | ใช้ได้ทุกโบรค", en: "90d + VPS (5 Ports) | Any Broker" },
+  pkg_label_vip: { th: "💎 1 ปี + VPS (9 พอร์ต) | ใช้ได้ทุกโบรค", en: "💎 1Y + VPS (9 Ports) | Any Broker" },
+  pkg_label_ib_vps: { th: "vCPU 2 / RAM 4GB / 1 ปี", en: "vCPU 2 / RAM 4GB / 1 Year" },
 
   // ── Renew extras ──
   select_package_first: { th: "กรุณาเลือกแพคเกจก่อน", en: "Please select a package first" },
