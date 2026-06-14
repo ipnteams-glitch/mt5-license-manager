@@ -225,7 +225,7 @@ export default function RenewPage() {
         <div className="text-center rounded-xl bg-white p-8 shadow-lg">
           <div className="text-5xl mb-4">✅</div>
           <h1 className="text-xl font-bold text-green-700 mb-2">{t("renew_success_title")}</h1>
-          <p className="text-zinc-500">กำลังกลับไปหน้า Dashboard...</p>
+          <p className="text-zinc-500">{t("returning_dashboard")}</p>
         </div>
       </div>
     );
@@ -236,23 +236,23 @@ export default function RenewPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
         <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg text-center">
-          <h2 className="text-lg font-bold text-zinc-800 mb-1">📱 สแกน QR เพื่อชำระเงิน</h2>
+          <h2 className="text-lg font-bold text-zinc-800 mb-1">{t("qr_scan_title")}</h2>
           {selected && <p className="text-sm font-semibold text-blue-600 mb-1">{PACKAGES[selected].name} — {PACKAGES[selected].label}</p>}
-          <p className="text-sm text-zinc-500 mb-2">จำนวน {amount.toFixed(2)} บาท</p>
+          <p className="text-sm text-zinc-500 mb-2">{t("qr_amount", { amount: amount.toFixed(2) })}</p>
 
           {/* นับถอยหลัง */}
           <div className="mb-4">
             {isExpired ? (
               <p className="inline-block rounded-full bg-red-100 px-4 py-1 text-sm font-semibold text-red-600">
-                ⏰ หมดเวลา — กรุณาสร้าง QR ใหม่
+                {t("qr_expired")}
               </p>
             ) : (
               <p className="inline-block rounded-full bg-amber-50 px-4 py-1 text-sm font-semibold text-amber-700">
-                ⏱️ ชำระภายใน{" "}
+                {t("qr_pay_within")}{" "}
                 <span className={timeLeft < 60 ? "text-red-600" : "text-amber-700"}>
                   {formatTime(timeLeft)}
                 </span>{" "}
-                นาที
+                {t("minutes")}
               </p>
             )}
           </div>
@@ -266,19 +266,19 @@ export default function RenewPage() {
                     onClick={() => { setShowUploadSlip(true); setSlipResult(null); }}
                     className="rounded-lg border-2 border-dashed border-zinc-300 px-4 py-3 text-sm font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
                   >
-                    📎 อัปโหลดสลิปแทน
+                    {t("upload_slip_alt")}
                   </button>
                   <button
                     onClick={handleCancelPayment}
                     disabled={cancelling}
                     className="rounded-lg border border-red-200 px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-50 disabled:opacity-50"
                   >
-                    {cancelling ? "กำลังยกเลิก..." : "❌ ยกเลิก"}
+                    {cancelling ? t("cancelling") : t("cancel_btn")}
                   </button>
                 </div>
               ) : (
                 <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-left">
-                  <p className="text-xs text-zinc-500 mb-2">ถ้าโอนเงินแล้ว — อัปโหลดรูปสลิป</p>
+                  <p className="text-xs text-zinc-500 mb-2">{t("upload_slip_if_paid")}</p>
                   <input
                     type="file"
                     accept="image/*"
@@ -297,7 +297,7 @@ export default function RenewPage() {
                       disabled={!slipFile || uploading}
                       className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
                     >
-                      {uploading ? "กำลังตรวจสอบ..." : "📤 ส่งสลิป"}
+                      {uploading ? t("checking") : t("send_slip")}
                     </button>
                     <button
                       onClick={() => { setShowUploadSlip(false); setSlipFile(null); setSlipResult(null); }}

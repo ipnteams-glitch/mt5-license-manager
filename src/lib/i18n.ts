@@ -143,7 +143,7 @@ export const translations = {
   // QR Payment
   qr_payment_title: { th: "💳 ชำระเงิน", en: "💳 Payment" },
   qr_expires_in: { th: "QR หมดอายุใน {time}", en: "QR expires in {time}" },
-  qr_expired: { th: "QR หมดอายุแล้ว", en: "QR expired" },
+  qr_expired: { th: "⏰ หมดเวลา — กรุณาสร้าง QR ใหม่", en: "⏰ Time expired — create new QR" },
   qr_amount: { th: "จำนวนเงิน: ฿{amount}", en: "Amount: ฿{amount}" },
   checking_status: { th: "กำลังตรวจสอบสถานะ...", en: "Checking status..." },
   payment_success: {
@@ -310,6 +310,31 @@ export const translations = {
   // ── Admin messages ──
   admin_update_success: { th: "✅ อัปเดต {email} สำเร็จ", en: "✅ Updated {email} successfully" },
 
+  // ── Dashboard cards & table ──
+  dash_package: { th: "แพคเกจ", en: "Package" },
+  dash_quota: { th: "โควต้าพอร์ต", en: "Port Quota" },
+  dash_remaining: { th: "{n} เหลือ", en: "{n} left" },
+  dash_expired_label: { th: "❌ หมดอายุแล้ว", en: "❌ Expired" },
+  dash_days_left: { th: "✅ เหลือ {n} วัน", en: "✅ {n} days left" },
+  dash_no_package: { th: "ไม่มีแพคเกจ", en: "No package" },
+  dash_your_ports: { th: "🔌 พอร์ต MT5 ของคุณ", en: "🔌 Your MT5 Ports" },
+  dash_pkg_expired_hint: { th: "แพคเกจหมดอายุ — ติดต่อแอดมินเพื่อต่ออายุ", en: "Package expired — contact admin to renew" },
+  dash_no_ports_hint2: { th: "ยังไม่มีพอร์ต — กด + เพิ่มพอร์ต เพื่อเพิ่ม", en: "No ports — press + Add Port" },
+  dash_no_pkg_hint2: { th: "ยังไม่มีแพคเกจ — ติดต่อแอดมิน", en: "No package — contact admin" },
+  dash_save_btn: { th: "💾 บันทึก", en: "💾 Save" },
+  dash_delete_btn: { th: "🗑 ลบ", en: "🗑 Delete" },
+  dash_col_date: { th: "วันที่", en: "Date" },
+  dash_col_expiry: { th: "หมดอายุ", en: "Expiry" },
+  dash_col_select: { th: "เลือก", en: "Select" },
+  dash_col_run: { th: "ฝากรัน", en: "VPS" },
+  dash_upload_slip: { th: "📎 อัปโหลดสลิป", en: "📎 Upload Slip" },
+  dash_upload_slip_hint: { th: "อัปโหลดรูปสลิปการโอนเงิน", en: "Upload payment slip" },
+  dash_payment_history: { th: "📋 ประวัติการชำระเงิน ({n} รายการ)", en: "📋 Payment History ({n} items)" },
+  dash_login_ok_msg: { th: "✓ Login สำเร็จ — รหัสเทรดถูกต้อง", en: "✓ Login success — password correct" },
+  dash_baht: { th: "บาท", en: "THB" },
+  dash_days: { th: "วัน", en: "days" },
+  dash_ib_vps_expiry: { th: "IB+VPS 2200 — หมดอายุ {date}", en: "IB+VPS 2200 — Expires {date}" },
+
   // ── Port Systems config (Dashboard) ──
   sys_config_title: { th: "ตั้งค่าระบบ — {account}", en: "System Config — {account}" },
   sys_login_hint: { th: "ใส่ Master Password แล้วกด Login เพื่อทดสอบ", en: "Enter Master Password and press Login to test" },
@@ -326,6 +351,16 @@ export const translations = {
   sys_login_fail: { th: "Login ไม่สำเร็จ — ตรวจสอบรหัสเทรด", en: "Login failed — check trading password" },
 
   // ── QR / Payment step (renew) ──
+  qr_scan_title: { th: "📱 สแกน QR เพื่อชำระเงิน", en: "📱 Scan QR to pay" },
+  qr_pay_within: { th: "⏱️ ชำระภายใน", en: "⏱️ Pay within" },
+  minutes: { th: "นาที", en: "minutes" },
+  upload_slip_alt: { th: "📎 อัปโหลดสลิปแทน", en: "📎 Upload slip instead" },
+  cancelling: { th: "กำลังยกเลิก...", en: "Cancelling..." },
+  cancel_btn: { th: "❌ ยกเลิก", en: "❌ Cancel" },
+  upload_slip_if_paid: { th: "ถ้าโอนเงินแล้ว — อัปโหลดรูปสลิป", en: "If paid — upload payment slip" },
+  checking: { th: "กำลังตรวจสอบ...", en: "Checking..." },
+  send_slip: { th: "📤 ส่งสลิป", en: "📤 Send Slip" },
+  returning_dashboard: { th: "กำลังกลับไปหน้า Dashboard...", en: "Returning to Dashboard..." },
   press_when_paid: { th: "กดปุ่มเมื่อชำระแล้ว", en: "Press after payment" },
   checking_payment: { th: "⏳ กำลังตรวจสอบการชำระเงิน...", en: "⏳ Checking payment..." },
   admin_force_verify: { th: "⚡ Admin: บังคับยืนยันการชำระเงิน", en: "⚡ Admin: Force Verify" },

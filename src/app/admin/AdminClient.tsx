@@ -179,13 +179,13 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
-                  <th className="px-2 py-1">อีเมล</th>
+                  <th className="px-2 py-1">{t("admin_col_email")}</th>
                   <th className="px-2 py-1">{t("wl_name")}</th>
-                  <th className="px-2 py-1">แพคเกจ</th>
-                  <th className="px-2 py-1">โควต้า</th>
-                  <th className="px-2 py-1">หมดอายุ</th>
-                  <th className="px-2 py-1">พอร์ต</th>
-                  <th className="px-2 py-1 text-right">จัดการ</th>
+                  <th className="px-2 py-1">{t("admin_col_package")}</th>
+                  <th className="px-2 py-1">{t("admin_col_quota")}</th>
+                  <th className="px-2 py-1">{t("admin_col_expiry")}</th>
+                  <th className="px-2 py-1">{t("admin_col_ports")}</th>
+                  <th className="px-2 py-1 text-right">{t("admin_col_manage")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -227,7 +227,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                             <button onClick={() => setEditing(null)} className="rounded px-3 py-1 text-xs text-black hover:bg-zinc-200">✕</button>
                           </div>
                         ) : (
-                          <button onClick={() => startEdit(m)} className="text-xs text-blue-600 hover:underline">แก้ไข</button>
+                          <button onClick={() => startEdit(m)} className="text-xs text-blue-600 hover:underline">{t("edit")}</button>
                         )}
                       </td>
                     </tr>
@@ -243,10 +243,10 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
-                  <th className="px-2 py-1">MT5 Account</th>
+                  <th className="px-2 py-1">{t("admin_col_account")}</th>
                   <th className="px-2 py-1">{t("wl_broker")}</th>
-                  <th className="px-2 py-1">เจ้าของ</th>
-                  <th className="px-2 py-1">สถานะ</th>
+                  <th className="px-2 py-1">{t("admin_col_owner")}</th>
+                  <th className="px-2 py-1">{t("status")}</th>
                   <th className="px-2 py-1">{t("wl_date_added")}</th>
                 </tr>
               </thead>
@@ -270,12 +270,12 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-semibold text-black">
-                  <th className="px-2 py-1">เวลา</th>
-                  <th className="px-2 py-1">อีเมล</th>
-                  <th className="px-2 py-1">แพคเกจ</th>
-                  <th className="px-2 py-1">จำนวน</th>
-                  <th className="px-2 py-1">สถานะ</th>
-                  <th className="px-2 py-1 text-right">จัดการ</th>
+                  <th className="px-2 py-1">{t("admin_col_time")}</th>
+                  <th className="px-2 py-1">{t("admin_col_email")}</th>
+                  <th className="px-2 py-1">{t("admin_col_package")}</th>
+                  <th className="px-2 py-1">{t("admin_col_amount")}</th>
+                  <th className="px-2 py-1">{t("status")}</th>
+                  <th className="px-2 py-1 text-right">{t("admin_col_manage")}</th>
                 </tr>
               </thead>
               <tbody>

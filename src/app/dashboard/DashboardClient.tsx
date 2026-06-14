@@ -346,26 +346,26 @@ export default function DashboardClient({
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 grid gap-4 sm:grid-cols-3">
               <div>
-                <p className="text-sm text-zinc-500">แพคเกจ</p>
+                <p className="text-sm text-zinc-500">{t("dash_package")}</p>
                 <p className="font-semibold text-zinc-900">{displayPkgLabel}</p>
               </div>
               <div>
-                <p className="text-sm text-zinc-500">สถานะ</p>
+                <p className="text-sm text-zinc-500">{t("status")}</p>
                 {displayIsExpired ? (
-                  <p className="font-semibold text-red-600">❌ หมดอายุแล้ว</p>
+                  <p className="font-semibold text-red-600">{t("dash_expired_label")}</p>
                 ) : displayDaysLeft > 0 ? (
-                  <p className="font-semibold text-green-600">✅ เหลือ {displayDaysLeft} วัน</p>
+                  <p className="font-semibold text-green-600">{t("dash_days_left", { n: displayDaysLeft })}</p>
                 ) : (
-                  <p className="font-semibold text-zinc-500">ไม่มีแพคเกจ</p>
+                  <p className="font-semibold text-zinc-500">{t("dash_no_package")}</p>
                 )}
               </div>
               <div>
-                <p className="text-sm text-zinc-500">โควต้าพอร์ต</p>
+                <p className="text-sm text-zinc-500">{t("dash_quota")}</p>
                 <p className="font-semibold text-zinc-900">
                   {usedCount} / {displayPortsTotal}
                   {displayPortsTotal > 0 && (
                     <span className="ml-2 text-xs text-zinc-400">
-                      ({displayPortsTotal - usedCount} เหลือ)
+                      ({t("dash_remaining", { n: displayPortsTotal - usedCount })})
                     </span>
                   )}
                 </p>
@@ -389,28 +389,28 @@ export default function DashboardClient({
         {/* Ports List */}
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-zinc-800">🔌 พอร์ต MT5 ของคุณ</h2>
+            <h2 className="text-lg font-bold text-zinc-800">{t("dash_your_ports")}</h2>
             {displayPortsTotal > 0 && usedCount < displayPortsTotal && !displayIsExpired && (
               <button
                 onClick={() => setShowAddPort(!showAddPort)}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
               >
-                + เพิ่มพอร์ต
+                {t("add_port")}
               </button>
             )}
             {displayPortsTotal === 0 && (
-              <span className="text-xs text-zinc-400">ยังไม่มีแพคเกจ</span>
+              <span className="text-xs text-zinc-400">{t("dash_no_package")}</span>
             )}
             {addonIbVpsExpiry && (
               <div className="mt-3 rounded-lg bg-purple-50 px-3 py-2 border border-purple-200">
                 <p className="text-sm font-medium text-purple-700">
-                  IB+VPS 2200 — หมดอายุ {new Date(addonIbVpsExpiry).toLocaleDateString("th-TH")}
-                  {" "}({Math.ceil((new Date(addonIbVpsExpiry).getTime() - Date.now()) / 86400000)} วัน)
+                  {t("dash_ib_vps_expiry", { date: new Date(addonIbVpsExpiry).toLocaleDateString("th-TH") })}
+                  {" "}({Math.ceil((new Date(addonIbVpsExpiry).getTime() - Date.now()) / 86400000)} {t("dash_days")})
                 </p>
               </div>
             )}
             {displayIsExpired && (
-              <span className="text-xs text-red-500">แพคเกจหมดอายุ — ติดต่อแอดมินเพื่อต่ออายุ</span>
+              <span className="text-xs text-red-500">{t("dash_pkg_expired_hint")}</span>
             )}
           </div>
 
@@ -423,7 +423,7 @@ export default function DashboardClient({
             <form onSubmit={handleAddPort} className="mb-4 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
               <div>
                 <label className="block text-xs font-medium text-zinc-600 mb-1">
-                  หมายเลขพอร์ต MT5
+                  {t("mt5_account_placeholder")}
                 </label>
                 <input
                   type="text"
@@ -440,14 +440,14 @@ export default function DashboardClient({
                   disabled={adding}
                   className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                 >
-                  {adding ? t("saving") : "💾 บันทึก"}
+                  {adding ? t("saving") : t("dash_save_btn")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddPort(false)}
                   className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-200"
                 >
-                  ยกเลิก
+                  {t("cancel")}
                 </button>
               </div>
             </form>
@@ -456,7 +456,7 @@ export default function DashboardClient({
           {/* Ports Table */}
           {portList.length === 0 ? (
             <p className="py-8 text-center text-sm text-zinc-400">
-              {displayPortsTotal > 0 ? "ยังไม่มีพอร์ต — กด + เพิ่มพอร์ต เพื่อเพิ่ม" : "ยังไม่มีแพคเกจ — ติดต่อแอดมิน"}
+              {displayPortsTotal > 0 ? t("dash_no_ports_hint2") : t("dash_no_pkg_hint2")}
             </p>
           ) : (
             <div className="overflow-x-auto">
@@ -464,11 +464,11 @@ export default function DashboardClient({
                 <thead>
                   <tr className="border-b text-left text-xs font-medium text-zinc-500">
                     <th className="pb-2">MT5 Account</th>
-                    <th className="pb-2">วันที่เพิ่ม</th>
-                    <th className="pb-2 text-red-600 font-bold">หมดอายุ</th>
-                    <th className="pb-2 text-right">เลือก</th>
-                    <th className="pb-2 text-right text-yellow-600 font-bold">ฝากรัน</th>
-                    <th className="pb-2 text-right">จัดการ</th>
+                    <th className="pb-2">{t("admin_col_date_added")}</th>
+                    <th className="pb-2 text-red-600 font-bold">{t("dash_col_expiry")}</th>
+                    <th className="pb-2 text-right">{t("dash_col_select")}</th>
+                    <th className="pb-2 text-right text-yellow-600 font-bold">{t("dash_col_run")}</th>
+                    <th className="pb-2 text-right">{t("admin_col_manage")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -502,7 +502,7 @@ export default function DashboardClient({
                           onClick={() => setDeleteConfirm(port)}
                           className="text-xs text-red-500 hover:text-red-700"
                         >
-                          🗑 ลบ
+                          {t("dash_delete_btn")}
                         </button>
                       </td>
                     </tr>
@@ -538,7 +538,7 @@ export default function DashboardClient({
                             onClick={() => { setSlipUploadTxnId(p.id); setSlipFile(null); setSlipMsg(null); }}
                             className="rounded-lg border-2 border-dashed border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-all"
                           >
-                            📎 อัปโหลดสลิป
+                            {t("dash_upload_slip")}
                           </button>
                           <button
                             onClick={() => handleCancelPayment(p.id)}
@@ -552,7 +552,7 @@ export default function DashboardClient({
                     </div>
                     {isOpen && (
                       <div className="mt-3 rounded-lg bg-zinc-50 p-3">
-                        <p className="text-xs text-zinc-500 mb-2">อัปโหลดรูปสลิปการโอนเงิน</p>
+                        <p className="text-xs text-zinc-500 mb-2">{t("dash_upload_slip_hint")}</p>
                         <input
                           type="file"
                           accept="image/*"
@@ -598,7 +598,7 @@ export default function DashboardClient({
               className="flex w-full items-center justify-between rounded-xl bg-white p-4 shadow-sm hover:shadow-md transition-all"
             >
               <span className="text-sm font-semibold text-zinc-700">
-                📋 ประวัติการชำระเงิน ({paymentHistory.length} รายการ)
+                {t("dash_payment_history", { n: paymentHistory.length })}
               </span>
               <span className={`text-zinc-400 transition-transform ${showPaymentHistory ? "rotate-180" : ""}`}>
                 ▼
@@ -610,10 +610,10 @@ export default function DashboardClient({
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b text-left text-xs font-semibold text-zinc-500">
-                        <th className="pb-2 pr-2">วันที่</th>
-                        <th className="pb-2 pr-2">แพคเกจ</th>
+                        <th className="pb-2 pr-2">{t("dash_col_date")}</th>
+                        <th className="pb-2 pr-2">{t("dash_package")}</th>
                         <th className="pb-2 pr-2">{t("amount")}</th>
-                        <th className="pb-2 text-right">สถานะ</th>
+                        <th className="pb-2 text-right">{t("status")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -646,7 +646,7 @@ export default function DashboardClient({
                               {pkgInfo?.name || p.package}
                             </td>
                             <td className="py-2 pr-2 text-zinc-600 text-xs">
-                              {p.amount.toFixed(2)} บาท
+                              {p.amount.toFixed(2)} {t("dash_baht")}
                             </td>
                             <td className={`py-2 text-right text-xs font-medium ${statusColor}`}>
                               {statusLabel}
@@ -716,7 +716,7 @@ export default function DashboardClient({
 
               {loginStatus === "ok" && (
                 <p className="mb-4 text-xs text-emerald-600 font-medium">
-                  ✓ Login สำเร็จ — รหัสเทรดถูกต้อง
+                  {t("dash_login_ok_msg")}
                 </p>
               )}
               {loginStatus === "fail" && (
@@ -766,8 +766,8 @@ export default function DashboardClient({
                   {loginStatus !== "ok"
                     ? t("login_first")
                     : selectedSystems.length > 0
-                    ? `ระบบที่เลือก: ${selectedSystems[0]}`
-                    : "ยังไม่ได้เลือกระบบ (ลูกค้าจะใช้ EA เอง)"}
+                    ? t("sys_selected", { sys: selectedSystems[0] })
+                    : t("sys_not_selected")}
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -806,14 +806,14 @@ export default function DashboardClient({
                 <button
                   onClick={() => setDeleteConfirm(null)}
                   className="rounded-lg px-6 py-2 text-sm text-zinc-600 hover:bg-zinc-100 border"
-                >ไม่</button>
+                >{t("no")}</button>
                 <button
                   onClick={async () => {
                     await handleDeletePort(deleteConfirm.id);
                     setDeleteConfirm(null);
                   }}
                   className="rounded-lg px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600"
-                >ใช่ ลบเลย</button>
+                >{t("delete_yes")}</button>
               </div>
             </div>
           </div>
