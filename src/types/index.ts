@@ -51,38 +51,38 @@ export interface PackageInfo {
 export const PACKAGES: Record<PackageType, PackageInfo> = {
   none: {
     key: "none", name: "ไม่มีแพคเกจ", name_en: "None", price: 0, duration_days: 0, max_ports: 0,
-    label: "ไม่มีแพคเกจ", rank: 0,
+    label: "No Package", rank: 0,
   },
   free_ib: {
     key: "free_ib", name: "⭐ ฟรี+IB", name_en: "Free+IB", price: 0, duration_days: 99999, max_ports: 999,
-    label: "⭐ ฟรี + IB ตลอดชีพ (Unlimited)", rank: -1,
+    label: "⭐ Free + IB Lifetime (Unlimited)", rank: -1,
   },
   free: {
     key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 7, max_ports: 1,
-    label: "ฟรี 7 วัน", rank: 1,
+    label: "Free 7 Days", rank: 1,
   },
   test_1: {
     key: "test_1", name: "ทดสอบ", name_en: "Test", price: 1, duration_days: 3, max_ports: 3,
-    label: "🧪 1 บาท / 3 วัน", rank: 2,
+    label: "🧪 1 THB / 3 Days", rank: 2,
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
-    label: "30 วัน (2 พอร์ต) | ไม่จำกัดโบรค", rank: 4,
+    label: "30d + VPS (2 Ports) | Any Broker", rank: 4,
     old_price: 990,
   },
   "2490_3m": {
     key: "2490_3m", name: "Premium", name_en: "Premium", price: 2990, duration_days: 90, max_ports: 5,
-    label: "90 วัน + ฝากรัน (5 พอร์ต) | ไม่จำกัดโบรค", rank: 6,
+    label: "90d + VPS (5 Ports) | Any Broker", rank: 6,
     old_price: 3900,
   },
   "4900_1y": {
     key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 9,
-    label: "💎 1 ปี + ฝากรัน (9 พอร์ต) | ไม่จำกัดโบรค", rank: 7,
+    label: "💎 1Y + VPS (9 Ports) | Any Broker", rank: 7,
     old_price: 15600,
   },
   ib_vps_2200: {
     key: "ib_vps_2200", name: "IB+VPS 1Y", name_en: "IB+VPS 1Y", price: 2200, duration_days: 365, max_ports: 999,
-    label: "vCPU 2 / RAM 4 GB / 1 ปี", rank: 8,
+    label: "vCPU 2 / RAM 4GB / 1 Year", rank: 8,
   },
 };
 
