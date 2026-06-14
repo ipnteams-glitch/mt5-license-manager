@@ -67,17 +67,17 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
-    label: "30 วัน (2 พอร์ต)", rank: 4,
+    label: "30 วัน (2 พอร์ต) | ไม่จำกัดโบรค", rank: 4,
     old_price: 990,
   },
   "2490_3m": {
     key: "2490_3m", name: "Premium", name_en: "Premium", price: 2990, duration_days: 90, max_ports: 5,
-    label: "90 วัน + ฝากรัน (5 พอร์ต)", rank: 6,
+    label: "90 วัน + ฝากรัน (5 พอร์ต) | ไม่จำกัดโบรค", rank: 6,
     old_price: 3900,
   },
   "4900_1y": {
     key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 9,
-    label: "💎 1 ปี + ฝากรัน (9 พอร์ต)", rank: 7,
+    label: "💎 1 ปี + ฝากรัน (9 พอร์ต) | ไม่จำกัดโบรค", rank: 7,
     old_price: 15600,
   },
   ib_vps_2200: {
