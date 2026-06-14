@@ -3,6 +3,8 @@
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import type { Member, Port, Payment } from "@/types";
+import { useT } from "@/lib/LanguageContext";
+import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
 import BROKERS from "@/../brokers.json";
 
@@ -33,6 +35,7 @@ export default function DashboardClient({
   pendingPayments,
   paymentHistory,
 }: Props) {
+  const { t } = useT();
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
   const [adding, setAdding] = useState(false);
@@ -136,7 +139,7 @@ export default function DashboardClient({
         setSlipUploadTxnId(null);
         setSlipFile(null);
       } else {
-        setSlipMsg({ ok: false, msg: data.message || data.error || "เกิดข้อผิดพลาด" });
+        setSlipMsg({ ok: false, msg: data.message || data.error || t("error_occurred") });
       }
     } catch (err: any) {
       setSlipMsg({ ok: false, msg: err.message });
@@ -159,13 +162,13 @@ export default function DashboardClient({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาด");
+      if (!res.ok) throw new Error(data.error || t("error_occurred"));
 
       setPortList([...portList, data.port]);
       setUsedCount(usedCount + 1);
       setMt5Account("");
       setShowAddPort(false);
-      setSuccess(`✅ เพิ่มพอร์ต ${mt5Account} สำเร็จ`);
+      setSuccess(t("add_port_success", { account: mt5Account }));
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -178,7 +181,7 @@ export default function DashboardClient({
     try {
       const res = await fetch(`/api/ports?id=${portId}`, { method: "DELETE" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาด");
+      if (!res.ok) throw new Error(data.error || t("error_occurred"));
 
       setPortList(portList.filter((p) => p.id !== portId));
       setUsedCount(usedCount - 1);
@@ -207,14 +210,14 @@ export default function DashboardClient({
       const data = await res.json();
       if (data.success) {
         setLoginStatus("ok");
-        setLoginMsg(data.message || "Login สำเร็จ");
+        setLoginMsg(data.message || t("login_ok"));
       } else {
         setLoginStatus("fail");
-        setLoginMsg(data.error || "Login ไม่สำเร็จ");
+        setLoginMsg(data.error || t("login_fail"));
       }
     } catch (err: any) {
       setLoginStatus("fail");
-      setLoginMsg(err.message || "เชื่อมต่อ VPS ไม่ได้");
+      setLoginMsg(err.message || t("error_occurred"));
     } finally {
       setLoginLoading(false);
     }
@@ -244,11 +247,11 @@ export default function DashboardClient({
       const res = await fetch(`/api/ports/systems?account=${port.mt5_account}`);
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "ไม่สามารถตรวจสอบสถานะพอร์ตได้");
+        setError(data.error || t("error_occurred"));
         return;
       }
       if (data.owned_by_other) {
-        setError("พอร์ตนี้ถูกใช้โดยสมาชิกอื่นแล้ว — ไม่สามารถตั้งค่าระบบซ้ำได้");
+        setError(t("error_occurred"));
         return;
       }
       const items = data.systems ? data.systems.split(",").map((s: string) => s.trim()) : [];
@@ -259,7 +262,7 @@ export default function DashboardClient({
       setSystemsCache(prev => ({ ...prev, [port.id]: data.systems || "" }));
       canOpen = true;
     } catch (err: any) {
-      setError("ไม่สามารถเชื่อมต่อเพื่อตรวจสอบสถานะพอร์ตได้");
+      setError(t("error_occurred"));
       return;
     }
     if (!canOpen) return;
@@ -313,6 +316,7 @@ export default function DashboardClient({
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="border-b bg-white">
+        <div className="flex justify-end px-4 py-2"><LangSwitch /></div>
         <div className="mx-auto max-w-4xl px-3 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -321,15 +325,15 @@ export default function DashboardClient({
             </div>
             <div className="flex items-center gap-1.5">
               <a href="/portfolio" className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700">📊 Portfolio</a>
-              <a href="/renew" className="rounded bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white">🔐 ต่ออายุ</a>
-              {isAdmin && <a href="/admin" className="rounded border px-3 py-1 text-xs font-medium">⚙️ จัดการ</a>}
+              <a href="/renew" className="rounded bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white">{t("renew")}</a>
+              {isAdmin && <a href="/admin" className="rounded border px-3 py-1 text-xs font-medium">{t("admin_panel")}</a>}
             </div>
           </div>
           <div className="flex items-center justify-between mt-1.5">
             <a href="https://line.me/R/ti/p/@harvestfarm" target="_blank" className="rounded bg-green-500 px-2 py-0.5 text-xs font-medium text-white hover:bg-green-600">Line: @harvestfarm</a>
             <div className="flex items-center gap-2">
               <span className="text-xs text-zinc-500">{member.email}</span>
-              <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-xs text-zinc-500 hover:text-red-500">ออก</button>
+              <button onClick={() => signOut({ callbackUrl: "/login" })} className="text-xs text-zinc-500 hover:text-red-500">{t("sign_out")}</button>
             </div>
           </div>
         </div>
@@ -338,7 +342,7 @@ export default function DashboardClient({
       <main className="mx-auto max-w-4xl px-6 py-8">
         {/* Package Card */}
         <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-lg font-bold text-zinc-800">📦 แพคเกจของคุณ</h2>
+          <h2 className="mb-4 text-lg font-bold text-zinc-800">{t("your_package")}</h2>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 grid gap-4 sm:grid-cols-3">
               <div>
@@ -436,7 +440,7 @@ export default function DashboardClient({
                   disabled={adding}
                   className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                 >
-                  {adding ? "กำลังบันทึก..." : "💾 บันทึก"}
+                  {adding ? t("saving") : "💾 บันทึก"}
                 </button>
                 <button
                   type="button"
@@ -514,7 +518,7 @@ export default function DashboardClient({
         {slipMsg && !slipMsg.ok && <div className="mt-6 rounded-xl bg-red-50 p-4 text-sm text-red-600 shadow-sm">{slipMsg.msg}</div>}
         {pendingList && pendingList.length > 0 && (
           <div className="mt-6 rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold text-zinc-800">📎 รายการรอชำระเงิน</h2>
+            <h2 className="mb-4 text-lg font-bold text-zinc-800">{t("pending_payments")}</h2>
             <div className="space-y-3">
               {pendingList.map((p) => {
                 const pkgInfo = PACKAGES[p.package];
@@ -525,7 +529,7 @@ export default function DashboardClient({
                       <div>
                         <p className="font-semibold text-sm text-zinc-800">{pkgInfo?.name || p.package}</p>
                         <p className="text-xs text-zinc-500">
-                          {p.amount.toFixed(2)} บาท · {new Date(p.created_at).toLocaleDateString("th-TH")}
+                          {p.amount.toFixed(2)} THB · {new Date(p.created_at).toLocaleDateString("th-TH")}
                         </p>
                       </div>
                       {!isOpen ? (
@@ -567,13 +571,13 @@ export default function DashboardClient({
                             disabled={!slipFile || slipUploading}
                             className="rounded bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
                           >
-                            {slipUploading ? "กำลังตรวจสอบ..." : "📤 ส่งสลิป"}
+                            {slipUploading ? t("verifying") : t("upload")}
                           </button>
                           <button
                             onClick={() => { setSlipUploadTxnId(null); setSlipFile(null); setSlipMsg(null); }}
                             className="rounded px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-200"
                           >
-                            ยกเลิก
+                            {t("cancel")}
                           </button>
                         </div>
                       </div>
@@ -608,7 +612,7 @@ export default function DashboardClient({
                       <tr className="border-b text-left text-xs font-semibold text-zinc-500">
                         <th className="pb-2 pr-2">วันที่</th>
                         <th className="pb-2 pr-2">แพคเกจ</th>
-                        <th className="pb-2 pr-2">จำนวนเงิน</th>
+                        <th className="pb-2 pr-2">{t("amount")}</th>
                         <th className="pb-2 text-right">สถานะ</th>
                       </tr>
                     </thead>
@@ -617,10 +621,10 @@ export default function DashboardClient({
                         const pkgInfo = PACKAGES[p.package];
                         const statusLabel =
                           p.status === "paid"
-                            ? "✅ จ่ายแล้ว"
+                            ? t("paid")
                             : p.status === "failed"
-                            ? "❌ ยกเลิก"
-                            : "⏳ รอดำเนินการ";
+                            ? t("admin_cancel")
+                            : t("pending");
                         const statusColor =
                           p.status === "paid"
                             ? "text-green-600"
@@ -663,10 +667,10 @@ export default function DashboardClient({
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
               <h3 className="text-lg font-bold text-zinc-800 mb-1">
-                ตั้งค่าระบบ — {systemsModalPort.mt5_account}
+                {t("sys_config_title", { account: systemsModalPort.mt5_account })}
               </h3>
               <p className="text-xs text-zinc-500 mb-4">
-                ใส่ Master Password แล้วกด Login เพื่อทดสอบ
+                {t("sys_login_hint")}
               </p>
 
               {error && (
@@ -684,7 +688,7 @@ export default function DashboardClient({
                   disabled={loginStatus === "ok"}
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 bg-white focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
                 >
-                  <option value="">-- เลือก Broker --</option>
+                  <option value="">{t("sys_select_broker")}</option>
                   {brokerList.map(b => (
                     <option key={b} value={b}>{b}</option>
                   ))}
@@ -706,7 +710,7 @@ export default function DashboardClient({
                   disabled={loginLoading || loginStatus === "ok" || !loginPassword || !loginBroker}
                   className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 whitespace-nowrap"
                 >
-                  {loginLoading ? "กำลังทดสอบ..." : loginStatus === "ok" ? "✓ ผ่าน" : "Login"}
+                  {loginLoading ? t("sys_testing") : loginStatus === "ok" ? t("sys_login_ok") : t("login")}
                 </button>
               </div>
 
@@ -717,14 +721,14 @@ export default function DashboardClient({
               )}
               {loginStatus === "fail" && (
                 <p className="mb-4 text-xs text-red-500 font-medium">
-                  ✗ {loginMsg || "Login ไม่สำเร็จ — ตรวจสอบรหัสเทรด"}
+                  ✗ {loginMsg || t("sys_login_fail")}
                 </p>
               )}
 
               {/* ── System Dropdown (disabled until login passes) ── */}
               <div className="mb-4">
                 <label className="block text-xs font-medium text-zinc-600 mb-1">
-                  เลือกระบบ
+                  {t("sys_select_system")}
                 </label>
                 <select
                   value={selectedSystems[0] || ""}
@@ -732,7 +736,7 @@ export default function DashboardClient({
                   disabled={loginStatus !== "ok"}
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm bg-white text-blue-600 font-medium focus:border-blue-500 focus:outline-none disabled:bg-zinc-100 disabled:text-zinc-400"
                 >
-                  <option value="">-- ไม่เลือก (ลูกค้าใช้ EA เอง) --</option>
+                  <option value="">{t("sys_no_select")}</option>
                   {ALL_SYSTEMS.map(sys => (
                     <option key={sys} value={sys}>{sys.replace("_", " ")}</option>
                   ))}
@@ -742,7 +746,7 @@ export default function DashboardClient({
               {/* ── Multiplier ── */}
               <div className="mb-4">
                 <label className="block text-xs font-medium text-zinc-600 mb-1">
-                  ตัวคูณ
+                  {t("sys_multiplier_label")}
                 </label>
                 <input
                   type="number"
@@ -760,7 +764,7 @@ export default function DashboardClient({
               <div className="flex gap-2 justify-between items-center">
                 <div className="text-xs text-zinc-400">
                   {loginStatus !== "ok"
-                    ? "กรุณา Login ก่อน"
+                    ? t("login_first")
                     : selectedSystems.length > 0
                     ? `ระบบที่เลือก: ${selectedSystems[0]}`
                     : "ยังไม่ได้เลือกระบบ (ลูกค้าจะใช้ EA เอง)"}
@@ -779,14 +783,14 @@ export default function DashboardClient({
                     }}
                     className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-200"
                   >
-                    ยกเลิก
+                    {t("cancel")}
                   </button>
                   <button
                     onClick={saveSystems}
                     disabled={savingSystems || loginStatus !== "ok"}
                     className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {savingSystems ? "กำลังบันทึก..." : "บันทึก"}
+                    {savingSystems ? t("saving") : t("save")}
                   </button>
                 </div>
               </div>
@@ -796,7 +800,7 @@ export default function DashboardClient({
         {deleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl text-center">
-              <p className="text-lg font-medium text-zinc-800 mb-2">ต้องการลบพอร์ตที่กำลังรันอยู่ออกหรือไม่?</p>
+              <p className="text-lg font-medium text-zinc-800 mb-2">{t("delete_port_confirm")}</p>
               <p className="text-3xl font-bold text-red-500 mb-6">{deleteConfirm.mt5_account}</p>
               <div className="flex gap-3 justify-center">
                 <button

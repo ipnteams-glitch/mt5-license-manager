@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import type { Member, Port, PackageType, Payment } from "@/types";
+import { useT } from "@/lib/LanguageContext";
+import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES } from "@/types";
 
 type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist: { name: string; broker: string; created_at: string }[] };
 
 export default function AdminClient({ members, ports, payments, whitelist }: Props) {
+  const { t } = useT();
   const [memberList, setMemberList] = useState(members);
   const [editing, setEditing] = useState<string | null>(null);
   const [selectedPkg, setSelectedPkg] = useState<PackageType>("none");
@@ -34,8 +37,8 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
       if (!res.ok) throw new Error("Failed");
       setWlList([...wlList, { name: wlName, broker: wlBroker, created_at: new Date().toISOString() }]);
       setWlName(""); setWlBroker("");
-      setMsg("✅ เพิ่ม whitelist แล้ว");
-    } catch { setMsg("❌ เพิ่มไม่สำเร็จ"); }
+      setMsg(t("wl_added"));
+    } catch { setMsg(t("wl_add_failed")); }
     finally { setWlAdding(false); }
   }
 
@@ -44,8 +47,8 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
       const res = await fetch(`/api/admin/whitelist?idx=${idx}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed");
       setWlList(wlList.filter((_, i) => i !== idx));
-      setMsg("✅ ลบแล้ว");
-    } catch { setMsg("❌ ลบไม่สำเร็จ"); }
+      setMsg(t("wl_deleted"));
+    } catch { setMsg(t("wl_delete_failed")); }
   }
 
   const [cancellingPayId, setCancellingPayId] = useState<string | null>(null);
@@ -63,9 +66,9 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
         setPaymentList((prev) =>
           prev.map((p) => (p.id === txnId ? { ...p, status: "failed" as const } : p))
         );
-        setMsg("ยกเลิกรายการแล้ว");
+        setMsg(t("payment_cancelled"));
       } else {
-        setMsg(data.error || "ยกเลิกไม่สำเร็จ");
+        setMsg(data.error || t("payment_cancelled"));
       }
     } catch (err: any) {
       setMsg(err.message);
@@ -87,7 +90,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
         setPaymentList((prev) =>
           prev.map((p) => (p.id === txnId ? { ...p, status: "paid" as const, paid_at: new Date().toISOString() } : p))
         );
-        setMsg(`✅ ยืนยันการจ่าย ${txnId.slice(0, 8)}... สำเร็จ`);
+        setMsg(`${t("admin_verify")} ${txnId.slice(0, 8)}...`);
       } else {
         setMsg(`❌ ${data.message}`);
       }
@@ -127,7 +130,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
         )
       );
       setEditing(null);
-      setMsg(`✅ อัปเดต ${editing} สำเร็จ`);
+      setMsg(t("admin_update_success", { email: editing! }));
     } catch (err: any) {
       setMsg(`❌ ${err.message}`);
     } finally {
@@ -136,12 +139,13 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
   }
 
   function getPortCount(email: string) {
-    return ports.filter((p) => p.member_email === email && p.status === "active").length;
+    return ports.filter((p) => p.member_email === email && p.status === t("active")).length;
   }
 
   return (
     <div className="min-h-screen bg-zinc-50">
       <header className="border-b bg-white">
+        <div className="flex justify-end px-4 py-2"><LangSwitch /></div>
         <div className="mx-auto flex max-w-5xl items-center justify-between px-2 py-1">
           <div className="flex items-center gap-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-600 text-base font-bold text-white">A</div>
@@ -159,7 +163,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
               onClick={() => setActiveTab(tab)}
               className={`rounded-lg px-4 py-2 text-base font-medium ${activeTab === tab ? "bg-blue-600 text-white" : "bg-white text-black hover:bg-zinc-100"}`}
             >
-              {tab === "members" ? `👥 สมาชิก` : tab === "ports" ? `🔌 พอร์ต` : tab === "payments" ? `💰 รอตรวจสอบ` : `⭐ Whitelist (${wlList.length})`}
+              {tab === "members" ? t("admin_tab_members") : tab === "ports" ? t("admin_tab_ports") : tab === "payments" ? t("admin_tab_payments") : t("admin_whitelist_count", { count: wlList.length })}
             </button>
           ))}
         </div>
@@ -176,7 +180,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
                   <th className="px-2 py-1">อีเมล</th>
-                  <th className="px-2 py-1">ชื่อ</th>
+                  <th className="px-2 py-1">{t("wl_name")}</th>
                   <th className="px-2 py-1">แพคเกจ</th>
                   <th className="px-2 py-1">โควต้า</th>
                   <th className="px-2 py-1">หมดอายุ</th>
@@ -219,7 +223,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                       <td className="px-2 py-1 text-right">
                         {isEditing ? (
                           <div className="flex gap-1 justify-end">
-                            <button onClick={saveEdit} disabled={saving} className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50">{saving ? "..." : "💾"}</button>
+                            <button onClick={saveEdit} disabled={saving} className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50">{saving ? t("loading") : "💾"}</button>
                             <button onClick={() => setEditing(null)} className="rounded px-3 py-1 text-xs text-black hover:bg-zinc-200">✕</button>
                           </div>
                         ) : (
@@ -240,14 +244,14 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
                   <th className="px-2 py-1">MT5 Account</th>
-                  <th className="px-2 py-1">Broker</th>
+                  <th className="px-2 py-1">{t("wl_broker")}</th>
                   <th className="px-2 py-1">เจ้าของ</th>
                   <th className="px-2 py-1">สถานะ</th>
-                  <th className="px-2 py-1">วันที่เพิ่ม</th>
+                  <th className="px-2 py-1">{t("wl_date_added")}</th>
                 </tr>
               </thead>
               <tbody>
-                {ports.filter((p) => p.status === "active").map((p) => (
+                {ports.filter((p) => p.status === t("active")).map((p) => (
                   <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
                     <td className="px-2 py-1 font-mono font-medium text-zinc-800">{p.mt5_account}</td>
                     <td className="px-2 py-1 text-black">{p.mt5_broker}</td>
@@ -294,7 +298,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                               p.status === "paid" ? "bg-green-500 text-white" : p.status === "failed" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
-                            {p.status === "paid" ? "✅ จ่ายแล้ว" : p.status === "failed" ? "❌ ล้มเหลว" : "⏳ รอตรวจสอบ"}
+                            {p.status === "paid" ? t("paid") : p.status === "failed" ? t("failed") : t("pending")}
                           </span>
                         </td>
                         <td className="px-2 py-1 text-right">
@@ -305,14 +309,14 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                               disabled={verifyingPayId === p.id}
                               className="rounded bg-green-600 px-3 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
                             >
-                              {verifyingPayId === p.id ? "..." : "✅ ยืนยัน"}
+                              {verifyingPayId === p.id ? t("loading") : t("admin_verify")}
                             </button>
                             <button
                               onClick={() => handleCancelPayment(p.id)}
                               disabled={cancellingPayId === p.id}
                               className="rounded bg-red-500 px-3 py-1 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50 ml-1"
                             >
-                              {cancellingPayId === p.id ? "..." : "❌ ยกเลิก"}
+                              {cancellingPayId === p.id ? t("loading") : t("admin_cancel")}
                             </button>
                             </>
                           )}
@@ -322,7 +326,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                   })}
                 {paymentList.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-3 text-center text-base text-zinc-400">ยังไม่มีรายการ</td>
+                    <td colSpan={6} className="px-4 py-3 text-center text-base text-zinc-400">{t("no_data")}</td>
                   </tr>
                 )}
               </tbody>
@@ -333,17 +337,17 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
         {activeTab === "whitelist" && (
           <div className="rounded-xl bg-white shadow-sm p-4">
             <form onSubmit={handleAddWhitelist} className="flex gap-2 mb-4">
-              <input value={wlName} onChange={(e) => setWlName(e.target.value)} placeholder="ชื่อ-สกุล" className="flex-1 rounded border px-2 py-1 text-sm text-black" required />
-              <input value={wlBroker} onChange={(e) => setWlBroker(e.target.value)} placeholder="Broker" className="w-32 rounded border px-2 py-1 text-sm text-black" required />
-              <button type="submit" disabled={wlAdding} className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50">{wlAdding ? "..." : "✅ เพิ่ม"}</button>
+              <input value={wlName} onChange={(e) => setWlName(e.target.value)} placeholder={t("wl_name")} className="flex-1 rounded border px-2 py-1 text-sm text-black" required />
+              <input value={wlBroker} onChange={(e) => setWlBroker(e.target.value)} placeholder={t("wl_broker")} className="w-32 rounded border px-2 py-1 text-sm text-black" required />
+              <button type="submit" disabled={wlAdding} className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50">{wlAdding ? t("loading") : t("wl_add")}</button>
             </form>
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b text-left text-xs font-semibold text-black">
-                    <th className="px-2 py-1">ชื่อ</th>
-                    <th className="px-2 py-1">Broker</th>
-                    <th className="px-2 py-1">วันที่เพิ่ม</th>
+                    <th className="px-2 py-1">{t("wl_name")}</th>
+                    <th className="px-2 py-1">{t("wl_broker")}</th>
+                    <th className="px-2 py-1">{t("wl_date_added")}</th>
                     <th className="px-2 py-1 text-right"></th>
                   </tr>
                 </thead>
@@ -359,7 +363,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                     </tr>
                   ))}
                   {wlList.length === 0 && (
-                    <tr><td colSpan={4} className="px-2 py-4 text-center text-zinc-400">ยังไม่มีรายการ</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-4 text-center text-zinc-400">{t("no_data")}</td></tr>
                   )}
                 </tbody>
               </table>

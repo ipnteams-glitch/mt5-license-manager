@@ -13,10 +13,10 @@ export default async function AdminPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-800">⛔ ไม่มีสิทธิ์เข้าใช้งาน</h1>
-          <p className="mt-2 text-zinc-500">เฉพาะแอดมินเท่านั้น</p>
+          <h1 className="text-2xl font-bold text-zinc-800">⛔ Access Denied</h1>
+          <p className="mt-2 text-zinc-500">Admins only</p>
           <a href="/dashboard" className="mt-4 inline-block text-blue-600 hover:underline">
-            กลับไป Dashboard
+            Back to Dashboard
           </a>
         </div>
       </div>

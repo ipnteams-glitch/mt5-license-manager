@@ -1,3 +1,0 @@
-102:     if (selected === "free_ib") {
-108:           body: JSON.stringify({ package: "free_ib" }),
-424:           {activating ? "กำลังดำเนินการ..." : selected === "free" ? "🎁 เปิดใช้งานฟรี" : selected === "free_ib" ? "📱 สมัครผ่าน Line OA" : "💳 สร้าง QR ชำระเงิน"}

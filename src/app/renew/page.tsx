@@ -4,10 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
+import { useT } from "@/lib/LanguageContext";
+import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 
 export default function RenewPage() {
   const router = useRouter();
+  const { t } = useT();
   const { data: session } = useSession();
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
 
@@ -73,7 +76,7 @@ export default function RenewPage() {
         setVerifying(false);
         setTimeout(() => router.push("/dashboard"), 3000);
       } else {
-        setError(data.message || "Admin verify failed");
+        setError(data.message || t("admin_verify_failed"));
       }
     } catch (err: any) {
       setError(err.message);
@@ -90,7 +93,7 @@ export default function RenewPage() {
       try {
         const res = await fetch("/api/payment/activate-free", { method: "POST" });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาด");
+        if (!res.ok) throw new Error(data.error || t("error_occurred"));
         setStep("done");
         setTimeout(() => router.push("/dashboard"), 3000);
       } catch (err: any) {
@@ -116,7 +119,7 @@ export default function RenewPage() {
         body: JSON.stringify({ package: selected }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "เกิดข้อผิดพลาด");
+      if (!res.ok) throw new Error(data.error || t("error_occurred"));
 
       setQrBase64(data.qr_base64);
       setAmount(data.amount);
@@ -147,7 +150,7 @@ export default function RenewPage() {
         } else if (data.cancelled) {
           clearInterval(interval);
           setVerifying(false);
-          setError("❌ รายการนี้ถูกยกเลิก — กรุณาสร้าง QR ใหม่");
+          setError(t("cancel_transaction"));
         }
       } catch {}
     }, 5000);
@@ -183,10 +186,10 @@ export default function RenewPage() {
         setStep("select");
         setError("");
       } else {
-        setError(data.error || "ยกเลิกไม่สำเร็จ");
+        setError(data.error || t("cancel_payment"));
       }
     } catch {
-      setError("เกิดข้อผิดพลาด");
+      setError(t("error_occurred"));
     } finally {
       setCancelling(false);
     }
@@ -207,7 +210,7 @@ export default function RenewPage() {
         setShowUploadSlip(false);
         setSlipFile(null);
       } else {
-        setSlipResult({ ok: false, msg: data.message || data.error || "เกิดข้อผิดพลาด" });
+        setSlipResult({ ok: false, msg: data.message || data.error || t("error_occurred") });
       }
     } catch (err: any) {
       setSlipResult({ ok: false, msg: err.message });
@@ -221,7 +224,7 @@ export default function RenewPage() {
       <div className="flex min-h-screen items-center justify-center bg-zinc-50">
         <div className="text-center rounded-xl bg-white p-8 shadow-lg">
           <div className="text-5xl mb-4">✅</div>
-          <h1 className="text-xl font-bold text-green-700 mb-2">ต่ออายุสำเร็จ!</h1>
+          <h1 className="text-xl font-bold text-green-700 mb-2">{t("renew_success_title")}</h1>
           <p className="text-zinc-500">กำลังกลับไปหน้า Dashboard...</p>
         </div>
       </div>
@@ -320,13 +323,13 @@ export default function RenewPage() {
               }}
               className="mt-3 w-full rounded-lg bg-green-600 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-all"
             >
-              กดปุ่มเมื่อชำระแล้ว
+              {t("press_when_paid")}
             </button>
           )}
 
           {verifying && !isExpired && !error && (
             <div className="flex items-center justify-center gap-2 text-sm text-blue-600">
-              <span className="animate-spin">⏳</span> กำลังตรวจสอบการชำระเงิน...
+              {t("checking_payment")}
             </div>
           )}
           {verifying && !isExpired && isTestUser && (
@@ -334,7 +337,7 @@ export default function RenewPage() {
               onClick={handleAdminVerify}
               className="mt-3 w-full rounded-lg border border-amber-400 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 hover:bg-amber-100 transition-all"
             >
-              ⚡ Admin: บังคับยืนยันการชำระเงิน
+              {t("admin_force_verify")}
             </button>
           )}
           {slipResult?.ok && (
@@ -345,10 +348,10 @@ export default function RenewPage() {
           )}
           {error && <p className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
           <p className="mt-3 pt-3 border-t border-zinc-200 text-xs text-zinc-400">
-            ติดต่อ: Line: @harvestfarm 
+            {t("contact_line")}
           </p>
           <button onClick={() => { setStep("select"); setError(""); }} className="mt-2 text-sm text-blue-600 hover:underline">
-            ← เลือกแพคเกจใหม่
+            {t("back_select_package")}
           </button>
         </div>
       </div>
@@ -358,8 +361,9 @@ export default function RenewPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
       <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
-        <h1 className="text-xl font-bold text-zinc-800 mb-1">🔐 ต่ออายุแพคเกจ</h1>
-        <p className="text-sm text-zinc-500 mb-6">เลือกแพคเกจที่ต้องการ</p>
+        <div className="flex justify-end mb-2"><LangSwitch /></div>
+        <h1 className="text-xl font-bold text-zinc-800 mb-1">{t("renew_title")}</h1>
+        <p className="text-sm text-zinc-500 mb-6">{t("renew_select")}</p>
 
         {error && <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
 
@@ -393,10 +397,10 @@ export default function RenewPage() {
                       </>
                     ) : (
                       <p className={`text-lg font-bold ${isFree ? "text-green-600" : "text-blue-600"}`}>
-                        {isFree ? "ฟรี" : `฿${pkg.price.toLocaleString()}`}
+                        {isFree ? t("free_label") : `฿${pkg.price.toLocaleString()}`}
                       </p>
                     )}
-                    <p className="text-xs text-zinc-400">{pkg.max_ports >= 999 ? "Unlimited" : `${pkg.max_ports} พอร์ต`}</p>
+                    <p className="text-xs text-zinc-400">{pkg.max_ports >= 999 ? t("unlimited") : `${pkg.max_ports} ${t("port_suffix")}`}</p>
                   </div>
                 </div>
               </button>
@@ -412,11 +416,11 @@ export default function RenewPage() {
           >
             <div className="flex justify-between items-center">
               <div>
-                <p className="font-semibold text-zinc-800">ฟรี+IB</p>
-                <p className="text-xs text-zinc-500">ฟรี + IB ตลอดชีพ</p>
+                <p className="font-semibold text-zinc-800">{t("pkg_free_ib")}</p>
+                <p className="text-xs text-zinc-500">{t("free_ib_lifetime")}</p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-green-600">ฟรี</p>
+                <p className="text-lg font-bold text-green-600">{t("free_label")}</p>
                 <p className="text-xs text-zinc-400">Unlimited</p>
               </div>
             </div>
@@ -428,11 +432,11 @@ export default function RenewPage() {
           disabled={!selected || activating}
           className="mt-6 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {activating ? "กำลังดำเนินการ..." : selected === "free" ? "🎁 เปิดใช้งานฟรี" : selected === "free_ib" ? "📱 สมัครผ่าน Line OA" : "💳 สร้าง QR ชำระเงิน"}
+          {activating ? t("loading") : selected === "free" ? t("activate_free") : selected === "free_ib" ? t("apply_line_oa") : t("create_qr")}
         </button>
 
         <button onClick={() => router.push("/dashboard")} className="mt-3 w-full text-sm text-zinc-500 hover:underline">
-          ← กลับ Dashboard
+          {t("back_to_dashboard")}
         </button>
       </div>
     </div>

@@ -3,12 +3,14 @@
 import { signIn, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/lib/LanguageContext";
+import LangSwitch from "@/components/LangSwitch";
 
 export default function LandingPage() {
   const { data: session, status } = useSession();
+  const { t, toggleLang } = useT();
   const [loading, setLoading] = useState<"signup" | "portfolio" | null>(null);
 
-  // ถ้า login แล้ว redirect ไป dashboard
   if (status === "authenticated" && session) {
     redirect("/dashboard");
   }
@@ -24,17 +26,22 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-50 to-blue-50">
       <div className="w-full max-w-lg rounded-2xl bg-white p-10 shadow-xl text-center">
+        {/* Lang Switch (top-right) */}
+        <div className="absolute top-4 right-4">
+          <LangSwitch />
+        </div>
+
         {/* Logo */}
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-blue-600 text-white text-3xl font-bold shadow-lg">
           MT5
         </div>
 
-        <h1 className="mb-2 text-2xl font-bold text-zinc-900">MT5 License Manager</h1>
+        <h1 className="mb-2 text-2xl font-bold text-zinc-900">{t("app_title")}</h1>
         <p className="mb-10 text-sm text-zinc-500">
-          จัดการพอร์ต MT5 ของคุณ — ดูภาพรวมกำไร/ขาดทุนได้ในหน้าต่างเดียว
+          {t("landing_subtitle")}
         </p>
 
-        {/* ปุ่ม */}
+        {/* Buttons */}
         <div className="flex gap-4">
           <button
             onClick={() => {
@@ -51,7 +58,7 @@ export default function LandingPage() {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
-              {loading === "signup" ? "กำลังดำเนินการ..." : "สมัครสมาชิก"}
+              {loading === "signup" ? t("loading") : t("signup")}
             </div>
           </button>
 
@@ -63,12 +70,12 @@ export default function LandingPage() {
             disabled={loading !== null}
             className="flex-1 rounded-xl bg-blue-600 px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md disabled:opacity-50"
           >
-            {loading === "portfolio" ? "กำลังดำเนินการ..." : "MyPortfolio"}
+            {loading === "portfolio" ? t("loading") : t("my_portfolio")}
           </button>
         </div>
 
         <p className="mt-8 text-xs text-zinc-400">
-          เฉพาะบัญชี @gmail.com เท่านั้น
+          {t("gmail_only")}
         </p>
       </div>
     </div>
