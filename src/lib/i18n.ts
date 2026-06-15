@@ -250,9 +250,9 @@ export const translations = {
   pkg_label_free: { th: "ฟรี 7 วัน", en: "Free 7 Days" },
   pkg_label_free_ib: { th: "⭐ ฟรี + IB ตลอดชีพ (Unlimited)", en: "⭐ Free + IB Lifetime (Unlimited)" },
   pkg_label_test_1: { th: "🧪 1 บาท / 3 วัน", en: "🧪 1 THB / 3 Days" },
-  pkg_label_basic: { th: "30 วัน + VPS (2 พอร์ต) | ใช้ได้ทุกโบรค", en: "30d + VPS (2 Ports) | Any Broker" },
-  pkg_label_premium: { th: "90 วัน + VPS (5 พอร์ต) | ใช้ได้ทุกโบรค", en: "90d + VPS (5 Ports) | Any Broker" },
-  pkg_label_vip: { th: "💎 1 ปี + VPS (9 พอร์ต) | ใช้ได้ทุกโบรค", en: "💎 1Y + VPS (9 Ports) | Any Broker" },
+  pkg_label_basic: { th: "30day | ใช้ได้ทุกโบรค", en: "30day | Any Broker" },
+  pkg_label_premium: { th: "90day | ใช้ได้ทุกโบรค", en: "90day | Any Broker" },
+  pkg_label_vip: { th: "1Y | ใช้ได้ทุกโบรค", en: "1Y | Any Broker" },
   pkg_label_ib_vps: { th: "vCPU 2 / RAM 4GB / 1 ปี", en: "vCPU 2 / RAM 4GB / 1 Year" },
   pkg_label_live_with_us: { th: "Lifetime | ใช้ได้ทุกโบรค | รับประกัน 2 ปี", en: "Lifetime | Any Broker | Guarantee 2Y" },
 
