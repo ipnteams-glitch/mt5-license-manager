@@ -446,6 +446,25 @@
             border: 0;
         }
         
+        /* —— Performance Donut —— */
+        .donut-wrap {
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+            animation: donut-pop 0.6s ease-out forwards;
+        }
+        .donut-svg {
+            overflow: visible;
+        }
+        .donut-arc {
+            transition: stroke-dasharray 0.8s ease;
+        }
+        @keyframes donut-pop {
+            0% { transform: scale(0.3); opacity: 0; }
+            60% { transform: scale(1.08); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
     </style>
 </head>
 <body>
@@ -641,6 +660,26 @@
     }
 
     function renderCards(data) {
+        function renderDonut(balance, profit7day) {
+            var circ = 2 * Math.PI * 26;
+            var pct = balance > 0 ? (profit7day / balance) * 100 : 0;
+            var absPct = Math.min(Math.abs(pct), 100);
+            var arc = (absPct / 100) * circ;
+            var color = profit7day >= 0 ? '#00c853' : '#ff1744';
+            var sign = profit7day >= 0 ? '+' : '';
+            return '<div class="donut-wrap">'
+                + '<svg width="64" height="64" viewBox="0 0 64 64" class="donut-svg">'
+                + '<circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>'
+                + '<circle cx="32" cy="32" r="26" fill="none" class="donut-arc" '
+                + 'stroke="' + color + '" stroke-width="6" stroke-linecap="round" '
+                + 'stroke-dasharray="' + arc.toFixed(1) + ' ' + (circ - arc).toFixed(1) + '" '
+                + 'stroke-dashoffset="' + (circ * 0.25).toFixed(1) + '" '
+                + 'transform="rotate(-90 32 32)"/>'
+                + '<text x="32" y="36" text-anchor="middle" fill="' + color + '" '
+                + 'font-family="Kanit, sans-serif" font-size="12" font-weight="700">'
+                + sign + pct.toFixed(0) + '%</text>'
+                + '</svg></div>';
+        }
         const container = document.getElementById('ea-container');
         const loader = document.getElementById('loader');
         const contactSection = document.getElementById('contact-section'); 
@@ -680,6 +719,7 @@
                         <div class="p-4"> 
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="badge rounded-pill bg-primary">Running</span>
+                                ` + renderDonut(item.balance, item.profit7day) + `
                             </div>
                             <h5 class="fw-bold" style="color: #ffeb3b;">${item.name}</h5>
                             
