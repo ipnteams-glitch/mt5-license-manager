@@ -242,7 +242,7 @@ export const translations = {
   pkg_basic: { th: "Basic", en: "Basic" },
   pkg_premium: { th: "Premium", en: "Premium" },
   pkg_vip: { th: "💎 VIP", en: "💎 VIP" },
-  pkg_ib_vps: { th: "IB+VPS 1Y", en: "IB+VPS 1Y" },
+  pkg_ib_vps: { th: "VIP for IB", en: "VIP for IB" },
   pkg_live_with_us: { th: "Live With Us", en: "Live With Us" },
 
   // ── Package labels (full) ──
