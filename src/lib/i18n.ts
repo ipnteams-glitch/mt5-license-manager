@@ -254,7 +254,7 @@ export const translations = {
   pkg_label_premium: { th: "90 วัน + VPS (5 พอร์ต) | ใช้ได้ทุกโบรค", en: "90d + VPS (5 Ports) | Any Broker" },
   pkg_label_vip: { th: "💎 1 ปี + VPS (9 พอร์ต) | ใช้ได้ทุกโบรค", en: "💎 1Y + VPS (9 Ports) | Any Broker" },
   pkg_label_ib_vps: { th: "vCPU 2 / RAM 4GB / 1 ปี", en: "vCPU 2 / RAM 4GB / 1 Year" },
-  pkg_label_live_with_us: { th: "Lifetime + VPS | ใช้ได้ทุกโบรค | รับประกัน 2 ปี", en: "Lifetime + VPS | Any Broker | Guarantee 2Y" },
+  pkg_label_live_with_us: { th: "Lifetime | ใช้ได้ทุกโบรค | รับประกัน 2 ปี", en: "Lifetime | Any Broker | Guarantee 2Y" },
 
   // ── Renew extras ──
   select_package_first: { th: "กรุณาเลือกแพคเกจก่อน", en: "Please select a package first" },

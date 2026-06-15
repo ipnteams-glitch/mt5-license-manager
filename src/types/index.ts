@@ -86,7 +86,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   live_with_us: {
     key: "live_with_us", name: "Live With Us", name_en: "Live With Us", price: 9900, duration_days: 99999, max_ports: 9,
-    label: "Lifetime + VPS | Any Broker | Guarantee 2Y", rank: 9,
+    label: "Lifetime | Any Broker | Guarantee 2Y", rank: 9,
     old_price: 19900,
   },
 };
