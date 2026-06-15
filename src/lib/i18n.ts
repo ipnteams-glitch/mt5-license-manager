@@ -243,6 +243,7 @@ export const translations = {
   pkg_premium: { th: "Premium", en: "Premium" },
   pkg_vip: { th: "💎 VIP", en: "💎 VIP" },
   pkg_ib_vps: { th: "IB+VPS 1Y", en: "IB+VPS 1Y" },
+  pkg_live_with_us: { th: "💎 Live With Us", en: "💎 Live With Us" },
 
   // ── Package labels (full) ──
   pkg_label_none: { th: "ไม่มีแพคเกจ", en: "No Package" },
@@ -253,6 +254,7 @@ export const translations = {
   pkg_label_premium: { th: "90 วัน + VPS (5 พอร์ต) | ใช้ได้ทุกโบรค", en: "90d + VPS (5 Ports) | Any Broker" },
   pkg_label_vip: { th: "💎 1 ปี + VPS (9 พอร์ต) | ใช้ได้ทุกโบรค", en: "💎 1Y + VPS (9 Ports) | Any Broker" },
   pkg_label_ib_vps: { th: "vCPU 2 / RAM 4GB / 1 ปี", en: "vCPU 2 / RAM 4GB / 1 Year" },
+  pkg_label_live_with_us: { th: "💎 Lifetime + VPS (9 พอร์ต) | ใช้ได้ทุกโบรค | รับประกัน 2 ปี", en: "💎 Lifetime + VPS (9 Ports) | Any Broker | Guarantee 2Y" },
 
   // ── Renew extras ──
   select_package_first: { th: "กรุณาเลือกแพคเกจก่อน", en: "Please select a package first" },
@@ -395,6 +397,7 @@ export function getLocalizedPackage(pkgType: PackageType, lang: Lang): PackageIn
     pkgType === "2490_3m" ? "pkg_premium" :
     pkgType === "4900_1y" ? "pkg_vip" :
     pkgType === "ib_vps_2200" ? "pkg_ib_vps" :
+    pkgType === "live_with_us" ? "pkg_live_with_us" :
     pkgType === "free_ib" ? "pkg_free_ib" :
     pkgType === "test_1" ? "pkg_test_1" :
     pkgType === "free" ? "pkg_free" :
@@ -406,6 +409,7 @@ export function getLocalizedPackage(pkgType: PackageType, lang: Lang): PackageIn
     pkgType === "2490_3m" ? "pkg_label_premium" :
     pkgType === "4900_1y" ? "pkg_label_vip" :
     pkgType === "ib_vps_2200" ? "pkg_label_ib_vps" :
+    pkgType === "live_with_us" ? "pkg_label_live_with_us" :
     pkgType === "free_ib" ? "pkg_label_free_ib" :
     pkgType === "test_1" ? "pkg_label_test_1" :
     pkgType === "free" ? "pkg_label_free" :

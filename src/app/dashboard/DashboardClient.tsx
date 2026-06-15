@@ -490,8 +490,8 @@ export default function DashboardClient({
                       <td className="py-3 text-right">
                         <button
                           onClick={() => openSystemsModal(port)}
-                          disabled={!displayPkgLabel?.includes("Premium") && !displayPkgLabel?.includes("VIP") && !isAdmin}
-                          className={!displayPkgLabel?.includes("Premium") && !displayPkgLabel?.includes("VIP") && !isAdmin ? "text-xs text-zinc-300 cursor-not-allowed" : "text-xs text-blue-500 hover:text-blue-700"}
+                          disabled={!displayPkgLabel?.includes("Premium") && !displayPkgLabel?.includes("VIP") && !displayPkgLabel?.includes("Live With Us") && !isAdmin}
+                          className={!displayPkgLabel?.includes("Premium") && !displayPkgLabel?.includes("VIP") && !displayPkgLabel?.includes("Live With Us") && !isAdmin ? "text-xs text-zinc-300 cursor-not-allowed" : "text-xs text-blue-500 hover:text-blue-700"}
                         >⚙️</button>
                       </td>
                       <td className="py-3 text-xs font-bold text-right text-blue-600">

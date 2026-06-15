@@ -34,7 +34,7 @@ export interface Payment {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "4900_1y" | "ib_vps_2200" | "none";
+export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -76,13 +76,18 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 3900,
   },
   "4900_1y": {
-    key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 9900, duration_days: 365, max_ports: 9,
+    key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 5900, duration_days: 365, max_ports: 9,
     label: "💎 1Y + VPS (9 Ports) | Any Broker", rank: 7,
     old_price: 15900,
   },
   ib_vps_2200: {
     key: "ib_vps_2200", name: "IB+VPS 1Y", name_en: "IB+VPS 1Y", price: 2200, duration_days: 365, max_ports: 999,
     label: "vCPU 2 / RAM 4GB / 1 Year", rank: 8,
+  },
+  live_with_us: {
+    key: "live_with_us", name: "💎 Live With Us", name_en: "Live With Us", price: 9900, duration_days: 99999, max_ports: 9,
+    label: "💎 Lifetime + VPS (9 Ports) | Any Broker | Guarantee 2Y", rank: 9,
+    old_price: 19900,
   },
 };
 
@@ -99,7 +104,7 @@ export interface PortfolioAccount {
   created_at: string;
 }
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "ib_vps_2200"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "ib_vps_2200", "live_with_us"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 
