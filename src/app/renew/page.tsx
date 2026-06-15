@@ -4,13 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
-import { useT } from "@/lib/LanguageContext";
-import LangSwitch from "@/components/LangSwitch";
+import { t as translate, type TKey } from "@/lib/i18n";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
+
+const t = (key: TKey, vars?: Record<string, string | number>) => translate(key, "en", vars);
 
 export default function RenewPage() {
   const router = useRouter();
-  const { t } = useT();
   const { data: session } = useSession();
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
 
@@ -361,7 +361,6 @@ export default function RenewPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
       <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
-        <div className="flex justify-end mb-2"><LangSwitch /></div>
         <h1 className="text-xl font-bold text-zinc-800 mb-1">{t("renew_title")}</h1>
         <p className="text-sm text-zinc-500 mb-6">{t("renew_select")}</p>
 
