@@ -15,9 +15,13 @@ export default async function DashboardPage() {
   let paymentHistory: Payment[] = [];
 
   try {
-    member = await getMemberByEmail(session.user.email);
-    ports = await getPortsByEmail(session.user.email);
-    const allPayments = await getAllPayments();
+    const [memberResult, portsResult, allPayments] = await Promise.all([
+      getMemberByEmail(session.user.email),
+      getPortsByEmail(session.user.email),
+      getAllPayments(),
+    ]);
+    member = memberResult;
+    ports = portsResult;
     const userPayments = allPayments.filter((p) => p.email === session.user!.email);
     pendingPayments = userPayments
       .filter((p) => p.status === "pending")

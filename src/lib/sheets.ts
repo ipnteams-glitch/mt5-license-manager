@@ -84,7 +84,7 @@ function paymentToRow(p: Payment): string[] {
 // ── Members ──
 
 export async function getAllMembers(): Promise<Member[]> {
-  const cached = getCache<Member[]>("members");
+  const cached = getCache<Member[]>("members", 120_000);
   if (cached) return cached;
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H` });
@@ -231,7 +231,7 @@ export async function getPortsByEmail(email: string): Promise<Port[]> {
 }
 
 export async function getAllPorts(): Promise<Port[]> {
-  const cached = getCache<Port[]>("ports");
+  const cached = getCache<Port[]>("ports", 60_000);
   if (cached) return cached;
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A:F` });
@@ -317,7 +317,7 @@ export async function findPortByAccount(mt5Account: string): Promise<Port | null
 // ── Payments ──
 
 export async function getAllPayments(): Promise<Payment[]> {
-  const cached = getCache<Payment[]>("payments");
+  const cached = getCache<Payment[]>("payments", 30_000);
   if (cached) return cached;
   const sheets = await getSheets();
   try {
@@ -549,7 +549,7 @@ export async function setAddonIbVpsExpiry(email: string): Promise<string> {
 // ── Whitelist (VIP ไม่จำกัดพอร์ต ไม่งดอายุ) ──
 
 export async function getAllWhitelist(): Promise<{ name: string; broker: string; created_at: string }[]> {
-  const cached = getCache<{ name: string; broker: string; created_at: string }[]>("whitelist");
+  const cached = getCache<{ name: string; broker: string; created_at: string }[]>("whitelist", 120_000);
   if (cached) return cached;
   const sheets = await getSheets();
   try {
@@ -778,7 +778,7 @@ async function initPortfolioSheet(): Promise<void> {
 
 export async function getPortfolioByEmail(email: string): Promise<PortfolioAccount[]> {
   const cacheKey = `portfolio:${email}`;
-  const cached = getCache<PortfolioAccount[]>(cacheKey);
+  const cached = getCache<PortfolioAccount[]>(cacheKey, 60_000);
   if (cached) return cached;
   await initPortfolioSheet();
   const sheets = await getSheets();
@@ -862,6 +862,17 @@ export async function pushPortfolioData(mt5Account: string, data: { balance: num
   if (!rows || rows.length <= 1) throw new Error("ไม่พบพอร์ตนี้");
   const idx = rows.findIndex((r) => r[2] === mt5Account);
   if (idx < 0) throw new Error("ไม่พบพอร์ตนี้");
+
+  // Skip update if balance & total_profit unchanged (floating_pl ignored — changes every tick)
+  const oldBalance = parseFloat(rows[idx][4]) || 0;
+  const oldTotalProfit = parseFloat(rows[idx][6]) || 0;
+  if (
+    oldBalance === data.balance &&
+    oldTotalProfit === data.total_profit
+  ) {
+    return; // no meaningful change, skip write
+  }
+
   rows[idx][4] = String(data.balance);
   rows[idx][5] = String(data.floating_pl);
   rows[idx][6] = String(data.total_profit);
@@ -952,7 +963,7 @@ async function initPortSystemsSheet(): Promise<void> {
 export async function getPortSystems(mt5Account: string): Promise<PortSystem | null> {
   // Read all port_systems, cache the full data
   const CACHE_KEY = "port_systems";
-  let rows: string[][] | null = getCache<string[][]>(CACHE_KEY);
+  let rows: string[][] | null = getCache<string[][]>(CACHE_KEY, 60_000);
   if (!rows) {
     await initPortSystemsSheet();
     const sheets = await getSheets();
@@ -1092,7 +1103,7 @@ async function initBrokersSheet(): Promise<void> {
 }
 
 export async function getAllBrokers(): Promise<string[]> {
-  const cached = getCache<string[]>("brokers");
+  const cached = getCache<string[]>("brokers", 600_000);
   if (cached) return cached;
   await initBrokersSheet();
   const sheets = await getSheets();
