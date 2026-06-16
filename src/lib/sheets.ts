@@ -654,6 +654,42 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
   if (memIdx < 0) throw new Error("Member not found");
 
   const member = members[memIdx];
+  const pkgInfo = PACKAGES[pkg];
+
+  // IB+VPS is an add-on — don't change main package, only set VPS expiry
+  if (pkg === "ib_vps_2200") {
+    const addonExpiry = new Date();
+    addonExpiry.setFullYear(addonExpiry.getFullYear() + 1);
+    const expiryStr = addonExpiry.toISOString();
+    members[memIdx].addon_ib_vps_expiry = expiryStr;
+
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: sid,
+      requestBody: {
+        data: [
+          {
+            range: `${PAYMENTS_SHEET}!A${payIdx + 2}:I${payIdx + 2}`,
+            values: [paymentToRow(payments[payIdx])],
+          },
+          {
+            range: `${MEMBERS_SHEET}!H${memIdx + 2}`,
+            values: [[expiryStr]],
+          },
+        ],
+        valueInputOption: "RAW",
+      },
+    });
+    invalidateCache("payments");
+    invalidateCache("members");
+
+    return {
+      memberEmail: email,
+      memberName: members[memIdx].name,
+      packageLabel: pkgInfo.label,
+      expiryDate: expiryStr,
+    };
+  }
+
   const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
   const { allowed, reason } = canUpgrade(member.package, pkg, isExpired);
   if (!allowed) throw new Error(reason || "Cannot upgrade");
@@ -662,8 +698,6 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
   members[memIdx].package = pkg;
   members[memIdx].max_ports = maxPorts;
   members[memIdx].expiry_date = expiry;
-
-  const pkgInfo = PACKAGES[pkg];
 
   // เขียนทั้งสองแผ่นใน call เดียว (atomic — ป้องกัน payment ไม่ถูกอัปเดต)
   await sheets.spreadsheets.values.batchUpdate({

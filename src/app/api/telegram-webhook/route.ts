@@ -39,7 +39,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // ดำเนินการแบบ sync
+    // Answer callback immediately to prevent Telegram timeout
+    await answerCallback(botToken, cb.id, "\u23f3 \u0e01\u0e33\u0e25\u0e31\u0e07\u0e14\u0e33\u0e40\u0e19\u0e34\u0e19\u0e01\u0e32\u0e23...");
+
+    // ดำเนินการแบบ async (callback already answered)
     let label = "";
     try {
       if (action === "approve") {
@@ -52,6 +55,14 @@ export async function POST(req: Request) {
           result.memberEmail, result.memberName,
           result.packageLabel, result.expiryDate,
         ).catch(() => {});
+        // Notify admin to create VPS for ib_vps_2200 orders
+        if (payment.package === "ib_vps_2200") {
+          notifyVpsOrder(
+            result.memberEmail, result.memberName,
+            result.packageLabel, result.expiryDate,
+            txnId,
+          ).catch(() => {});
+        }
         label = "\u2705 \u0e2d\u0e19\u0e38\u0e21\u0e31\u0e15\u0e34\u0e41\u0e25\u0e49\u0e27";
       } else {
         await retry(() => markPaymentFailed(txnId), "markPaymentFailed", 3);
@@ -64,7 +75,7 @@ export async function POST(req: Request) {
         : "\u274c \u0e22\u0e01\u0e40\u0e25\u0e34\u0e01\u0e44\u0e21\u0e48\u0e2a\u0e33\u0e40\u0e23\u0e47\u0e08 \u0e01\u0e14\u0e43\u0e2b\u0e21\u0e48\u0e2d\u0e35\u0e01\u0e04\u0e23\u0e31\u0e49\u0e07";
     }
 
-    await answerCallback(botToken, cb.id, label);
+    // Update message with final result (callback already answered)
     await editMessage(botToken, chatId, msg.message_id, label);
     await removeKeyboard(botToken, chatId, msg.message_id);
 
@@ -84,11 +95,19 @@ async function answerCallback(token: string, callbackId: string, text: string) {
 }
 
 async function editMessage(token: string, chatId: number, messageId: number, text: string) {
-  await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
+  // Try editMessageText first (text messages); fallback to editMessageCaption (photo messages)
+  const res = await fetch(`https://api.telegram.org/bot${token}/editMessageText`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, message_id: messageId, text }),
-  }).catch(() => {});
+  }).catch(() => null);
+  if (!res || !res.ok) {
+    await fetch(`https://api.telegram.org/bot${token}/editMessageCaption`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, message_id: messageId, caption: text }),
+    }).catch(() => {});
+  }
 }
 
 async function removeKeyboard(token: string, chatId: number, messageId: number) {
