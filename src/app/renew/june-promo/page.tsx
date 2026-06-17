@@ -57,6 +57,13 @@ export default function JunePromoPage() {
 
   async function handleActivate() {
     if (!selected) return;
+
+    // free_ib -> link to Line OA
+    if (selected === "free_ib") {
+      window.open("https://line.me/R/ti/p/@harvestfarm", "_blank");
+      return;
+    }
+
     setError("");
     setActivating(true);
     try {
