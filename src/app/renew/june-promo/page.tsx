@@ -198,7 +198,7 @@ export default function JunePromoPage() {
               const discounted = promoPrice(key);
               const isSelected = selected === key;
               const isFree = key === "free_ib";
-              const isNoDiscount = key === "ib_vps_2200";
+              const isNoDiscount = key === "ib_vps_2200" || key === "live_with_us";
               return (
                 <button
                   key={key}
