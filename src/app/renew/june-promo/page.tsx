@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
 import { PACKAGES } from "@/types";
 
-const PROMO_PACKAGES: PackageType[] = ["free_ib", "1000_2m", "2490_3m", "4900_1y", "live_with_us", "ib_vps_2200"];
+const PROMO_PACKAGES: PackageType[] = ["1000_2m", "2490_3m", "4900_1y", "live_with_us", "ib_vps_2200", "free_ib"];
 
 function promoPrice(key: PackageType): number {
   return Math.round(PACKAGES[key].price * 0.5);
