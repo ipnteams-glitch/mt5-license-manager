@@ -191,6 +191,7 @@ export default function JunePromoPage() {
               const discounted = promoPrice(key);
               const isSelected = selected === key;
               const isFree = key === "free_ib";
+              const isNoDiscount = key === "ib_vps_2200";
               return (
                 <button
                   key={key}
@@ -209,6 +210,11 @@ export default function JunePromoPage() {
                       {isFree ? (
                         <>
                           <p className="text-xl font-bold text-green-600">FREE</p>
+                          <p className="text-xs text-zinc-400 mt-1">Unlimited Ports</p>
+                        </>
+                      ) : isNoDiscount ? (
+                        <>
+                          <p className="text-xl font-bold text-blue-600">THB {pkg.price.toLocaleString()}</p>
                           <p className="text-xs text-zinc-400 mt-1">Unlimited Ports</p>
                         </>
                       ) : (
