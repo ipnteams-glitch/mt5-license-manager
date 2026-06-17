@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
 import { PACKAGES } from "@/types";
 
-const PROMO_PACKAGES: PackageType[] = ["1000_2m", "2490_3m", "4900_1y", "live_with_us"];
+const PROMO_PACKAGES: PackageType[] = ["free_ib", "1000_2m", "2490_3m", "4900_1y", "live_with_us", "ib_vps_2200"];
 
 function promoPrice(key: PackageType): number {
   return Math.round(PACKAGES[key].price * 0.5);
@@ -190,12 +190,15 @@ export default function JunePromoPage() {
               const pkg = PACKAGES[key];
               const discounted = promoPrice(key);
               const isSelected = selected === key;
+              const isFree = key === "free_ib";
               return (
                 <button
                   key={key}
                   onClick={() => setSelected(key)}
                   className={"w-full rounded-xl border-2 p-4 text-left transition-all " +
-                    (isSelected ? "border-red-400 bg-red-50 shadow-md" : "border-zinc-200 hover:border-zinc-300")}
+                    (isSelected
+                      ? (isFree ? "border-green-400 bg-green-50 shadow-md" : "border-red-400 bg-red-50 shadow-md")
+                      : "border-zinc-200 hover:border-zinc-300")}
                 >
                   <div className="flex justify-between items-center">
                     <div>
@@ -203,9 +206,19 @@ export default function JunePromoPage() {
                       <p className="text-xs text-zinc-500">{pkg.label}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-zinc-400 line-through">THB {pkg.price.toLocaleString()}</p>
-                      <p className="text-xl font-bold text-red-600">THB {discounted.toLocaleString()}</p>
-                      <p className="text-xs text-red-400 font-medium">Save THB {(pkg.price - discounted).toLocaleString()}</p>
+                      {isFree ? (
+                        <>
+                          <p className="text-xl font-bold text-green-600">FREE</p>
+                          <p className="text-xs text-zinc-400 mt-1">Unlimited Ports</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-zinc-400 line-through">THB {pkg.price.toLocaleString()}</p>
+                          <p className="text-xl font-bold text-red-600">THB {discounted.toLocaleString()}</p>
+                          <p className="text-xs text-red-400 font-medium">Save THB {(pkg.price - discounted).toLocaleString()}</p>
+                          <p className="text-xs text-zinc-400 mt-1">{pkg.max_ports >= 999 ? "Unlimited" : pkg.max_ports} Ports</p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </button>
