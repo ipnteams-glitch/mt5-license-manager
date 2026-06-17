@@ -30,8 +30,17 @@ export async function POST(req: Request) {
     const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
     if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
 
-    // สร้าง payment (จองสตางค์ในตัว)
-    const payment = await createPayment(session.user.email, pkg as PackageType, pkgInfo.price);
+    // Promo: June 2026 50% off for 4 packages
+    const promoPackages = ["1000_2m", "2490_3m", "4900_1y", "live_with_us"];
+    const isPromo = body.promo === "june2026";
+    const promoNow = new Date();
+    const isJune2026 = promoNow.getFullYear() === 2026 && promoNow.getMonth() === 5;
+    const finalPrice = (isPromo && isJune2026 && promoPackages.includes(pkg as PackageType))
+      ? Math.round(pkgInfo.price * 0.5)
+      : pkgInfo.price;
+
+    // สร้าง payment
+    const payment = await createPayment(session.user.email, pkg as PackageType, finalPrice);
 
     // สร้าง QR ผ่าน EasySlip
     const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {

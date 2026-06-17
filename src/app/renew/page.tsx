@@ -4,6 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
+
+// Redirect to June promo during June 2026
+if (typeof window !== "undefined") {
+  const now = new Date();
+  if (now.getFullYear() === 2026 && now.getMonth() === 5) {
+    window.location.href = "/renew/june-promo";
+  }
+}
 import { t as translate, type TKey } from "@/lib/i18n";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 
