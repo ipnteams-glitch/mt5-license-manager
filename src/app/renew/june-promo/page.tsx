@@ -226,9 +226,9 @@ export default function JunePromoPage() {
                         </>
                       ) : (
                         <>
-                          <p className="text-sm text-zinc-400 line-through">THB {pkg.price.toLocaleString()}</p>
+                          <p className="text-sm text-zinc-400 line-through">THB {(pkg.old_price || pkg.price).toLocaleString()}</p>
                           <p className="text-xl font-bold text-red-600">THB {discounted.toLocaleString()}</p>
-                          <p className="text-xs text-red-400 font-medium">Save THB {(pkg.price - discounted).toLocaleString()}</p>
+                          <p className="text-xs text-red-400 font-medium">Save THB {((pkg.old_price || pkg.price) - discounted).toLocaleString()}</p>
                           <p className="text-xs text-zinc-400 mt-1">{pkg.max_ports >= 999 ? "Unlimited" : pkg.max_ports} Ports</p>
                         </>
                       )}
