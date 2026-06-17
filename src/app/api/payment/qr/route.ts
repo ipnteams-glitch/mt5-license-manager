@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   if (!session?.user?.email) return NextResponse.json({ error: "กรุณาล็อคอิน" }, { status: 401 });
 
   try {
-    const { package: pkg } = await req.json();
+    const { package: pkg, promo } = await req.json();
     if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType)) {
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
     }
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     // Promo: June 2026 50% off for 4 packages
     const promoPackages = ["1000_2m", "2490_3m", "4900_1y", "live_with_us"];
-    const isPromo = body.promo === "june2026";
+    const isPromo = promo === "june2026";
     const promoNow = new Date();
     const isJune2026 = promoNow.getFullYear() === 2026 && promoNow.getMonth() === 5;
     const finalPrice = (isPromo && isJune2026 && promoPackages.includes(pkg as PackageType))
