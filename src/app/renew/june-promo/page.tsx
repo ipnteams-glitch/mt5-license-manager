@@ -186,10 +186,10 @@ export default function JunePromoPage() {
         <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-rose-200">
           <div className="text-center mb-4">
             <span className="inline-block rounded-full bg-red-500 px-4 py-1 text-xs font-bold text-white tracking-wide">
-              JUNE SALE -50%
+              JUNE SALE
             </span>
             <h1 className="mt-2 text-xl font-bold text-zinc-800">Promotion June</h1>
-            <p className="text-xs text-zinc-500 mt-1">50% off all packages until 30 June 2026</p>
+            <p className="text-xs text-zinc-500 mt-1">Special promotion until 30 June 2026</p>
           </div>
           {error && <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
           <div className="space-y-3">
@@ -228,7 +228,7 @@ export default function JunePromoPage() {
                         <>
                           <p className="text-sm text-zinc-400 line-through">THB {(pkg.old_price || pkg.price).toLocaleString()}</p>
                           <p className="text-xl font-bold text-red-600">THB {discounted.toLocaleString()}</p>
-                          <p className="text-xs text-red-400 font-medium">Save THB {((pkg.old_price || pkg.price) - discounted).toLocaleString()}</p>
+                          <p className="text-xs text-red-400 font-medium">Save {Math.round((1 - discounted / (pkg.old_price || pkg.price)) * 100)}% • THB {((pkg.old_price || pkg.price) - discounted).toLocaleString()}</p>
                           <p className="text-xs text-zinc-400 mt-1">{pkg.max_ports >= 999 ? "Unlimited" : pkg.max_ports} Ports</p>
                         </>
                       )}
@@ -243,7 +243,7 @@ export default function JunePromoPage() {
             disabled={!selected || activating}
             className="mt-6 w-full rounded-xl bg-red-500 py-3.5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-red-200"
           >
-            {activating ? "Creating QR..." : "Get 50% Off!"}
+            {activating ? "Creating QR..." : "Get Promo Price!"}
           </button>
           <button onClick={() => router.push("/dashboard")} className="mt-3 w-full text-sm text-zinc-400 hover:underline">
             Back to Dashboard
@@ -258,7 +258,7 @@ export default function JunePromoPage() {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-rose-50 via-white to-amber-50 p-4">
         <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-rose-200">
           <div className="text-center mb-4">
-            <span className="inline-block rounded-full bg-red-500 px-3 py-0.5 text-xs font-bold text-white">JUNE -50%</span>
+            <span className="inline-block rounded-full bg-red-500 px-3 py-0.5 text-xs font-bold text-white">JUNE SALE</span>
           </div>
           <h2 className="text-lg font-bold text-zinc-800 text-center">Scan QR to pay</h2>
           <p className="text-center text-3xl font-bold text-red-600 mt-1">THB {amount.toLocaleString()}</p>
