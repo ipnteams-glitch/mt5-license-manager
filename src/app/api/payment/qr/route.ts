@@ -30,13 +30,17 @@ export async function POST(req: Request) {
     const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
     if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
 
-    // Promo: June 2026 50% off for 4 packages
+    // Promo: June 2026 discounted prices
+    const promoPrices: Record<string, number> = {
+      "4900_1y": 4990,
+    };
     const promoPackages = ["1000_2m", "2490_3m", "4900_1y"];
     const isPromo = promo === "june2026";
     const promoNow = new Date();
     const isJune2026 = promoNow.getFullYear() === 2026 && promoNow.getMonth() === 5;
-    const finalPrice = (isPromo && isJune2026 && promoPackages.includes(pkg as PackageType))
-      ? Math.round(pkgInfo.price * 0.5)
+    const isEligible = isPromo && isJune2026 && promoPackages.includes(pkg as string);
+    const finalPrice = isEligible
+      ? (promoPrices[pkg as string] ?? Math.round(pkgInfo.price * 0.5))
       : pkgInfo.price;
 
     // สร้าง payment

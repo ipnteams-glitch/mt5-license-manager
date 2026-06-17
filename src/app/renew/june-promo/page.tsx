@@ -8,7 +8,13 @@ import { PACKAGES } from "@/types";
 
 const PROMO_PACKAGES: PackageType[] = ["1000_2m", "2490_3m", "4900_1y", "live_with_us", "ib_vps_2200", "free_ib"];
 
+// Custom promo prices (not just 50%)
+const PROMO_PRICES: Partial<Record<PackageType, number>> = {
+  "4900_1y": 4990,
+};
+
 function promoPrice(key: PackageType): number {
+  if (PROMO_PRICES[key] !== undefined) return PROMO_PRICES[key]!;
   return Math.round(PACKAGES[key].price * 0.5);
 }
 
