@@ -891,10 +891,10 @@ export default function DashboardClient({
 
       {/* Approve Terms Popup */}
       {showApprove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="rounded-xl bg-white p-6 shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
-            <h2 className="text-lg font-bold text-zinc-800 mb-3">ข้อตกลงและเงื่อนไขการใช้งาน</h2>
-            <div className="flex-1 overflow-y-auto mb-4 text-sm text-zinc-600 whitespace-pre-line border rounded-lg p-4 bg-zinc-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" style={{ overscrollBehavior: "contain" }}>
+          <div className="rounded-xl bg-white p-4 sm:p-6 shadow-2xl max-w-lg w-full mx-2 sm:mx-4 max-h-[85dvh] flex flex-col overflow-hidden">
+            <h2 className="text-base sm:text-lg font-bold text-zinc-800 mb-2 sm:mb-3 flex-shrink-0">ข้อตกลงและเงื่อนไขการใช้งาน</h2>
+            <div className="flex-1 overflow-y-auto mb-3 sm:mb-4 text-xs sm:text-sm text-zinc-600 whitespace-pre-line border rounded-lg p-3 sm:p-4 bg-zinc-50 overscroll-contain">
               {`ข้อตกลงและเงื่อนไขการใช้งานซอฟต์แวร์เทรดอัตโนมัติ (Expert Advisor - EA)
 โปรดอ่านข้อตกลงและเงื่อนไขเหล่านี้อย่างละเอียด ก่อนทำการซื้อ เช่า หรือเปิดใช้งานระบบเทรดอัตโนมัติ (EA) การที่คุณกด "ยอมรับ" หรือดำเนินการติดตั้งและใช้งานซอฟต์แวร์นี้ ถือว่าคุณได้ทำความเข้าใจและยอมรับเงื่อนไขทั้งหมดที่ระบุไว้ด้านล่างนี้โดยไม่มีข้อโต้แย้ง
 
@@ -941,12 +941,12 @@ EA เป็นเพียงเครื่องมืออำนวยค�
 การยอมรับข้อตกลง
 `}
             </div>
-            <div className="space-y-2 mb-4">
-              <label className="flex items-start gap-2 text-sm text-zinc-700 cursor-pointer">
+            <div className="space-y-2 mb-3 sm:mb-4 flex-shrink-0">
+              <label className="flex items-start gap-2 text-xs sm:text-sm text-zinc-700 cursor-pointer">
                 <input type="checkbox" checked={agree1} onChange={e => setAgree1(e.target.checked)} className="mt-0.5" />
                 <span>ข้าพเจ้าได้อ่าน ทำความเข้าใจ และยอมรับข้อตกลง เงื่อนไข และความเสี่ยงทั้งหมดที่ระบุไว้ข้างต้น</span>
               </label>
-              <label className="flex items-start gap-2 text-sm text-zinc-700 cursor-pointer">
+              <label className="flex items-start gap-2 text-xs sm:text-sm text-zinc-700 cursor-pointer">
                 <input type="checkbox" checked={agree2} onChange={e => setAgree2(e.target.checked)} className="mt-0.5" />
                 <span>ข้าพเจ้ายืนยันว่าข้าพเจ้าเป็นผู้รับผิดชอบต่อผลลัพธ์ของการเทรดและการใช้ซอฟต์แวร์นี้แต่เพียงผู้เดียว และจะไม่ทำการฟ้องร้องหรือเรียกร้องค่าเสียหายใดๆ จากผู้พัฒนาและผู้ให้บริการในทุกกรณี</span>
               </label>
