@@ -77,9 +77,10 @@ export default function DashboardClient({
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>(BROKERS);
 
-  // Show approve popup on first visit only
+  // Show approve popup per email (first visit per account)
   useEffect(() => {
-    const agreed = localStorage.getItem("agreed_terms");
+    const key = "agreed_" + member.email;
+    const agreed = localStorage.getItem(key);
     if (!agreed) {
       fetch("/api/approve")
         .then(res => res.json())
@@ -917,7 +918,7 @@ export default function DashboardClient({
             </div>
             <button
               onClick={() => {
-                localStorage.setItem("agreed_terms", "1");
+                localStorage.setItem("agreed_" + member.email, "1");
                 setShowApprove(false);
                 setAgree1(false);
                 setAgree2(false);
