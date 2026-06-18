@@ -113,10 +113,10 @@ export async function upsertMember(email: string, name: string): Promise<Member>
     invalidateCache("members");
     return members[idx];
   } else {
-    // สมาชิกใหม่ → ให้แพคเกจฟรี 7 วัน
+    // สมาชิกใหม่ → ให้แพคเกจฟรี (ตาม duration_days ใน PACKAGES)
     const now = new Date();
     const expiry = new Date(now);
-    expiry.setDate(expiry.getDate() + 7);
+    expiry.setDate(expiry.getDate() + PACKAGES.free.duration_days);
     const member: Member = {
       email, name: name || email.split("@")[0],
       package: "free", max_ports: 1,
