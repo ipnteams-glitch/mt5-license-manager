@@ -1005,11 +1005,11 @@ export async function getPortSystems(mt5Account: string): Promise<PortSystem | n
     systems: row[2] || "",
     password: row[3] || "",
     broker: row[4] || "",
-    vps_id: psRow[5] || "",
-    status: psRow[6] || "pending",
-    heartbeat: psRow[7] || "",
-    updated_at: psRow[8] || "",
-    multiplier: psRow[9] || "1",
+    vps_id: row[5] || "",
+    status: row[6] || "pending",
+    heartbeat: row[7] || "",
+    updated_at: row[8] || "",
+    multiplier: row[9] || "1",
     created_at: "",
   };
 }
