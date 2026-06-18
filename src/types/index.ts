@@ -85,7 +85,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "vCPU 2 / RAM 4GB / 1 Year", rank: 8,
   },
   live_with_us: {
-    key: "live_with_us", name: "Life", name_en: "Life", price: 12900, duration_days: 99999, max_ports: 999,
+    key: "live_with_us", name: "Life", name_en: "Life", price: 15900, duration_days: 99999, max_ports: 999,
     label: "Lifetime | Any Broker | Guarantee 2Y", rank: 9,
     old_price: 24900,
   },
