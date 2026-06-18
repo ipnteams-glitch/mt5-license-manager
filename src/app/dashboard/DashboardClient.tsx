@@ -224,6 +224,7 @@ export default function DashboardClient({
   }
 
   async function openSystemsModal(port: Port) {
+    return; // Disabled for all packages
     setSystemsModalPort(port);
     setLoginBroker(port.mt5_broker || "");
     setError("");
