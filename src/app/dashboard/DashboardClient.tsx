@@ -539,13 +539,20 @@ export default function DashboardClient({
                         {new Date(port.created_at).toLocaleDateString("en-GB")}
                       </td>
                       <td className="py-3">
-                        {displayExpiryDate ? (
-                          <span className={displayIsExpired ? "text-red-500 font-medium" : "text-zinc-600"}>
-                            {new Date(displayExpiryDate).toLocaleDateString("en-GB")}
-                          </span>
-                        ) : (
-                          <span className="text-zinc-400">-</span>
-                        )}
+                        {(() => {
+                          const sorted = [...portList].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+                          const isFirst = sorted[0]?.mt5_account === port.mt5_account;
+                          if (isFirst) {
+                            return <span className="text-green-600 font-medium">ถาวร</span>;
+                          }
+                          return displayExpiryDate ? (
+                            <span className={displayIsExpired ? "text-red-500 font-medium" : "text-zinc-600"}>
+                              {new Date(displayExpiryDate).toLocaleDateString("en-GB")}
+                            </span>
+                          ) : (
+                            <span className="text-zinc-400">-</span>
+                          );
+                        })()}
                       </td>
                       <td className="py-3 text-right">
                         <button

@@ -1,4 +1,4 @@
-import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist } from "@/lib/sheets";
+import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 
@@ -57,9 +57,16 @@ export async function GET(req: Request) {
       });
     }
 
-    // เช็คหมดอายุ
+    // เช็ค: พอร์ตแรกใช้ได้ถาวร, พอร์ต 2+ ตรวจสอบวันหมดอายุ
+    const allPorts = await getAllPorts();
+    const memberPorts = allPorts
+      .filter(p => p.member_email === member.email && p.status === "active")
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    
+    const isFirstPort = memberPorts.length > 0 && memberPorts[0].mt5_account === account;
+
     let daysLeft = 0;
-    if (member.expiry_date) {
+    if (!isFirstPort && member.expiry_date) {
       const expiry = new Date(member.expiry_date);
       const now = new Date();
       daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
