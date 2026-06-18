@@ -76,9 +76,9 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 3900,
   },
   "4900_1y": {
-    key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 7900, duration_days: 365, max_ports: 15,
+    key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 6900, duration_days: 365, max_ports: 15,
     label: "1Y | Any Broker | ฝากรันได้", rank: 7,
-    old_price: 24900,
+    old_price: 15900,
   },
   ib_vps_2200: {
     key: "ib_vps_2200", name: "VPS for IB", name_en: "VPS for IB", price: 2200, duration_days: 365, max_ports: 999,
