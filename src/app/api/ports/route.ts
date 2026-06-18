@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { addPort, deletePort, getMemberByEmail } from "@/lib/sheets";
+import { addPort, deletePort, getAllPorts, getMemberByEmail, getPortSystems } from "@/lib/sheets";
 import { NextResponse } from "next/server";
 
 // POST /api/ports — เพิ่มพอร์ต MT5
@@ -63,14 +63,24 @@ export async function DELETE(req: Request) {
   }
 
   try {
+    // Check port_systems BEFORE deleting (for Telegram notification)
+    let preDeletePs = null;
+    try {
+      const allPorts = await getAllPorts();
+      const port = allPorts.find(p => p.id === portId);
+      if (port) {
+        preDeletePs = await getPortSystems(port.mt5_account);
+      }
+    } catch {}
+
     const result = await deletePort(portId, session.user.email);
 
-    // แจ้ง Telegram เฉพาะเมื่อลบจาก port_systems สำเร็จ
-    if (result.deletedFromPortSystems) {
+    // แจ้ง Telegram ถ้าพอร์ตนี้เคยอยู่ใน port_systems (ไม่ต้องรอ cascade สำเร็จ)
+    if (preDeletePs || result.deletedFromPortSystems) {
       const token = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
       if (token && chatId) {
-        const msg = `🗑 <b>Port Removed</b>\n\nUser: ${session.user.email}\nAccount: <code>${result.mt5Account}</code>\nVPS: ${result.vpsId || "?"}\n\n🔧 Please close terminal on VPS`;
+        const msg = `🗑 <b>Port Removed</b>\n\nUser: ${session.user.email}\nAccount: <code>${result.mt5Account}</code>\nVPS: ${result.vpsId || preDeletePs?.vps_id || "?"}\n\n🔧 Please close terminal on VPS`;
         fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
