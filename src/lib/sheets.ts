@@ -107,7 +107,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
     members[idx].name = name || members[idx].name;
     const sheets = await getSheets();
     await sheets.spreadsheets.values.update({
-      spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:H${idx + 2}`,
+      spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:I${idx + 2}`,
       valueInputOption: "RAW", requestBody: { values: [memberToRow(members[idx])] },
     });
     invalidateCache("members");
@@ -144,7 +144,7 @@ export async function updateMemberPackage(
   members[idx].expiry_date = expiryDate;
   const sheets = await getSheets();
   await sheets.spreadsheets.values.update({
-    spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:H${idx + 2}`,
+    spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:I${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [memberToRow(members[idx])] },
   });
   invalidateCache("members");
