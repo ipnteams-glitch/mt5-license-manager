@@ -51,10 +51,11 @@ function memberFromRow(row: string[]): Member {
     max_ports: parseInt(row[3]) || 0, expiry_date: row[4] || "",
     role: (row[5] as "user" | "admin") || "user", created_at: row[6] || "",
     addon_ib_vps_expiry: row[7] || "",
+    ib_vps_choice: row[8] || "",
   };
 }
 function memberToRow(m: Member): string[] {
-  return [m.email, m.name, m.package, String(m.max_ports), m.expiry_date, m.role, m.created_at, m.addon_ib_vps_expiry || ""];
+  return [m.email, m.name, m.package, String(m.max_ports), m.expiry_date, m.role, m.created_at, m.addon_ib_vps_expiry || "", m.ib_vps_choice || ""];
 }
 
 function portFromRow(row: string[]): Port {
@@ -87,7 +88,7 @@ export async function getAllMembers(): Promise<Member[]> {
   const cached = getCache<Member[]>("members", 120_000);
   if (cached) return cached;
   const sheets = await getSheets();
-  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H` });
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:I` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
   const members = rows.slice(1).map(memberFromRow);
   setCache("members", members);
@@ -124,7 +125,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
     };
     const sheets = await getSheets();
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:H`,
+      spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A:I`,
       valueInputOption: "RAW", requestBody: { values: [memberToRow(member)] },
     });
     invalidateCache("members");

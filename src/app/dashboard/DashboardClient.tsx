@@ -32,6 +32,7 @@ export default function DashboardClient({
   isExpired,
   isAdmin,
   addonIbVpsExpiry,
+  ibVpsChoice,
   pendingPayments,
   paymentHistory,
 }: Props) {
@@ -61,6 +62,9 @@ export default function DashboardClient({
   const [showPaymentHistory, setShowPaymentHistory] = useState(false);
   // Systems config (OneComplete)
   const [systemsModalPort, setSystemsModalPort] = useState<Port | null>(null);
+  const [ibVpsChoiceState, setIbVpsChoiceState] = useState(ibVpsChoice);
+  const [showVpsConfirm, setShowVpsConfirm] = useState<"1" | "2" | null>(null);
+  const [savingVpsChoice, setSavingVpsChoice] = useState(false);
   const [systemsModalOpen, setSystemsModalOpen] = useState(false);
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
@@ -313,6 +317,26 @@ export default function DashboardClient({
     return s || "-";
   }
 
+  async function handleSaveVpsChoice() {
+    if (!showVpsConfirm) return;
+    setSavingVpsChoice(true);
+    try {
+      const res = await fetch("/api/member/ib-vps-choice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ choice: showVpsConfirm }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error");
+      setIbVpsChoiceState(showVpsConfirm);
+      setShowVpsConfirm(null);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setSavingVpsChoice(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
@@ -393,6 +417,27 @@ export default function DashboardClient({
               {t("dash_ib_vps_expiry", { date: new Date(addonIbVpsExpiry).toLocaleDateString("th-TH") })}
               {" "}({Math.ceil((new Date(addonIbVpsExpiry).getTime() - Date.now()) / 86400000)} {t("dash_days")})
             </p>
+            {/* IB+VPS Choice Buttons */}
+            {!ibVpsChoiceState ? (
+              <div className="mt-2 flex gap-2">
+                <button
+                  onClick={() => setShowVpsConfirm("1")}
+                  className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                >
+                  ตั้งค่า EA เอง
+                </button>
+                <button
+                  onClick={() => setShowVpsConfirm("2")}
+                  className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-700"
+                >
+                  ตั้งค่าอัตโนมัติ
+                </button>
+              </div>
+            ) : (
+              <p className="mt-1 text-xs font-medium text-purple-800">
+                {ibVpsChoiceState === "1" ? "✅ ตั้งค่า EA เอง" : "✅ ตั้งค่าอัตโนมัติ"}
+              </p>
+            )}
           </div>
         )}
 
@@ -821,6 +866,35 @@ export default function DashboardClient({
           </div>
         )}
       </main>
+
+      {/* Confirm Dialog for IB+VPS Choice */}
+      {showVpsConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="rounded-xl bg-white p-6 shadow-2xl max-w-sm w-full mx-4">
+            <p className="text-sm text-zinc-700 mb-4">
+              {showVpsConfirm === "1"
+                ? "คุณจะตั้งค่า EA เองทั้งหมด?"
+                : "คุณจะตั้งค่าผ่านหน้าเว็ปทั้งหมดและไม่สามารถเข้าใช้งาน VPS ได้เอง"}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowVpsConfirm(null)}
+                className="flex-1 rounded-lg border border-zinc-200 py-2 text-sm text-zinc-600 hover:bg-zinc-50"
+              >
+                No
+              </button>
+              <button
+                onClick={handleSaveVpsChoice}
+                disabled={savingVpsChoice}
+                className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {savingVpsChoice ? "..." : "Yes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -8,6 +8,7 @@ export interface Member {
   role: "user" | "admin";
   created_at: string;
   addon_ib_vps_expiry?: string;
+  ib_vps_choice?: string;
 }
 
 // ── Port (พอร์ต MT5) ──
@@ -126,6 +127,7 @@ export interface DashboardData {
   package_label: string;
   days_left: number;
   is_expired: boolean;
+  ib_vps_choice?: string;
 }
 
 export interface QrResponse {
