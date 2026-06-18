@@ -1025,21 +1025,21 @@ export async function setPortSystems(
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
   // Read directly from sheet (no cache) for immediate update
-  const sheets = await getSheets();
-  const sid = sheetId();
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: sid,
+  const psSheets = await getSheets();
+  const psSid = sheetId();
+  const psRes = await psSheets.spreadsheets.values.get({
+    spreadsheetId: psSid,
     range: `${PORT_SYSTEMS_SHEET}!A:J`,
   });
-  const rows = res.data.values || [];
-  const row = rows.slice(1).find(r => r[0] === mt5Account);
-  const existing: PortSystem | null = row ? {
+  const psRows = psRes.data.values || [];
+  const psRow = psRows.slice(1).find(r => r[0] === mt5Account);
+  const existing: PortSystem | null = psRow ? {
     id: "", port_id: "",
-    member_email: row[1] || "",
-    mt5_account: row[0] || "",
-    systems: row[2] || "",
-    password: row[3] || "",
-    broker: row[4] || "",
+    member_email: psRow[1] || "",
+    mt5_account: psRow[0] || "",
+    systems: psRow[2] || "",
+    password: psRow[3] || "",
+    broker: psRow[4] || "",
     vps_id: row[5] || "",
     status: row[6] || "pending",
     heartbeat: row[7] || "",
