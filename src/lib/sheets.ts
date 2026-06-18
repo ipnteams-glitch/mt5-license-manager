@@ -136,17 +136,26 @@ export async function upsertMember(email: string, name: string): Promise<Member>
 export async function updateMemberPackage(
   email: string, pkg: PackageType, maxPorts: number, expiryDate: string
 ): Promise<void> {
-  invalidateCache("members"); // Ensure fresh data
-  const members = await getAllMembers();
-  const idx = members.findIndex((m) => m.email === email);
-  if (idx === -1) throw new Error(`Member not found: ${email}`);
-  members[idx].package = pkg;
-  members[idx].max_ports = maxPorts;
-  members[idx].expiry_date = expiryDate;
+  // Read directly from sheet (no cache) to avoid Vercel serverless instance mismatch
   const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid,
+    range: `${MEMBERS_SHEET}!A:I`,
+  });
+  const rows = res.data.values || [];
+  const idx = rows.slice(1).findIndex((r) => r[0] === email);
+  if (idx === -1) throw new Error(`Member not found: ${email}`);
+  const sheetRow = idx + 2; // 1-based + header
+  const member = memberFromRow(rows[sheetRow - 1]);
+  member.package = pkg;
+  member.max_ports = maxPorts;
+  member.expiry_date = expiryDate;
   await sheets.spreadsheets.values.update({
-    spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:I${idx + 2}`,
-    valueInputOption: "RAW", requestBody: { values: [memberToRow(members[idx])] },
+    spreadsheetId: sid,
+    range: `${MEMBERS_SHEET}!A${sheetRow}:I${sheetRow}`,
+    valueInputOption: "RAW",
+    requestBody: { values: [memberToRow(member)] },
   });
   invalidateCache("members");
 }
