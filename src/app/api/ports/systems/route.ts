@@ -99,6 +99,12 @@ export async function POST(req: Request) {
       }
     }
 
+    // Get existing state BEFORE saving (for change detection)
+    const existing = await getPortSystems(account);
+    const oldSystems = existing?.systems || "";
+    const oldMultiplier = existing?.multiplier || "1.0";
+    const portIsActive = port.status === "active";
+
     const result = await setPortSystems(
       session.user.email,
       port.id,
@@ -108,6 +114,37 @@ export async function POST(req: Request) {
       broker || undefined,
       multiplier || undefined,
     );
+
+    // Notify Telegram if port is active & something changed
+    if (portIsActive && existing) {
+      const newSystems = items.join(",") || "(none)";
+      const newMultiplier = multiplier || "1.0";
+      const systemsChanged = oldSystems !== newSystems;
+      const multiplierChanged = oldMultiplier !== newMultiplier;
+
+      if (systemsChanged || multiplierChanged) {
+        const token = process.env.TELEGRAM_BOT_TOKEN;
+        const chatId = process.env.TELEGRAM_CHAT_ID;
+        if (token && chatId) {
+          let msg = `⚙️ <b>ปรับตั้งค่า Sys</b>\n👤 ${session.user.email}\n📊 ${account}`;
+          if (systemsChanged) {
+            msg += `\n🔄 Sys: <code>${oldSystems || "(none)"}</code> → <code>${newSystems}</code>`;
+          }
+          if (multiplierChanged) {
+            msg += `\n✖️ ตัวคูณ: ${oldMultiplier} → ${newMultiplier}`;
+          }
+          fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: msg,
+              parse_mode: "HTML",
+            }),
+          }).catch(() => {});
+        }
+      }
+    }
 
     return NextResponse.json({ success: true, systems: result.systems });
   } catch (err: any) {
