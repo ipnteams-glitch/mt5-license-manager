@@ -68,6 +68,8 @@ export default function DashboardClient({
   const [savingVpsChoice, setSavingVpsChoice] = useState(false);
   const [approveText, setApproveText] = useState("");
   const [showApprove, setShowApprove] = useState(false);
+  const [agree1, setAgree1] = useState(false);
+  const [agree2, setAgree2] = useState(false);
   const [systemsModalOpen, setSystemsModalOpen] = useState(false);
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
@@ -931,12 +933,24 @@ EA เป็นเพียงเครื่องมืออำนวยค�
 
 [ ปุ่ม ยอมรับเงื่อนไขและดำเนินการต่อ ]`}
             </div>
+            <div className="space-y-2 mb-4">
+              <label className="flex items-start gap-2 text-sm text-zinc-700 cursor-pointer">
+                <input type="checkbox" checked={agree1} onChange={e => setAgree1(e.target.checked)} className="mt-0.5" />
+                <span>ข้าพเจ้าได้อ่าน ทำความเข้าใจ และยอมรับข้อตกลง เงื่อนไข และความเสี่ยงทั้งหมดที่ระบุไว้ข้างต้น</span>
+              </label>
+              <label className="flex items-start gap-2 text-sm text-zinc-700 cursor-pointer">
+                <input type="checkbox" checked={agree2} onChange={e => setAgree2(e.target.checked)} className="mt-0.5" />
+                <span>ข้าพเจ้ายืนยันว่าข้าพเจ้าเป็นผู้รับผิดชอบต่อผลลัพธ์ของการเทรดและการใช้ซอฟต์แวร์นี้แต่เพียงผู้เดียว และจะไม่ทำการฟ้องร้องหรือเรียกร้องค่าเสียหายใดๆ จากผู้พัฒนาและผู้ให้บริการในทุกกรณี</span>
+              </label>
+            </div>
             <button
               onClick={() => {
-                localStorage.setItem("agreed_terms", "1");
                 setShowApprove(false);
+                setAgree1(false);
+                setAgree2(false);
               }}
-              className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+              disabled={!agree1 || !agree2}
+              className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ยอมรับเงื่อนไขและดำเนินการต่อ
             </button>
