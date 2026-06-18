@@ -106,7 +106,7 @@ export default function JunePromoPage() {
         if (data.paid) {
           if (pollingRef.current) clearInterval(pollingRef.current);
           setStep("done");
-          setTimeout(() => router.push("/dashboard"), 3000);
+          setTimeout(() => window.location.href = "https://mt5.harvestfarm.site/dashboard", 3000);
         }
       } catch { /* ignore */ }
     };
@@ -167,7 +167,7 @@ export default function JunePromoPage() {
       if (data.success) {
         if (pollingRef.current) clearInterval(pollingRef.current);
         setStep("done");
-        setTimeout(() => router.push("/dashboard"), 3000);
+        setTimeout(() => window.location.href = "https://mt5.harvestfarm.site/dashboard", 3000);
       } else {
         setError(data.message || "Not paid yet");
       }
@@ -251,7 +251,7 @@ export default function JunePromoPage() {
           >
             {activating ? "Creating QR..." : "Get Promo Price!"}
           </button>
-          <button onClick={() => router.push("/dashboard")} className="mt-3 w-full text-sm text-zinc-400 hover:underline">
+          <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"} className="mt-3 w-full text-sm text-zinc-400 hover:underline">
             Back to Dashboard
           </button>
         </div>
@@ -314,7 +314,7 @@ export default function JunePromoPage() {
         </div>
         <h2 className="text-xl font-bold text-zinc-800">Payment Successful!</h2>
         <p className="text-sm text-zinc-500 mt-2">Your package has been activated. Redirecting to Dashboard...</p>
-        <button onClick={() => router.push("/dashboard")} className="mt-6 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
+        <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"} className="mt-6 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700">
           Go to Dashboard
         </button>
       </div>
