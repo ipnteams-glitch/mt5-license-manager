@@ -77,18 +77,15 @@ export default function DashboardClient({
 
   // Show approve popup on first visit
   useEffect(() => {
-    const agreed = localStorage.getItem("agreed_terms");
-    if (!agreed) {
-      fetch("/api/approve")
-        .then(res => res.json())
-        .then(data => {
-          if (data.text) {
-            setApproveText(data.text);
-            setShowApprove(true);
-          }
-        })
-        .catch(() => {});
-    }
+    fetch("/api/approve")
+      .then(res => res.json())
+      .then(data => {
+        if (data.text) {
+          setApproveText(data.text);
+          setShowApprove(true);
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
