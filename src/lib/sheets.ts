@@ -271,14 +271,21 @@ export async function addPort(email: string, mt5Account: string, mt5Broker: stri
 }
 
 export async function deletePort(portId: string, email: string): Promise<{ deletedFromPortSystems: boolean; vpsId?: string; mt5Account: string }> {
-  const all = await getAllPorts();
-  const idx = all.findIndex((p) => p.id === portId && p.member_email === email);
+  // Read directly from sheet (no cache) for immediate update
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid, range: `${PORTS_SHEET}!A:F`,
+  });
+  const rows = res.data.values || [];
+  const idx = rows.slice(1).findIndex((r) => r[0] === portId && r[1] === email);
   if (idx === -1) throw new Error("Port not found");
+  const sheetIdx = idx + 2; // 1-based + header
+  const all = rows.slice(1).map(portFromRow);
   const mt5Account = all[idx].mt5_account;
   all[idx].status = "removed";
-  const sheets = await getSheets();
   await sheets.spreadsheets.values.update({
-    spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A${idx + 2}:F${idx + 2}`,
+    spreadsheetId: sid, range: `${PORTS_SHEET}!A${sheetIdx}:F${sheetIdx}`,
     valueInputOption: "RAW", requestBody: { values: [portToRow(all[idx])] },
   });
   // Cascade: also remove from port_systems if exists AND email matches
@@ -1017,7 +1024,29 @@ export async function setPortSystems(
   multiplier?: string,
 ): Promise<PortSystem> {
   await initPortSystemsSheet();
-  const existing = await getPortSystems(mt5Account);
+  // Read directly from sheet (no cache) for immediate update
+  const sheets = await getSheets();
+  const sid = sheetId();
+  const res = await sheets.spreadsheets.values.get({
+    spreadsheetId: sid,
+    range: `${PORT_SYSTEMS_SHEET}!A:J`,
+  });
+  const rows = res.data.values || [];
+  const row = rows.slice(1).find(r => r[0] === mt5Account);
+  const existing: PortSystem | null = row ? {
+    id: "", port_id: "",
+    member_email: row[1] || "",
+    mt5_account: row[0] || "",
+    systems: row[2] || "",
+    password: row[3] || "",
+    broker: row[4] || "",
+    vps_id: row[5] || "",
+    status: row[6] || "pending",
+    heartbeat: row[7] || "",
+    updated_at: row[8] || "",
+    multiplier: row[9] || "1",
+    created_at: "",
+  } : null;
   if (existing && existing.member_email !== email) {
     throw new Error("หมายเลขพอร์ตนี้ถูกใช้โดยสมาชิกอื่นแล้ว");
   }
