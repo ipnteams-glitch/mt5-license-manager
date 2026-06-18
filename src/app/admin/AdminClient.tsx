@@ -114,10 +114,12 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
     setSaving(true);
     setMsg("");
     try {
+      // Free package: auto-set unlimited expiry
+      const finalExpiry = selectedPkg === "free" ? "2099-12-31" : expiryDate;
       const res = await fetch("/api/admin/members", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: editing, package: selectedPkg, expiry_date: expiryDate }),
+        body: JSON.stringify({ email: editing, package: selectedPkg, expiry_date: finalExpiry }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Error");
@@ -125,7 +127,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
       setMemberList((prev) =>
         prev.map((m) =>
           m.email === editing
-            ? { ...m, package: selectedPkg, max_ports: PACKAGES[selectedPkg].max_ports, expiry_date: expiryDate }
+            ? { ...m, package: selectedPkg, max_ports: PACKAGES[selectedPkg].max_ports, expiry_date: finalExpiry }
             : m
         )
       );
@@ -198,7 +200,7 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
                       <td className="px-2 py-1 font-medium text-zinc-800">{m.name}</td>
                       <td className="px-2 py-1">
                         {isEditing ? (
-                          <select value={selectedPkg} onChange={(e) => setSelectedPkg(e.target.value as PackageType)} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900">
+                          <select value={selectedPkg} onChange={(e) => { setSelectedPkg(e.target.value as PackageType); if (e.target.value === "free") setExpiryDate("2099-12-31"); }} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900">
                             {pkgOptions.map((k) => (<option key={k} value={k}>{PACKAGES[k].label}</option>))}
                           </select>
                         ) : (
