@@ -77,9 +77,12 @@ export default function DashboardClient({
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>(BROKERS);
 
-  // Show approve popup on every visit
+  // Show approve popup on first visit only
   useEffect(() => {
-    setShowApprove(true);
+    const agreed = localStorage.getItem("agreed_terms");
+    if (!agreed) {
+      setShowApprove(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -941,6 +944,7 @@ EA เป็นเพียงเครื่องมืออำนวยค�
             </div>
             <button
               onClick={() => {
+                localStorage.setItem("agreed_terms", "1");
                 setShowApprove(false);
                 setAgree1(false);
                 setAgree2(false);
