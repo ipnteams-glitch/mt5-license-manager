@@ -18,6 +18,7 @@ type Props = {
   isExpired: boolean;
   isAdmin: boolean;
   addonIbVpsExpiry?: string;
+  ibVpsChoice?: string;
   pendingPayments?: Payment[];
   paymentHistory?: Payment[];
 };
