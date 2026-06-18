@@ -228,7 +228,7 @@ export default function DashboardClient({
   }
 
   async function openSystemsModal(port: Port) {
-    return; // Disabled for all packages
+    if (ibVpsChoiceState !== "2") return; // Only auto-config users can access
     setSystemsModalPort(port);
     setLoginBroker(port.mt5_broker || "");
     setError("");
