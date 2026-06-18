@@ -66,12 +66,30 @@ export default function DashboardClient({
   const [ibVpsChoiceState, setIbVpsChoiceState] = useState(ibVpsChoice);
   const [showVpsConfirm, setShowVpsConfirm] = useState<"1" | "2" | null>(null);
   const [savingVpsChoice, setSavingVpsChoice] = useState(false);
+  const [approveText, setApproveText] = useState("");
+  const [showApprove, setShowApprove] = useState(false);
   const [systemsModalOpen, setSystemsModalOpen] = useState(false);
   const [selectedSystems, setSelectedSystems] = useState<string[]>([]);
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
   const [brokerList, setBrokerList] = useState<string[]>(BROKERS);
+
+  // Show approve popup on first visit
+  useEffect(() => {
+    const agreed = localStorage.getItem("agreed_terms");
+    if (!agreed) {
+      fetch("/api/approve")
+        .then(res => res.json())
+        .then(data => {
+          if (data.text) {
+            setApproveText(data.text);
+            setShowApprove(true);
+          }
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   useEffect(() => {
     fetch("/api/ports/status")
@@ -867,6 +885,27 @@ export default function DashboardClient({
           </div>
         )}
       </main>
+
+      {/* Approve Terms Popup */}
+      {showApprove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="rounded-xl bg-white p-6 shadow-2xl max-w-lg w-full mx-4 max-h-[80vh] flex flex-col">
+            <h2 className="text-lg font-bold text-zinc-800 mb-3">ข้อตกลงและเงื่อนไขการใช้งาน</h2>
+            <div className="flex-1 overflow-y-auto mb-4 text-sm text-zinc-600 whitespace-pre-line border rounded-lg p-4 bg-zinc-50">
+              {approveText}
+            </div>
+            <button
+              onClick={() => {
+                localStorage.setItem("agreed_terms", "1");
+                setShowApprove(false);
+              }}
+              className="w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              ยอมรับเงื่อนไขและดำเนินการต่อ
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Confirm Dialog for IB+VPS Choice */}
       {showVpsConfirm && (
