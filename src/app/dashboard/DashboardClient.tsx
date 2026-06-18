@@ -387,6 +387,15 @@ export default function DashboardClient({
           </div>
         </div>
 
+        {addonIbVpsExpiry && (
+          <div className="rounded-lg bg-purple-50 px-3 py-2 border border-purple-200">
+            <p className="text-sm font-medium text-purple-700">
+              {t("dash_ib_vps_expiry", { date: new Date(addonIbVpsExpiry).toLocaleDateString("th-TH") })}
+              {" "}({Math.ceil((new Date(addonIbVpsExpiry).getTime() - Date.now()) / 86400000)} {t("dash_days")})
+            </p>
+          </div>
+        )}
+
         {/* Ports List */}
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
@@ -401,14 +410,6 @@ export default function DashboardClient({
             )}
             {displayPortsTotal === 0 && (
               <span className="text-xs text-zinc-400">{t("dash_no_package")}</span>
-            )}
-            {addonIbVpsExpiry && (
-              <div className="mt-3 rounded-lg bg-purple-50 px-3 py-2 border border-purple-200">
-                <p className="text-sm font-medium text-purple-700">
-                  {t("dash_ib_vps_expiry", { date: new Date(addonIbVpsExpiry).toLocaleDateString("th-TH") })}
-                  {" "}({Math.ceil((new Date(addonIbVpsExpiry).getTime() - Date.now()) / 86400000)} {t("dash_days")})
-                </p>
-              </div>
             )}
             {displayIsExpired && (
               <span className="text-xs text-red-500">{t("dash_pkg_expired_hint")}</span>
