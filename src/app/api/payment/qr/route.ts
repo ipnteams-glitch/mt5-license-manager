@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     const promoPrices: Record<string, number> = {
       "4900_1y": 4990,
     };
-    const promoPackages = ["1000_2m", "2490_3m", "4900_1y"];
+    const promoPackages = ["1000_2m", "4900_1y"];
     const isPromo = promo === "june2026";
     const promoNow = new Date();
     const isJune2026 = promoNow.getFullYear() === 2026 && promoNow.getMonth() === 5;

@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import type { PackageType } from "@/types";
 import { PACKAGES } from "@/types";
 
-const PROMO_PACKAGES: PackageType[] = ["1000_2m", "2490_3m", "4900_1y", "live_with_us"];
+const PROMO_PACKAGES: PackageType[] = ["1000_2m", "4900_1y", "live_with_us"];
 
 // Custom promo prices (not just 50%)
 const PROMO_PRICES: Partial<Record<PackageType, number>> = {

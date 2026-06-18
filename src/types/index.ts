@@ -105,7 +105,7 @@ export interface PortfolioAccount {
   created_at: string;
 }
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "ib_vps_2200", "live_with_us"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "4900_1y", "live_with_us", "ib_vps_2200"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 

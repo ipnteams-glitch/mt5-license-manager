@@ -17,7 +17,7 @@ export async function PUT(req: Request) {
     const { email, package: pkg, expiry_date } = await req.json();
     if (!email) return NextResponse.json({ error: "ต้องระบุอีเมลสมาชิก" }, { status: 400 });
 
-    const validPkgs: PackageType[] = ["free", "1000_2m", "2490_3m", "4900_1y", "ib_vps_2200", "live_with_us", "none"];
+    const validPkgs: PackageType[] = ["free", "1000_2m", "4900_1y", "live_with_us", "ib_vps_2200", "none"];
     if (pkg && !validPkgs.includes(pkg)) return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
 
     const pkgInfo = PACKAGES[pkg as PackageType] || PACKAGES.none;
