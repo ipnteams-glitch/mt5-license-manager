@@ -136,6 +136,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
 export async function updateMemberPackage(
   email: string, pkg: PackageType, maxPorts: number, expiryDate: string
 ): Promise<void> {
+  invalidateCache("members"); // Ensure fresh data
   const members = await getAllMembers();
   const idx = members.findIndex((m) => m.email === email);
   if (idx === -1) throw new Error(`Member not found: ${email}`);
