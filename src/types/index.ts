@@ -81,7 +81,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 15900,
   },
   ib_vps_2200: {
-    key: "ib_vps_2200", name: "VPS for IB", name_en: "VPS for IB", price: 2200, duration_days: 365, max_ports: 999,
+    key: "ib_vps_2200", name: "Private VPS", name_en: "Private VPS", price: 2200, duration_days: 365, max_ports: 999,
     label: "vCPU 2 / RAM 4GB / 1 Year", rank: 8,
   },
   live_with_us: {
