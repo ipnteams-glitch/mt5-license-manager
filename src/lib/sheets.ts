@@ -242,7 +242,7 @@ export async function getPortsByEmail(email: string): Promise<Port[]> {
 }
 
 export async function getAllPorts(): Promise<Port[]> {
-  const cached = getCache<Port[]>("ports", 10_000);
+  const cached = getCache<Port[]>("ports", 3_000);
   if (cached) return cached;
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PORTS_SHEET}!A:F` });
@@ -981,7 +981,7 @@ async function initPortSystemsSheet(): Promise<void> {
 export async function getPortSystems(mt5Account: string): Promise<PortSystem | null> {
   // Read all port_systems, cache the full data
   const CACHE_KEY = "port_systems";
-  let rows: string[][] | null = getCache<string[][]>(CACHE_KEY, 10_000);
+  let rows: string[][] | null = getCache<string[][]>(CACHE_KEY, 3_000);
   if (!rows) {
     await initPortSystemsSheet();
     const sheets = await getSheets();
