@@ -40,7 +40,7 @@ export default async function DashboardPage() {
       email: session.user.email,
       name: session.user.name || "",
       package: "none",
-      max_ports: 0,
+      max_ports: 1,
       expiry_date: "",
       role: "user",
       created_at: "",
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
 
   const pkgInfo = PACKAGES[member.package] || PACKAGES.none;
   const portsUsed = ports.length;
-  const portsTotal = member.max_ports;
+  const portsTotal = member.max_ports > 0 ? member.max_ports : 1;
 
   // คำนวณวันหมดอายุ
   let daysLeft = 0;
