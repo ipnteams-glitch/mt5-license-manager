@@ -45,18 +45,19 @@ export async function POST(req: Request) {
 
     invalidateCache("members");
 
-    // Notify Telegram when customer chooses auto-config
-    if (choice === "2") {
-      const token = process.env.TELEGRAM_BOT_TOKEN;
-      const chatId = process.env.TELEGRAM_CHAT_ID;
-      if (token && chatId) {
-        const msg = `🤖 <b>ตั้งค่าอัตโนมัติ</b>\n👤 ${session.user.email}\n\nลูกค้าเลือกตั้งค่าผ่านหน้าเว็บทั้งหมด`;
-        fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "HTML" }),
-        }).catch(() => {});
-      }
+    // Notify Telegram
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    if (token && chatId) {
+      const label = choice === "1" ? "ตั้งค่า EA เอง" : "ตั้งค่าอัตโนมัติ";
+      const emoji = choice === "1" ? "⚙️" : "🤖";
+      const detail = choice === "1" ? "ลูกค้าจะตั้งค่า EA เองทั้งหมด" : "ลูกค้าจะตั้งค่าผ่านหน้าเว็บทั้งหมดและไม่สามารถเข้าใช้งาน VPS ได้เอง";
+      const msg = `${emoji} <b>${label}</b>\n👤 ${session.user.email}\n\n${detail}`;
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "HTML" }),
+      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true, choice });
