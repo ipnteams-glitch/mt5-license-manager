@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getMemberByEmail, getPortsByEmail, getAllPayments, deletePort, updateMemberPackage } from "@/lib/sheets";
-import { invalidateCache } from "@/lib/cache";
+import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
@@ -64,49 +63,7 @@ export default async function DashboardPage() {
     isExpired = daysLeft <= 0;
   }
 
-  // Auto-reset expired members to free tier (keep only first port)
-  if (isExpired && member.package !== "none" && member.package !== "free" && member.package !== "free_ib") {
-    try {
-      // Sort ports by created_at, keep only the first (oldest)
-      const sortedPorts = [...ports].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-      const portsToDelete = sortedPorts.slice(1); // all except first
 
-      if (portsToDelete.length > 0) {
-        for (const p of portsToDelete) {
-          try {
-            await deletePort(p.id, session.user!.email);
-          } catch {}
-        }
-        // Reset to free tier: 1 port, no expiry
-        await updateMemberPackage(session.user!.email, "none", 1, "");
-        invalidateCache("members");
-        invalidateCache("ports");
-
-        // Refresh ports
-        ports = await getPortsByEmail(session.user!.email);
-        member.package = "none";
-        member.max_ports = 1;
-        member.expiry_date = "";
-        isExpired = false;
-        daysLeft = 0;
-
-        // Telegram notify
-        const token = process.env.TELEGRAM_BOT_TOKEN;
-        const chatId = process.env.TELEGRAM_CHAT_ID;
-        if (token && chatId) {
-          const deletedAccounts = portsToDelete.map(p => p.mt5_account).join(", ");
-          const msg = `⏰ <b>Package Expired - Reset to Free</b>\n👤 ${session.user!.email}\n🗑 Deleted ports: ${deletedAccounts}\n✅ Kept: ${sortedPorts[0].mt5_account}\n📦 Reset to Free (1 port)`;
-          fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: "HTML" }),
-          }).catch(() => {});
-        }
-      }
-    } catch (e) {
-      console.error("Auto-reset failed:", e);
-    }
-  }
 
   const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
   const isAdmin = adminEmails.includes(session.user.email);
