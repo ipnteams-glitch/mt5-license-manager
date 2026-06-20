@@ -164,22 +164,22 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                   const absPct = Math.min(Math.abs(pctReturn), 100);
                   const isPositive = pctReturn >= 0;
                   const barColor = isPositive ? "bg-green-500" : "bg-red-500";
-                  const textColor = isPositive ? "text-green-700" : "text-red-700";
                   const displayPct = pctReturn > 100 ? ">+100" : pctReturn < -100 ? "<-100" : `${isPositive ? "+" : ""}${pctReturn.toFixed(1)}`;
                   return (
                     <div key={acc.id} className="flex items-center gap-3">
                       <span className="w-28 flex-shrink-0 text-xs font-mono font-semibold text-zinc-700 truncate" title={acc.mt5_account}>
                         {acc.mt5_account}
                       </span>
-                      <div className="flex-1 h-6 bg-zinc-100 rounded-full overflow-hidden">
+                      <div className="flex-1 h-7 bg-zinc-100 rounded-full overflow-hidden relative">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-                          style={{ width: `${absPct}%` }}
-                        />
+                          className={`h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2.5 ${barColor}`}
+                          style={{ width: `${Math.max(absPct, 3)}%`, minWidth: absPct > 0 ? "2rem" : 0 }}
+                        >
+                          <span className="text-xs font-bold text-white drop-shadow-sm whitespace-nowrap">
+                            {displayPct}%
+                          </span>
+                        </div>
                       </div>
-                      <span className={`w-24 flex-shrink-0 text-right text-xs font-bold ${textColor}`}>
-                        {displayPct}%
-                      </span>
                     </div>
                   );
                 })}
