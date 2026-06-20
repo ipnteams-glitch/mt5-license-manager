@@ -35,7 +35,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
       const res = await fetch("/api/portfolio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: session?.user?.email, mt5_account: mt5Account.trim() }),
+        body: JSON.stringify({ mt5_account: mt5Account.trim() }),
       });
       const data = await res.json();
       if (data.success) {
@@ -58,7 +58,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
     setDeleting(id);
     setError("");
     try {
-      const res = await fetch(`/api/portfolio?id=${encodeURIComponent(id)}&email=${encodeURIComponent(session?.user?.email || "")}`, { method: "DELETE" });
+      const res = await fetch(`/api/portfolio?id=${encodeURIComponent(id)}`, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         setAccounts((prev) => prev.filter((a) => a.id !== id));
