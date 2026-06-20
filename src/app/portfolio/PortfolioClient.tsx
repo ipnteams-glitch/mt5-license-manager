@@ -153,6 +153,39 @@ export default function PortfolioClient({ initialAccounts }: Props) {
           </form>
         )}
 
+        {/* Float P/L Bar Chart */}
+        {accounts.length > 0 && (() => {
+          const maxAbs = Math.max(...accounts.map(a => Math.abs(a.floating_pl)), 1);
+          return (
+            <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
+              <h3 className="mb-4 text-sm font-semibold text-zinc-700">{t("portfolio_chart_title") || "Float P/L by Account"}</h3>
+              <div className="space-y-2">
+                {accounts.map((acc) => {
+                  const pctWidth = (Math.abs(acc.floating_pl) / maxAbs) * 100;
+                  const barColor = acc.floating_pl >= 0 ? "bg-green-500" : "bg-red-500";
+                  const textColor = acc.floating_pl >= 0 ? "text-green-700" : "text-red-700";
+                  return (
+                    <div key={acc.id} className="flex items-center gap-3">
+                      <span className="w-28 flex-shrink-0 text-xs font-mono font-semibold text-zinc-700 truncate" title={acc.mt5_account}>
+                        {acc.mt5_account}
+                      </span>
+                      <div className="flex-1 h-6 bg-zinc-100 rounded-full overflow-hidden relative">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                          style={{ width: `${Math.max(pctWidth, 2)}%` }}
+                        />
+                      </div>
+                      <span className={`w-24 flex-shrink-0 text-right text-xs font-bold ${textColor}`}>
+                        {acc.floating_pl >= 0 ? "+" : ""}{acc.floating_pl.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Portfolio Cards */}
         {accounts.length === 0 ? (
           <div className="rounded-xl bg-white p-12 text-center shadow-sm">

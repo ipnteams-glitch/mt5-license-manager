@@ -163,6 +163,7 @@ export const translations = {
     th: "ยังไม่มีพอร์ต — เพิ่มพอร์ตแรกของคุณ",
     en: "No portfolio yet — add your first account",
   },
+  portfolio_chart_title: { th: "Float P/L by Account", en: "Float P/L by Account" },
   portfolio_empty_hint: {
     th: "หลังจากเพิ่มแล้ว ให้ติดตั้ง EA เพื่อส่งข้อมูลอัปเดต",
     en: "After adding, install the EA to send updates",
