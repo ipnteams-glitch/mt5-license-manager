@@ -217,7 +217,7 @@ export default function JunePromoPage() {
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-semibold text-zinc-800">{pkg.name}</p>
-                      <p className="text-xs text-zinc-500">{pkg.label}</p>
+                      <p className="text-xs text-zinc-500 whitespace-pre-line">{pkg.label}</p>
                     </div>
                     <div className="text-right">
                       {isFree ? (
