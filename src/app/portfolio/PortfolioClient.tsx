@@ -164,7 +164,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                   const absPct = Math.min(Math.abs(pctReturn), 100);
                   const isPositive = pctReturn >= 0;
                   const barColor = isPositive ? "bg-green-500" : "bg-red-500";
-                  const displayPct = pctReturn > 100 ? ">+100" : pctReturn < -100 ? "<-100" : `${isPositive ? "+" : ""}${pctReturn.toFixed(1)}`;
+                  const displayPct = `${isPositive ? "+" : ""}${pctReturn.toFixed(1)}`; // show full %, bar width already capped
                   return (
                     <div key={acc.id} className="flex items-center gap-3">
                       <span className="w-28 flex-shrink-0 text-xs font-mono font-semibold text-zinc-700 truncate" title={acc.mt5_account}>
