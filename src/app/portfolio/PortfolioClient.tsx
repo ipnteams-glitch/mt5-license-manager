@@ -159,42 +159,23 @@ export default function PortfolioClient({ initialAccounts }: Props) {
             <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
               <h3 className="mb-4 text-sm font-semibold text-zinc-700">{t("portfolio_chart_title") || "Float P/L by Account"}</h3>
               <div className="space-y-2">
-                {/* Scale reference: -100% | 0 | +100% */}
-                <div className="flex items-center gap-3">
-                  <span className="w-28 flex-shrink-0" />
-                  <div className="flex-1 h-4 relative flex items-center">
-                    <div className="absolute left-0 right-0 h-px bg-zinc-200" />
-                    <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-400" />
-                    <span className="absolute left-1/2 -translate-x-1/2 text-[9px] text-zinc-400 bg-white px-1">0%</span>
-                  </div>
-                  <span className="w-24 flex-shrink-0" />
-                </div>
                 {accounts.map((acc) => {
                   const pctReturn = acc.balance > 0 ? (acc.floating_pl / acc.balance) * 100 : 0;
-                  // Right half = 0..+100%, Left half = -100%..0
-                  const halfPct = Math.min(Math.abs(pctReturn), 100) / 2; // scale to 0..50% of container
+                  const absPct = Math.min(Math.abs(pctReturn), 100);
                   const isPositive = pctReturn >= 0;
+                  const barColor = isPositive ? "bg-green-500" : "bg-red-500";
                   const textColor = isPositive ? "text-green-700" : "text-red-700";
-                  // Capped display value
                   const displayPct = pctReturn > 100 ? ">+100" : pctReturn < -100 ? "<-100" : `${isPositive ? "+" : ""}${pctReturn.toFixed(1)}`;
                   return (
                     <div key={acc.id} className="flex items-center gap-3">
                       <span className="w-28 flex-shrink-0 text-xs font-mono font-semibold text-zinc-700 truncate" title={acc.mt5_account}>
                         {acc.mt5_account}
                       </span>
-                      <div className="flex-1 h-6 bg-zinc-100 rounded-full overflow-hidden relative">
-                        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-zinc-300" />
-                        {isPositive ? (
-                          <div
-                            className="h-full rounded-r-full bg-green-500 transition-all duration-500"
-                            style={{ marginLeft: "50%", width: `${halfPct}%` }}
-                          />
-                        ) : (
-                          <div
-                            className="h-full rounded-l-full bg-red-500 transition-all duration-500 ml-auto"
-                            style={{ width: `${halfPct}%`, marginRight: "50%" }}
-                          />
-                        )}
+                      <div className="flex-1 h-6 bg-zinc-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+                          style={{ width: `${absPct}%` }}
+                        />
                       </div>
                       <span className={`w-24 flex-shrink-0 text-right text-xs font-bold ${textColor}`}>
                         {displayPct}%
