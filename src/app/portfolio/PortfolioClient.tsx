@@ -160,7 +160,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
               <h3 className="mb-4 text-sm font-semibold text-zinc-700">{t("portfolio_chart_title") || "Float P/L by Account"}</h3>
               <div className="space-y-2">
                 {accounts.map((acc) => {
-                  const pctReturn = acc.balance > 0 ? (acc.floating_pl / acc.balance) * 100 : 0;
+                  const pctReturn = acc.floating_pl; // already a percentage from sheets
                   const absPct = Math.min(Math.abs(pctReturn), 100);
                   const isPositive = pctReturn >= 0;
                   const barColor = isPositive ? "bg-green-500" : "bg-red-500";
