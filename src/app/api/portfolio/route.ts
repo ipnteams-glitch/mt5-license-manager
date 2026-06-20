@@ -44,6 +44,11 @@ export async function POST(req: Request) {
       if (!mt5_account) {
         return NextResponse.json({ error: "กรุณากรอกหมายเลขพอร์ต MT5" }, { status: 400 });
       }
+      // Limit: max 20 portfolio accounts
+      const existing = await getPortfolioByEmail(session.user.email);
+      if (existing.length >= 20) {
+        return NextResponse.json({ error: "Maximum 20 portfolio accounts allowed" }, { status: 400 });
+      }
       const account = await addPortfolioAccount(session.user.email, mt5_account, broker || "");
       return NextResponse.json({ success: true, account });
     } catch (err: any) {
@@ -55,6 +60,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     if (body.email && body.email.endsWith("@gmail.com")) {
+      const existing2 = await getPortfolioByEmail(body.email);
+      if (existing2.length >= 20) {
+        return NextResponse.json({ error: "Maximum 20 portfolio accounts allowed" }, { status: 400 });
+      }
       const account = await addPortfolioAccount(body.email, body.mt5_account, body.broker || "");
       return NextResponse.json({ success: true, account });
     }

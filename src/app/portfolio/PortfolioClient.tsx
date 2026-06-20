@@ -24,6 +24,10 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!mt5Account.trim()) return;
+    if (accounts.length >= 20) {
+      setError("Maximum 20 ports allowed");
+      return;
+    }
     setAdding(true);
     setError("");
     setSuccess("");
@@ -124,7 +128,8 @@ export default function PortfolioClient({ initialAccounts }: Props) {
           </h2>
           <button
             onClick={() => setShowAdd(!showAdd)}
-            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
+            disabled={accounts.length >= 20}
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {showAdd ? t("portfolio_close_btn") : t("portfolio_add_btn")}
           </button>
