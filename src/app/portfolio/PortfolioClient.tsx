@@ -170,7 +170,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                       <span className="w-28 flex-shrink-0 text-xs font-mono font-semibold text-zinc-700 truncate" title={acc.mt5_account}>
                         {acc.mt5_account}
                       </span>
-                      <div className="flex-1 h-7 bg-zinc-100 rounded-full overflow-hidden relative">
+                      <div className="flex-1 h-[22px] bg-zinc-100 rounded-full overflow-hidden relative">
                         <div
                           className={`h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2.5 ${barColor}`}
                           style={{ width: `${Math.max(absPct, 3)}%`, minWidth: absPct > 0 ? "2rem" : 0 }}
