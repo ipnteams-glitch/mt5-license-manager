@@ -68,7 +68,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 390, duration_days: 30, max_ports: 2,
-    label: "30day | Any Broker", rank: 4,
+    label: "Any Broker | 30Day", rank: 4,
     old_price: 990,
   },
   "2490_3m": {
@@ -87,7 +87,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   live_with_us: {
     key: "live_with_us", name: "👑 Life", name_en: "Life", price: 15900, duration_days: 99999, max_ports: 999,
-    label: "Lifetime | Any Broker\nGuarantee 2Y", rank: 9,
+    label: "Lifetime | Any Broker\nGuarantee 2 Year", rank: 9,
     old_price: 24900,
   },
 };
