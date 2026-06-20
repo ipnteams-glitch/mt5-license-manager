@@ -858,7 +858,7 @@ export async function deletePortfolioAccount(id: string, email: string): Promise
   // ตรวจสอบ port_system ก่อนลบ — ต้องมีพอร์ตใน port_system และอีเมลตรงกัน
   const mt5Account = rows[idx][2];
   const ps = await getPortSystems(mt5Account);
-  if (!ps) throw new Error("ไม่พบพอร์ตนี้ใน port_system — กรุณาลงทะเบียนพอร์ตก่อนลบ");
+  // allow delete even if not in port_systems
   // skip ownership check
 
   const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
