@@ -6,7 +6,7 @@ import type { Member, Port, Payment } from "@/types";
 import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
-import BROKERS from "@/../brokers.json";
+
 
 type Props = {
   member: Member;
@@ -75,7 +75,16 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
-  const [brokerList, setBrokerList] = useState<string[]>(BROKERS);
+  const [brokerList, setBrokerList] = useState<string[]>([]); // ponytail: fetch from /api/brokers instead of static JSON
+  const [eaVersion, setEaVersion] = useState<string | null>(null);
+
+  // Fetch EA version from Google Drive
+  useEffect(() => {
+    fetch("/api/ea-version")
+      .then(res => res.json())
+      .then(data => { if (data.version) setEaVersion(data.version); })
+      .catch(() => {});
+  }, []);
 
   // Show approve popup per email (first visit per account)
   useEffect(() => {
@@ -420,6 +429,12 @@ export default function DashboardClient({
                 </p>
               </div>
             </div>
+            {eaVersion && (
+              <div className="flex-shrink-0 self-center text-center mr-1">
+                <p className="text-[10px] text-zinc-400 leading-tight">{t("ea_version") || "Version"}</p>
+                <p className="text-xs font-bold text-blue-600 leading-tight">{eaVersion}</p>
+              </div>
+            )}
             <a
               href="https://drive.google.com/drive/folders/16l_45ZJOdT-qAtkU2gB9S5eWrVlHf_J9"
               target="_blank"

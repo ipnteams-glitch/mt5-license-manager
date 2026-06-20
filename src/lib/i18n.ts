@@ -372,6 +372,9 @@ export const translations = {
   // Language switcher
   lang_switch: { th: "EN", en: "TH" },
   lang_label: { th: "ภาษา", en: "Language" },
+
+  // EA Version
+  ea_version: { th: "เวอร์ชั่น EA", en: "EA Version" },
 } as const;
 
 // ── Helper: translate a key ──

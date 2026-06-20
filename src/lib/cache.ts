@@ -37,7 +37,3 @@ export function invalidateCachePrefix(prefix: string): void {
   }
 }
 
-/** ล้าง cache ทั้งหมด (ใช้ตอน debug หรือ force refresh) */
-export function clearAllCache(): void {
-  store.clear();
-}
