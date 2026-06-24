@@ -61,12 +61,12 @@ export default async function DashboardPage() {
     isExpired = daysLeft <= 0;
   }
 
-  // ── Free package หลังหมดอายุ: เหลือ 1 port ถาวร ──
+  // ── ทุกแพคเกจหลังหมดอายุ: เหลือ 1 port ถาวร ──
   let portsTotal = member.max_ports > 0 ? member.max_ports : 1;
   let packageLabel = pkgInfo.label;
-  if (member.package === "free" && isExpired) {
+  if (isExpired && member.package !== "free_ib" && member.package !== "live_with_us") {
     portsTotal = 1;
-    packageLabel = "ฟรี — เหลือ 1 พอร์ตถาวร\n(อัปเกรดเพื่อเพิ่มพอร์ต)";
+    packageLabel = pkgInfo.name + " — หมดอายุ\nเหลือ 1 พอร์ตถาวร (ต่ออายุเพื่อเพิ่มพอร์ต)";
   }
 
 

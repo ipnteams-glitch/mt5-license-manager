@@ -72,37 +72,21 @@ export async function GET(req: Request) {
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     const isFirstPort = memberPorts.length > 0 && memberPorts[0].mt5_account === account;
 
-    // ── Free package: 5 ports / 30 วัน → หลังหมดอายุเหลือ 1 port ถาวร ──
-    if (member.package === "free") {
-      if (daysLeft > 0) {
-        // ยังไม่หมดอายุ: ใช้ได้ตาม max_ports (5 พอร์ต)
-      } else {
-        // หมดอายุแล้ว: เหลือ 1 พอร์ตแรกถาวร, พอร์ตอื่นถูกปฏิเสธ
-        if (!isFirstPort) {
-          return NextResponse.json({
-            valid: false,
-            email: member.email,
-            package: member.package,
-            package_key: member.package,
-            expiry_date: member.expiry_date,
-            days_left: 0,
-            reason: "แพคเกจฟรีหมดอายุ — เหลือ 1 พอร์ตถาวร (พอร์ตแรก) ต้องการเพิ่มพอร์ต กรุณาอัปเกรด",
-          });
-        }
+    // ── ทุกแพคเกจ: หลังหมดอายุ → พอร์ตแรกใช้ได้ถาวร, พอร์ตอื่นถูกปฏิเสธ ──
+    if (daysLeft <= 0 && member.package !== "free_ib" && member.package !== "live_with_us") {
+      if (isFirstPort) {
         // พอร์ตแรก: ผ่าน (ถาวร)
         daysLeft = 9999;
-      }
-    } else {
-      // แพคเกจอื่น: ตรวจสอบวันหมดอายุตามปกติ
-      if (daysLeft <= 0 && member.package !== "free_ib" && member.package !== "live_with_us") {
+      } else {
+        // พอร์ตอื่น: ถูกปฏิเสธ
         return NextResponse.json({
           valid: false,
           email: member.email,
           package: member.package,
           package_key: member.package,
           expiry_date: member.expiry_date,
-          days_left: daysLeft,
-          reason: "แพคเกจหมดอายุแล้ว — กรุณาต่ออายุ",
+          days_left: 0,
+          reason: "แพคเกจหมดอายุ — พอร์ตแรกใช้ฟรีถาวร ต้องการเพิ่มพอร์ต กรุณาต่ออายุ",
         });
       }
     }
