@@ -57,28 +57,52 @@ export async function GET(req: Request) {
       });
     }
 
-    // เช็ค: พอร์ตแรกใช้ได้ถาวร, พอร์ต 2+ ตรวจสอบวันหมดอายุ
+    // คำนวณวันหมดอายุ
+    let daysLeft = 0;
+    if (member.expiry_date) {
+      const expiry = new Date(member.expiry_date);
+      const now = new Date();
+      daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    // หาพอร์ตที่ active ของสมาชิกนี้ เรียงตามวันที่สร้าง (เก่าสุด = พอร์ตแรก)
     const allPorts = await getAllPorts();
     const memberPorts = allPorts
       .filter(p => p.member_email === member.email && p.status === "active")
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    
     const isFirstPort = memberPorts.length > 0 && memberPorts[0].mt5_account === account;
 
-    let daysLeft = 0;
-    if (!isFirstPort && member.expiry_date) {
-      const expiry = new Date(member.expiry_date);
-      const now = new Date();
-      daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-      if (daysLeft <= 0) {
+    // ── Free package: 5 ports / 30 วัน → หลังหมดอายุเหลือ 1 port ถาวร ──
+    if (member.package === "free") {
+      if (daysLeft > 0) {
+        // ยังไม่หมดอายุ: ใช้ได้ตาม max_ports (5 พอร์ต)
+      } else {
+        // หมดอายุแล้ว: เหลือ 1 พอร์ตแรกถาวร, พอร์ตอื่นถูกปฏิเสธ
+        if (!isFirstPort) {
+          return NextResponse.json({
+            valid: false,
+            email: member.email,
+            package: member.package,
+            package_key: member.package,
+            expiry_date: member.expiry_date,
+            days_left: 0,
+            reason: "แพคเกจฟรีหมดอายุ — เหลือ 1 พอร์ตถาวร (พอร์ตแรก) ต้องการเพิ่มพอร์ต กรุณาอัปเกรด",
+          });
+        }
+        // พอร์ตแรก: ผ่าน (ถาวร)
+        daysLeft = 9999;
+      }
+    } else {
+      // แพคเกจอื่น: ตรวจสอบวันหมดอายุตามปกติ
+      if (daysLeft <= 0 && member.package !== "free_ib" && member.package !== "live_with_us") {
         return NextResponse.json({
           valid: false,
           email: member.email,
           package: member.package,
+          package_key: member.package,
           expiry_date: member.expiry_date,
           days_left: daysLeft,
-          reason: "แพคเกจหมดอายุแล้ว",
+          reason: "แพคเกจหมดอายุแล้ว — กรุณาต่ออายุ",
         });
       }
     }
