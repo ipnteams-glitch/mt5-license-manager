@@ -76,7 +76,95 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
-  const [brokerList, setBrokerList] = useState<string[]>([]);
+  const BROKERS = [
+  "InterStellarFinancial-Demo",
+  "InterStellarFinancial-Server",
+  "TPTradesGroup-Online",
+  "VTMarkets-Demo",
+  "VTMarkets-Live",
+  "ICMarketsSC-Demo",
+  "ICMarketsSC-MT5-2",
+  "ICMarketsSC-MT5-3",
+  "ICMarketsSC-MT5-4",
+  "ICMarketsSC-MT5-5",
+  "ICMarketsSC-MT5-6",
+  "GOCPrime-Server",
+  "RoboForex-Pro",
+  "RoboForex-ECN",
+  "UltimaMarkets-Demo",
+  "UltimaMarkets-Live 2",
+  "UltimaMarkets-Live 1",
+  "KCMTrade-Live",
+  "ACCapitalMarket-Real",
+  "MohicansMarkets-Live",
+  "Exness-MT5Trial",
+  "Exness-MT5Trial1",
+  "Exness-MT5Trial2",
+  "Exness-MT5Trial3",
+  "Exness-MT5Trial4",
+  "Exness-MT5Trial5",
+  "Exness-MT5Trial6",
+  "Exness-MT5Trial7",
+  "Exness-MT5Trial8",
+  "Exness-MT5Trial9",
+  "Exness-MT5Trial10",
+  "Exness-MT5Trial11",
+  "Exness-MT5Trial12",
+  "Exness-MT5Trial13",
+  "Exness-MT5Trial14",
+  "Exness-MT5Trial15",
+  "Exness-MT5Trial16",
+  "Exness-MT5Trial17",
+  "Exness-MT5Trial18",
+  "Exness-MT5Trial19",
+  "Exness-MT5Real",
+  "Exness-MT5Real1",
+  "Exness-MT5Real2",
+  "Exness-MT5Real3",
+  "Exness-MT5Real4",
+  "Exness-MT5Real5",
+  "Exness-MT5Real6",
+  "Exness-MT5Real7",
+  "Exness-MT5Real8",
+  "Exness-MT5Real9",
+  "Exness-MT5Real10",
+  "Exness-MT5Real11",
+  "Exness-MT5Real12",
+  "Exness-MT5Real13",
+  "Exness-MT5Real14",
+  "Exness-MT5Real15",
+  "Exness-MT5Real16",
+  "Exness-MT5Real17",
+  "Exness-MT5Real18",
+  "Exness-MT5Real19",
+  "Exness-MT5Real20",
+  "Exness-MT5Real21",
+  "Exness-MT5Real22",
+  "Exness-MT5Real23",
+  "Exness-MT5Real24",
+  "Exness-MT5Real25",
+  "Exness-MT5Real26",
+  "Exness-MT5Real27",
+  "Exness-MT5Real28",
+  "Exness-MT5Real29",
+  "Exness-MT5Real30",
+  "Exness-MT5Real31",
+  "Exness-MT5Real32",
+  "Exness-MT5Real33",
+  "Exness-MT5Real34",
+  "Exness-MT5Real35",
+  "Exness-MT5Real36",
+  "Exness-MT5Real37",
+  "Exness-MT5Real38",
+  "Exness-MT5Real39",
+  "Exness-MT5Real40",
+  "Exness-MT5Real41",
+  "Exness-MT5Real42",
+  "Exness-MT5Real43",
+  "Exness-MT5Real44",
+  "Exness-MT5Real45",
+  "Exness-MT5Real46"
+];
   const [eaVersion, setEaVersion] = useState<string | null>(null);
 
   // Fetch EA version from Google Drive
@@ -272,12 +360,12 @@ export default function DashboardClient({
     setLoginPassword("");
     setMultiplier("1.0");
     // Fetch brokers in background
-    if (brokerList.length === 0) {
+    if (BROKERS.length === 0) {
       try {
         const res = await fetch("/api/brokers");
         if (res.ok) {
           const data = await res.json();
-          setBrokerList(data.brokers || []);
+          // BROKERS is hardcoded; update via redeploy
         }
       } catch {}
     }
@@ -533,7 +621,7 @@ export default function DashboardClient({
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">-- เลือกโบรกเกอร์ --</option>
-                  {brokerList.map(b => (
+                  {BROKERS.map(b => (
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
@@ -800,7 +888,7 @@ export default function DashboardClient({
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 bg-white focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
                 >
                   <option value="">{t("sys_select_broker")}</option>
-                  {brokerList.map(b => (
+                  {BROKERS.map(b => (
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
