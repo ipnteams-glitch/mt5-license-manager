@@ -161,6 +161,17 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                 className="flex-1 rounded-lg border border-zinc-200 px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
                 required
               />
+              <select
+                required
+                value={mt5Broker}
+                onChange={(e) => setMt5Broker(e.target.value)}
+                className="w-44 rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="">-- โบรกเกอร์ --</option>
+                {BROKERS.map(b => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
               <button
                 type="submit"
                 disabled={adding || !mt5Account.trim()}
