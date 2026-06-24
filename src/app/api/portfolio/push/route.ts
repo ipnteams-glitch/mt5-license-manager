@@ -10,6 +10,7 @@ export async function GET(req: Request) {
     const balance = searchParams.get("balance");
     const floating_pl = searchParams.get("floating_pl");
     const total_profit = searchParams.get("total_profit");
+    const broker = searchParams.get("broker") || "";
 
     if (!mt5_account) {
       return NextResponse.json({ error: "ต้องระบุ mt5_account" }, { status: 400 });
@@ -19,6 +20,7 @@ export async function GET(req: Request) {
       balance: parseFloat(balance || "0"),
       floating_pl: parseFloat(floating_pl || "0"),
       total_profit: parseFloat(total_profit || "0"),
+      broker: broker || undefined,
     });
 
     return NextResponse.json({ success: true });
@@ -31,7 +33,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { mt5_account, balance, floating_pl, total_profit } = body;
+    const { mt5_account, balance, floating_pl, total_profit, broker } = body;
 
     if (!mt5_account) {
       return NextResponse.json({ error: "ต้องระบุ mt5_account" }, { status: 400 });
@@ -41,6 +43,7 @@ export async function POST(req: Request) {
       balance: typeof balance === "number" ? balance : parseFloat(balance) || 0,
       floating_pl: typeof floating_pl === "number" ? floating_pl : parseFloat(floating_pl) || 0,
       total_profit: typeof total_profit === "number" ? total_profit : parseFloat(total_profit) || 0,
+      broker: broker || undefined,
     });
 
     return NextResponse.json({ success: true });
