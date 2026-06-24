@@ -2,7 +2,7 @@
 // v2 - broker dropdown 2026-06-24
 
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { PortfolioAccount } from "@/types";
 import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
@@ -23,18 +23,15 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
 
-  const BROKERS = [
-    "InterstellarFinancial-Demo",
-    "InterstellarFinancial-Main",
-    "TPTradesGroup-Demo",
-    "VTMarkets-Demo",
-    "VTMarkets-Live",
-    "Exness-Real",
-    "ICMarkets-Demo",
-    "ICMarkets-Live",
-    "Tickmill-Demo",
-    "Pepperstone-Demo",
-  ];
+  // Fetch broker list
+  useEffect(() => {
+    fetch("/api/brokers")
+      .then(res => res.json())
+      .then(data => { if (data.brokers) setBrokerList(data.brokers); })
+      .catch(() => {});
+  }, []);
+
+  const [brokerList, setBrokerList] = useState<string[]>([]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -169,7 +166,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                 className="w-44 rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none"
               >
                 <option value="">-- โบรกเกอร์ --</option>
-                {BROKERS.map(b => (
+                {brokerList.map(b => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
