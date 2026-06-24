@@ -18,7 +18,7 @@ export default function RenewPage() {
 
   const visiblePackages = (isTestUser
     ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES]
-    : BUYABLE_PACKAGES);
+    : BUYABLE_PACKAGES).filter((k) => k !== "free");
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [step, setStep] = useState<"select" | "qr" | "done">("select");
   const [qrBase64, setQrBase64] = useState("");
