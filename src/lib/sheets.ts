@@ -827,8 +827,8 @@ export async function getPortfolioByEmail(email: string): Promise<PortfolioAccou
 export async function addPortfolioAccount(email: string, mt5Account: string, broker: string): Promise<PortfolioAccount> {
   await initPortfolioSheet();
   const existing = await getPortfolioByEmail(email);
-  if (existing.some((p) => p.mt5_account === mt5Account)) {
-    throw new Error("หมายเลขพอร์ตนี้มีอยู่ในระบบแล้ว");
+  if (existing.some((p) => p.mt5_account === mt5Account && p.broker === broker)) {
+    throw new Error("หมายเลขพอร์ตนี้มีอยู่ในระบบแล้วสำหรับโบรกเกอร์นี้");
   }
   const now = new Date().toISOString();
   const account: PortfolioAccount = {
@@ -886,14 +886,14 @@ export async function deletePortfolioAccount(id: string, email: string): Promise
   invalidateCache(`portfolio:${email}`);
 }
 
-export async function pushPortfolioData(mt5Account: string, data: { balance: number; floating_pl: number; total_profit: number }): Promise<void> {
+export async function pushPortfolioData(mt5Account: string, data: { balance: number; floating_pl: number; total_profit: number; broker?: string }): Promise<void> {
   await initPortfolioSheet();
   const sheets = await getSheets();
   const sid = sheetId();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${PORTFOLIO_SHEET}!A:I` });
   const rows = res.data.values;
   if (!rows || rows.length <= 1) throw new Error("ไม่พบพอร์ตนี้");
-  const idx = rows.findIndex((r) => r[2] === mt5Account);
+  const idx = rows.findIndex((r) => r[2] === mt5Account && (data.broker ? r[3] === data.broker : true));
   if (idx < 0) throw new Error("ไม่พบพอร์ตนี้");
 
   // Skip update if balance & total_profit unchanged (floating_pl ignored — changes every tick)

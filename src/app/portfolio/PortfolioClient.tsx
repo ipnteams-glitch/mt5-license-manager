@@ -15,11 +15,25 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   const { t } = useT();
   const [accounts, setAccounts] = useState<PortfolioAccount[]>(initialAccounts);
   const [mt5Account, setMt5Account] = useState("");
+  const [mt5Broker, setMt5Broker] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+
+  const BROKERS = [
+    "InterstellarFinancial-Demo",
+    "InterstellarFinancial-Main",
+    "TPTradesGroup-Demo",
+    "VTMarkets-Demo",
+    "VTMarkets-Live",
+    "Exness-Real",
+    "ICMarkets-Demo",
+    "ICMarkets-Live",
+    "Tickmill-Demo",
+    "Pepperstone-Demo",
+  ];
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -35,7 +49,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
       const res = await fetch("/api/portfolio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mt5_account: mt5Account.trim() }),
+        body: JSON.stringify({ mt5_account: mt5Account.trim(), broker: mt5Broker }),
       });
       const data = await res.json();
       if (data.success) {
