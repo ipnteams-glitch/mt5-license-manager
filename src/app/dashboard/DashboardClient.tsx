@@ -76,7 +76,18 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
-  const [brokerList, setBrokerList] = useState<string[]>([]); // ponytail: fetch from /api/brokers instead of static JSON
+  const BROKERS = [
+  "InterstellarFinancial-Demo",
+  "InterstellarFinancial-Main",
+  "TPTradesGroup-Demo",
+  "VTMarkets-Demo",
+  "VTMarkets-Live",
+  "Exness-Real",
+  "ICMarkets-Demo",
+  "ICMarkets-Live",
+  "Tickmill-Demo",
+  "Pepperstone-Demo",
+];
   const [eaVersion, setEaVersion] = useState<string | null>(null);
 
   // Fetch EA version from Google Drive
@@ -87,13 +98,7 @@ export default function DashboardClient({
       .catch(() => {});
   }, []);
 
-  // Fetch broker list on mount
-  useEffect(() => {
-    fetch("/api/brokers")
-      .then(res => res.json())
-      .then(data => { if (data.brokers) setBrokerList(data.brokers); })
-      .catch(() => {});
-  }, []);
+
 
   // Show approve popup per email (first visit per account)
   useEffect(() => {
@@ -278,12 +283,12 @@ export default function DashboardClient({
     setLoginPassword("");
     setMultiplier("1.0");
     // Fetch brokers in background
-    if (brokerList.length === 0) {
+    if (BROKERS.length === 0) {
       try {
         const res = await fetch("/api/brokers");
         if (res.ok) {
           const data = await res.json();
-          setBrokerList(data.brokers || []);
+          // brokers loaded from hardcoded list
         }
       } catch {}
     }
@@ -539,7 +544,7 @@ export default function DashboardClient({
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
                 >
                   <option value="">-- เลือกโบรกเกอร์ --</option>
-                  {brokerList.map(b => (
+                  {BROKERS.map(b => (
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
@@ -806,7 +811,7 @@ export default function DashboardClient({
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2.5 text-sm text-gray-900 bg-white focus:border-blue-500 focus:outline-none disabled:bg-zinc-100"
                 >
                   <option value="">{t("sys_select_broker")}</option>
-                  {brokerList.map(b => (
+                  {BROKERS.map(b => (
                     <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
