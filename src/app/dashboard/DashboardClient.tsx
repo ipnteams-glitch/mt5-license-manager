@@ -40,6 +40,7 @@ export default function DashboardClient({
   const { t } = useT();
   const [showAddPort, setShowAddPort] = useState(false);
   const [mt5Account, setMt5Account] = useState("");
+  const [mt5Broker, setMt5Broker] = useState("");
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -83,6 +84,14 @@ export default function DashboardClient({
     fetch("/api/ea-version")
       .then(res => res.json())
       .then(data => { if (data.version) setEaVersion(data.version); })
+      .catch(() => {});
+  }, []);
+
+  // Fetch broker list on mount
+  useEffect(() => {
+    fetch("/api/brokers")
+      .then(res => res.json())
+      .then(data => { if (data.brokers) setBrokerList(data.brokers); })
       .catch(() => {});
   }, []);
 
@@ -193,7 +202,7 @@ export default function DashboardClient({
       const res = await fetch("/api/ports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mt5_account: mt5Account }),
+        body: JSON.stringify({ mt5_account: mt5Account, mt5_broker: mt5Broker }),
       });
 
       const data = await res.json();
@@ -203,6 +212,7 @@ export default function DashboardClient({
       setUsedCount(usedCount + 1);
       setMt5Account("");
       setShowAddPort(false);
+      setMt5Broker("");
       setSuccess(t("add_port_success", { account: mt5Account }));
     } catch (err: any) {
       setError(err.message);
@@ -519,6 +529,20 @@ export default function DashboardClient({
                   className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none"
                   placeholder="12345678"
                 />
+              </div>
+              <div className="mt-3">
+                <label className="block text-xs font-medium text-zinc-600 mb-1">Broker Server</label>
+                <select
+                  required
+                  value={mt5Broker}
+                  onChange={(e) => setMt5Broker(e.target.value)}
+                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+                >
+                  <option value="">-- เลือกโบรกเกอร์ --</option>
+                  {brokerList.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
               </div>
               <div className="mt-3 flex gap-2">
                 <button
