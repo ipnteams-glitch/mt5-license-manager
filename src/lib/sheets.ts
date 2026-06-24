@@ -190,9 +190,12 @@ export function canUpgrade(currentPkg: PackageType, newPkg: PackageType, isExpir
   const current = PACKAGES[currentPkg];
   const next = PACKAGES[newPkg];
 
-  // free → free: ไม่อนุญาตให้ต่อฟรีซ้ำ — ต้องซื้อแพคเกจ
+  // free → free: ได้เฉพาะตอนหมดอายุแล้ว (ลูกค้าเก่า 1 port ถาวร → 5 ports/14d)
   if (currentPkg === "free" && newPkg === "free") {
-    return { allowed: false, reason: "คุณเคยใช้แพคเกจฟรีแล้ว — ยังคงใช้ฟรี 1 พอร์ตถาวร ต้องการเพิ่มพอร์ต กรุณาเลือกแพคเกจเสียเงิน" };
+    if (!isExpired) {
+      return { allowed: false, reason: "แพคเกจฟรียังไม่หมดอายุ — รอให้หมดอายุก่อนจึงต่อฟรีได้อีกครั้ง" };
+    }
+    return { allowed: true };
   }
 
   // free → paid: ได้เสมอ
