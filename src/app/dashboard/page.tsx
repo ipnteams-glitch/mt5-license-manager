@@ -51,7 +51,13 @@ export default async function DashboardPage() {
 
   const pkgInfo = PACKAGES[member.package] || PACKAGES.none;
   const portsUsed = ports.length;
-  const portsTotal = member.max_ports > 0 ? member.max_ports : 1;
+  // ── Free package หลังหมดอายุ: เหลือ 1 port ถาวร ──
+  let portsTotal = member.max_ports > 0 ? member.max_ports : 1;
+  let packageLabel = pkgInfo.label;
+  if (member.package === "free" && isExpired) {
+    portsTotal = 1;
+    packageLabel = "ฟรี — เหลือ 1 พอร์ตถาวร\n(อัปเกรดเพื่อเพิ่มพอร์ต)";
+  }
 
   // คำนวณวันหมดอายุ
   let daysLeft = 0;
@@ -74,7 +80,7 @@ export default async function DashboardPage() {
       ports={ports}
       portsUsed={portsUsed}
       portsTotal={portsTotal}
-      packageLabel={pkgInfo.label}
+      packageLabel={packageLabel}
       daysLeft={daysLeft}
       isExpired={isExpired}
       isAdmin={isAdmin}

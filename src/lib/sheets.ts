@@ -111,6 +111,15 @@ export async function upsertMember(email: string, name: string): Promise<Member>
   const idx = members.findIndex((m) => m.email === email);
   if (idx >= 0) {
     members[idx].name = name || members[idx].name;
+    // ถ้าสมาชิกเก่ายังไม่มีแพคเกจ หรือ max_ports=0 → ให้ free
+    if (members[idx].package === "none" || members[idx].max_ports <= 0) {
+      const now = new Date();
+      const expiry = new Date(now);
+      expiry.setDate(expiry.getDate() + PACKAGES.free.duration_days);
+      members[idx].package = "free";
+      members[idx].max_ports = PACKAGES.free.max_ports;
+      members[idx].expiry_date = expiry.toISOString();
+    }
     const sheets = await getSheets();
     await sheets.spreadsheets.values.update({
       spreadsheetId: sheetId(), range: `${MEMBERS_SHEET}!A${idx + 2}:I${idx + 2}`,
@@ -125,7 +134,7 @@ export async function upsertMember(email: string, name: string): Promise<Member>
     expiry.setDate(expiry.getDate() + PACKAGES.free.duration_days);
     const member: Member = {
       email, name: name || email.split("@")[0],
-      package: "free", max_ports: 1,
+      package: "free", max_ports: PACKAGES.free.max_ports,
       expiry_date: expiry.toISOString(),
       role: "user", created_at: now.toISOString(),
     };
