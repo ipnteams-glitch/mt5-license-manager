@@ -248,7 +248,7 @@ export const translations = {
 
   // ── Package labels (full) ──
   pkg_label_none: { th: "ไม่มีแพคเกจ", en: "No Package" },
-  pkg_label_free: { th: "ฟรี 30 วัน / 5 พอร์ต", en: "Free 30 Days / 5 Ports" },
+  pkg_label_free: { th: "ฟรี 14 วัน / 5 พอร์ต", en: "Free 14 Days / 5 Ports" },
   pkg_label_free_ib: { th: "⭐ ฟรี + IB ตลอดชีพ (Unlimited)", en: "⭐ Free + IB Lifetime (Unlimited)" },
   pkg_label_test_1: { th: "🧪 1 บาท / 3 วัน", en: "🧪 1 THB / 3 Days" },
   pkg_label_basic: { th: "30day | ใช้ได้ทุกโบรค", en: "30day | Any Broker" },

@@ -21,7 +21,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      message: "เปิดใช้งานแพคเกจฟรี 30 วัน สำเร็จ",
+      message: "เปิดใช้งานแพคเกจฟรี 14 วัน สำเร็จ",
       package: "free",
       expiry_date: expiry,
     });
