@@ -1,4 +1,5 @@
 "use client";
+// v2 - broker dropdown 2026-06-24
 
 import { signOut, useSession } from "next-auth/react";
 import { useState } from "react";
