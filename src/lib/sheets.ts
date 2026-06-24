@@ -339,8 +339,11 @@ export async function deletePort(portId: string, email: string): Promise<{ delet
   return { deletedFromPortSystems, vpsId, mt5Account };
 }
 
-export async function findPortByAccount(mt5Account: string): Promise<Port | null> {
+export async function findPortByAccount(mt5Account: string, broker?: string): Promise<Port | null> {
   const all = await getAllPorts();
+  if (broker) {
+    return all.find((p) => p.mt5_account === mt5Account && p.mt5_broker === broker && p.status === "active") || null;
+  }
   return all.find((p) => p.mt5_account === mt5Account && p.status === "active") || null;
 }
 

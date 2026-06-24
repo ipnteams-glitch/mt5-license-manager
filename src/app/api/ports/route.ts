@@ -17,11 +17,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "กรุณากรอกหมายเลขพอร์ต MT5" }, { status: 400 });
     }
 
-    // เช็คเลข MT5 ซ้ำ — ห้ามใช้เลขเดิมซ้ำ (แม้คนละ broker)
+    // เช็คเลข MT5 + broker ซ้ำ — ห้ามใช้คู่เดียวกัน
     const allPorts = await getAllPorts();
-    const duplicate = allPorts.find(p => p.mt5_account === mt5_account && p.status === "active");
+    const duplicate = allPorts.find(p => p.mt5_account === mt5_account && p.mt5_broker === (mt5_broker || "") && p.status === "active");
     if (duplicate) {
-      return NextResponse.json({ error: "หมายเลขพอร์ต MT5 นี้ถูกลงทะเบียนแล้ว — กรุณาใช้หมายเลขอื่น" }, { status: 409 });
+      return NextResponse.json({ error: "หมายเลขพอร์ต MT5 นี้ถูกลงทะเบียนแล้วในโบรกเกอร์นี้ — กรุณาใช้หมายเลขอื่นหรือเปลี่ยนโบรกเกอร์" }, { status: 409 });
     }
 
     // ดึงข้อมูลสมาชิกเพื่อเช็คโควต้า

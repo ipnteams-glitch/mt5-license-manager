@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const port = await findPortByAccount(account);
+    const port = await findPortByAccount(account, broker || undefined);
 
     if (!port) {
       return NextResponse.json({
