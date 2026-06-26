@@ -83,6 +83,7 @@ export default function DashboardClient({
   "VTMarkets-Demo",
   "VTMarkets-Live",
   "VantageMarkets-Live",
+  "HFMarketsGlobal-Live",
   "ICMarketsSC-Demo",
   "ICMarketsSC-MT5-2",
   "ICMarketsSC-MT5-3",
