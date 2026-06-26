@@ -82,6 +82,7 @@ export default function DashboardClient({
   "TPTradesGroup-Online",
   "VTMarkets-Demo",
   "VTMarkets-Live",
+  "VantageMarkets-Live",
   "ICMarketsSC-Demo",
   "ICMarketsSC-MT5-2",
   "ICMarketsSC-MT5-3",
@@ -163,7 +164,7 @@ export default function DashboardClient({
   "Exness-MT5Real43",
   "Exness-MT5Real44",
   "Exness-MT5Real45",
-  "Exness-MT5Real46"
+  "Exness-MT5Real46",
 ];
   const [eaVersion, setEaVersion] = useState<string | null>(null);
 
@@ -359,16 +360,6 @@ export default function DashboardClient({
     setLoginMsg("");
     setLoginPassword("");
     setMultiplier("1.0");
-    // Fetch brokers in background
-    if (BROKERS.length === 0) {
-      try {
-        const res = await fetch("/api/brokers");
-        if (res.ok) {
-          const data = await res.json();
-          // BROKERS is hardcoded; update via redeploy
-        }
-      } catch {}
-    }
     // Check ownership BEFORE opening modal
     let canOpen = false;
     try {

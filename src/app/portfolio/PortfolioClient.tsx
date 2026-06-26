@@ -31,6 +31,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   "TPTradesGroup-Online",
   "VTMarkets-Demo",
   "VTMarkets-Live",
+  "VantageMarkets-Live",
   "ICMarketsSC-Demo",
   "ICMarketsSC-MT5-2",
   "ICMarketsSC-MT5-3",
@@ -112,7 +113,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
   "Exness-MT5Real43",
   "Exness-MT5Real44",
   "Exness-MT5Real45",
-  "Exness-MT5Real46"
+  "Exness-MT5Real46",
 ];
 
   async function handleAdd(e: React.FormEvent) {
