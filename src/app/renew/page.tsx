@@ -54,6 +54,12 @@ export default function RenewPage() {
     return () => clearInterval(timer);
   }, [step, expiresAt]);
 
+  function pkgBg(key: PackageType) {
+    if (key === "1000_2m" || key === "3900_6m" || key === "live_with_us") return "bg-amber-50";
+    if (key === "ib_vps_2200" || key === "free_ib") return "bg-purple-50";
+    return "";
+  }
+
   function formatTime(seconds: number) {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -376,7 +382,7 @@ export default function RenewPage() {
                 key={key}
                 onClick={() => setSelected(key)}
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-                  isSelected ? "border-blue-500 bg-blue-50 shadow-md" : "border-zinc-200 hover:border-zinc-300"
+                  isSelected ? "border-blue-500 bg-blue-50 shadow-md" : `border-zinc-200 hover:border-zinc-300 ${pkgBg(key)}`
                 }`}
               >
                 <div className="flex justify-between items-center">
@@ -410,7 +416,7 @@ export default function RenewPage() {
           <button
             onClick={() => setSelected("free_ib")}
             className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-              selected === "free_ib" ? "border-green-500 bg-green-50 shadow-md" : "border-zinc-200 hover:border-zinc-300"
+              selected === "free_ib" ? "border-green-500 bg-green-50 shadow-md" : `border-zinc-200 hover:border-zinc-300 ${pkgBg("free_ib")}`
             }`}
           >
             <div className="flex justify-between items-center">
