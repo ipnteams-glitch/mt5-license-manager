@@ -240,22 +240,24 @@ export const translations = {
   pkg_free: { th: "ฟรี", en: "Free" },
   pkg_free_ib: { th: "⭐ ฟรี+IB", en: "⭐ Free+IB" },
   pkg_test_1: { th: "ทดสอบ", en: "Test" },
+  pkg_6month: { th: "6Month", en: "6Month" },
   pkg_basic: { th: "Basic", en: "Basic" },
   pkg_premium: { th: "Premium", en: "Premium" },
   pkg_vip: { th: "💎 VIP", en: "💎 VIP" },
   pkg_ib_vps: { th: "VPS for IB", en: "VPS for IB" },
-  pkg_live_with_us: { th: "Live With Us", en: "Live With Us" },
+  pkg_live_with_us: { th: "💎 LifeTime", en: "💎 LifeTime" },
 
   // ── Package labels (full) ──
   pkg_label_none: { th: "ไม่มีแพคเกจ", en: "No Package" },
   pkg_label_free: { th: "ฟรี 14 วัน / 5 พอร์ต", en: "Free 14 Days / 5 Ports" },
   pkg_label_free_ib: { th: "⭐ ฟรี + IB ตลอดชีพ (Unlimited)", en: "⭐ Free + IB Lifetime (Unlimited)" },
   pkg_label_test_1: { th: "🧪 1 บาท / 3 วัน", en: "🧪 1 THB / 3 Days" },
+  pkg_label_6month: { th: "180 วัน | ทุกโบรค", en: "180 Day | Any Broker" },
   pkg_label_basic: { th: "30day | ใช้ได้ทุกโบรค", en: "30day | Any Broker" },
   pkg_label_premium: { th: "90day | ใช้ได้ทุกโบรค", en: "90day | Any Broker" },
   pkg_label_vip: { th: "1Y | ใช้ได้ทุกโบรค", en: "1Y | Any Broker" },
   pkg_label_ib_vps: { th: "vCPU 2 / RAM 4GB / 1 ปี", en: "vCPU 2 / RAM 4GB / 1 Year" },
-  pkg_label_live_with_us: { th: "Lifetime | ใช้ได้ทุกโบรค | รับประกัน 2 ปี", en: "Lifetime | Any Broker | Guarantee 2Y" },
+  pkg_label_live_with_us: { th: "Lifetime | ใช้ได้ทุกโบรค", en: "Lifetime | Any Broker" },
 
   // ── Renew extras ──
   select_package_first: { th: "กรุณาเลือกแพคเกจก่อน", en: "Please select a package first" },
@@ -399,6 +401,7 @@ export function getLocalizedPackage(pkgType: PackageType, lang: Lang): PackageIn
   const nameKey = (
     pkgType === "1000_2m" ? "pkg_basic" :
     pkgType === "2490_3m" ? "pkg_premium" :
+    pkgType === "3900_6m" ? "pkg_6month" :
     pkgType === "4900_1y" ? "pkg_vip" :
     pkgType === "ib_vps_2200" ? "pkg_ib_vps" :
     pkgType === "live_with_us" ? "pkg_live_with_us" :
@@ -411,6 +414,7 @@ export function getLocalizedPackage(pkgType: PackageType, lang: Lang): PackageIn
   const labelKey = (
     pkgType === "1000_2m" ? "pkg_label_basic" :
     pkgType === "2490_3m" ? "pkg_label_premium" :
+    pkgType === "3900_6m" ? "pkg_label_6month" :
     pkgType === "4900_1y" ? "pkg_label_vip" :
     pkgType === "ib_vps_2200" ? "pkg_label_ib_vps" :
     pkgType === "live_with_us" ? "pkg_label_live_with_us" :

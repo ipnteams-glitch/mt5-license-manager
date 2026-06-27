@@ -35,7 +35,7 @@ export interface Payment {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
+export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -67,7 +67,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "🧪 1 THB / 3 Days", rank: 2,
   },
   "1000_2m": {
-    key: "1000_2m", name: "Basic", name_en: "Basic", price: 390, duration_days: 30, max_ports: 2,
+    key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
     label: "Any Broker | 30Day", rank: 4,
     old_price: 990,
   },
@@ -75,6 +75,11 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     key: "2490_3m", name: "Premium", name_en: "Premium", price: 990, duration_days: 60, max_ports: 5,
     label: "60day | Any Broker", rank: 6,
     old_price: 3900,
+  },
+  "3900_6m": {
+    key: "3900_6m", name: "6Month", name_en: "6Month", price: 3900, duration_days: 180, max_ports: 10,
+    label: "180 Day | Any Broker", rank: 5,
+    old_price: 5900,
   },
   "4900_1y": {
     key: "4900_1y", name: "💎 VIP", name_en: "VIP", price: 5900, duration_days: 365, max_ports: 15,
@@ -86,8 +91,8 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "vCPU 2 / RAM 4GB / 1 Year\nOnly VIP | Life | IB", rank: 8,
   },
   live_with_us: {
-    key: "live_with_us", name: "👑 Life", name_en: "Life", price: 15900, duration_days: 99999, max_ports: 999,
-    label: "Lifetime | Any Broker\nGuarantee 2 Year", rank: 9,
+    key: "live_with_us", name: "💎 LifeTime", name_en: "LifeTime", price: 9900, duration_days: 99999, max_ports: 999,
+    label: "Lifetime | Any Broker", rank: 9,
     old_price: 24900,
   },
 };
@@ -105,7 +110,7 @@ export interface PortfolioAccount {
   created_at: string;
 }
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "4900_1y", "live_with_us", "ib_vps_2200"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "3900_6m", "4900_1y", "live_with_us", "ib_vps_2200"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 
