@@ -64,11 +64,6 @@ export default function JunePromoPage() {
   async function handleActivate() {
     if (!selected) return;
 
-    // free_ib -> link to Line OA
-    if (selected === "free_ib") {
-      window.open("https://line.me/R/ti/p/@harvestfarm", "_blank");
-      return;
-    }
 
     setError("");
     setActivating(true);
@@ -203,7 +198,7 @@ export default function JunePromoPage() {
               const pkg = PACKAGES[key];
               const discounted = promoPrice(key);
               const isSelected = selected === key;
-              const isFree = key === "free_ib";
+              const isFree = false;
               const isNoDiscount = key === "ib_vps_2200" || key === "live_with_us";
               return (
                 <button

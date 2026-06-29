@@ -56,7 +56,7 @@ export default function RenewPage() {
 
   function pkgBg(key: PackageType) {
     if (key === "1000_2m" || key === "3900_6m" || key === "live_with_us") return "bg-amber-50";
-    if (key === "ib_vps_2200" || key === "free_ib") return "bg-purple-50";
+    if (key === "ib_vps_2200") return "bg-purple-50";
     return "";
   }
 
@@ -111,11 +111,6 @@ export default function RenewPage() {
     }
 
 
-    // ฟรี+IB → ลิงค์ไป Line OA
-    if (selected === "free_ib") {
-      window.open("https://line.me/R/ti/p/@harvestfarm", "_blank");
-      return;
-    }
 
     // แพคเกจเสียเงิน → สร้าง QR
     try {
@@ -376,7 +371,7 @@ export default function RenewPage() {
           {visiblePackages.map((key) => {
             const pkg = PACKAGES[key];
             const isSelected = selected === key;
-            const isFree = key === "free_ib" || key === "test_1";
+            const isFree = key === "test_1";
             return (
               <button
                 key={key}
@@ -412,24 +407,6 @@ export default function RenewPage() {
             );
           })}
 
-          {/* ฟรี+IB — ลิงค์ไป Line OA */}
-          <button
-            onClick={() => setSelected("free_ib")}
-            className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-              selected === "free_ib" ? "border-green-500 bg-green-50 shadow-md" : `border-zinc-200 hover:border-zinc-300 ${pkgBg("free_ib")}`
-            }`}
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="font-semibold text-zinc-800">{t("pkg_free_ib")}</p>
-                <p className="text-xs text-zinc-500">{t("free_ib_lifetime")}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-lg font-bold text-green-600">{t("free_label")}</p>
-                <p className="text-xs text-zinc-400">Unlimited</p>
-              </div>
-            </div>
-          </button>
         </div>
 
         <button
@@ -437,7 +414,7 @@ export default function RenewPage() {
           disabled={!selected || activating}
           className="mt-6 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {activating ? t("loading") : selected === "free" ? t("activate_free") : selected === "free_ib" ? t("apply_line_oa") : t("create_qr")}
+          {activating ? t("loading") : selected === "free" ? t("activate_free") : t("create_qr")}
         </button>
 
         <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"} className="mt-3 w-full text-sm text-zinc-500 hover:underline">

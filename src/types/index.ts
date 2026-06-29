@@ -67,7 +67,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "🧪 1 THB / 3 Days", rank: 2,
   },
   "1000_2m": {
-    key: "1000_2m", name: "Basic", name_en: "Basic", price: 590, duration_days: 30, max_ports: 2,
+    key: "1000_2m", name: "Basic", name_en: "Basic", price: 299, duration_days: 30, max_ports: 2,
     label: "Any Broker | 30Day", rank: 4,
     old_price: 990,
   },
@@ -77,7 +77,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 3900,
   },
   "3900_6m": {
-    key: "3900_6m", name: "6Month", name_en: "6Month", price: 3900, duration_days: 180, max_ports: 10,
+    key: "3900_6m", name: "6Month", name_en: "6Month", price: 2590, duration_days: 180, max_ports: 10,
     label: "180 Day | Any Broker", rank: 5,
     old_price: 5900,
   },
