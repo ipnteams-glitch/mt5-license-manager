@@ -62,16 +62,14 @@ export default function LandingPage() {
             </div>
           </button>
 
-          <button
-            onClick={() => {
-              setLoading("portfolio");
-              signIn("google", { callbackUrl: "/portfolio" });
-            }}
-            disabled={loading !== null}
-            className="flex-1 rounded-xl bg-blue-600 px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md disabled:opacity-50"
+          <a
+            href="https://thaifxbook.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-1 items-center justify-center rounded-xl bg-blue-600 px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
           >
-            {loading === "portfolio" ? t("loading") : t("my_portfolio")}
-          </button>
+            {t("my_portfolio")}
+          </a>
         </div>
 
         <p className="mt-8 text-xs text-zinc-400">
