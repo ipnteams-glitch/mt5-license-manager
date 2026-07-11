@@ -162,7 +162,7 @@ export default function RenewCryptoPage() {
                 <img src={topupData.qr_url} alt="QR" className="h-full w-full object-contain" />
               </div>
               <div className="mb-4 flex items-center gap-2 rounded-lg bg-zinc-100 p-2">
-                <code className="flex-1 break-all text-xs text-left">{topupData.wallet_address}</code>
+                <code className="flex-1 break-all text-xs text-zinc-800">{topupData.wallet_address}</code>
                 <button onClick={() => copyAddr(topupData.wallet_address)} className="shrink-0 rounded bg-blue-600 px-2 py-1 text-xs text-white">{copied ? t("crypto_copied") : t("crypto_copy_address")}</button>
               </div>
               <p className="mb-4 rounded-lg bg-amber-50 p-2 text-xs text-amber-700">{t("crypto_warning_network", { network: topupData.network_label })}</p>
