@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { signIn } from "next-auth/react";
 import type { PackageType, CryptoNetwork } from "@/types";
 import { t as translate, type TKey } from "@/lib/i18n";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES, CRYPTO_NETWORK_INFO, PACKAGE_USDT_PRICES } from "@/types";
@@ -12,7 +11,7 @@ const t = (key: TKey, vars?: Record<string, string | number>) => translate(key, 
 export default function RenewCryptoPage() {
   const { data: session, status } = useSession();
   if (status === "loading") return <Spinner />;
-  if (!session) return <NeedLogin />;
+  const isLoggedIn = !!session;
 
   const [view, setView] = useState<"main" | "topup">("main");
   const [balance, setBalance] = useState(0);
@@ -29,7 +28,7 @@ export default function RenewCryptoPage() {
   const [copied, setCopied] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isTestUser = session.user?.email === "ipnteams@gmail.com";
+  const isTestUser = session?.user?.email === "ipnteams@gmail.com";
   const visiblePackages = (isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES).filter(k => k !== "free");
 
   // Fetch balance
@@ -252,17 +251,6 @@ function Spinner() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50">
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-zinc-300 border-t-blue-600" />
-    </div>
-  );
-}
-
-function NeedLogin() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-      <div className="text-center">
-        <p className="text-zinc-700 mb-4">Please sign in to access Crypto Wallet</p>
-        <button onClick={() => signIn("google", { callbackUrl: "/renewcrypto" })} className="rounded-lg bg-blue-600 px-6 py-2 text-white">Sign in with Google</button>
-      </div>
     </div>
   );
 }
