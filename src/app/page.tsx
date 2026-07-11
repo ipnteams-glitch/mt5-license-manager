@@ -49,7 +49,7 @@ export default function LandingPage() {
               signIn("google", { callbackUrl: "/dashboard" });
             }}
             disabled={loading !== null}
-            className="flex-1 rounded-xl border border-zinc-200 bg-white px-6 py-4 text-sm font-semibold text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:shadow-md disabled:opacity-50"
+            className="flex flex-1 items-center justify-center rounded-xl border border-zinc-200 bg-white px-6 py-4 text-sm font-semibold text-zinc-700 shadow-sm transition-all hover:bg-zinc-50 hover:shadow-md disabled:opacity-50"
           >
             <div className="flex items-center justify-center gap-2">
               <svg className="h-5 w-5" viewBox="0 0 24 24">
