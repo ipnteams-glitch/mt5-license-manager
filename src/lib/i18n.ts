@@ -378,6 +378,44 @@ export const translations = {
 
   // EA Version
   ea_version: { th: "เวอร์ชั่น EA", en: "EA Version" },
+
+  // ── Crypto Payment (renewcrypto) ──
+  crypto_title: { th: "ชำระด้วย Crypto", en: "Pay with Crypto" },
+  crypto_select_network: { th: "เลือก Network", en: "Select Network" },
+  crypto_network_fee: { th: "ค่าธรรมเนียม", en: "Fee" },
+  crypto_wallet_address: { th: "Wallet Address", en: "Wallet Address" },
+  crypto_copy_address: { th: "📋 คัดลอก", en: "📋 Copy" },
+  crypto_copied: { th: "คัดลอกแล้ว!", en: "Copied!" },
+  crypto_send_usdt: { th: "ส่ง {amount} USDT", en: "Send {amount} USDT" },
+  crypto_warning_network: { th: "⚠️ ส่งเฉพาะ USDT บนเครือข่าย {network} — ส่งผิด network = เงินหาย", en: "⚠️ Send only USDT on {network} — wrong network = lost funds" },
+  crypto_checking: { th: "กำลังตรวจสอบการโอน...", en: "Checking for transfer..." },
+  crypto_poll_count: { th: "ตรวจสอบครั้งที่ {count}", en: "Check #{count}" },
+  crypto_waiting: { th: "ยังไม่พบรายการโอน", en: "No transfer found yet" },
+  crypto_received_label: { th: "พบการโอน", en: "Transfer found" },
+  crypto_found_mismatch: { th: "พบการโอนแต่ยอดไม่ตรง", en: "Transfer found but amount mismatch" },
+  crypto_expected: { th: "ต้องโอน", en: "Expected" },
+  crypto_received: { th: "คุณโอน", en: "Received" },
+  crypto_still_checking: { th: "ระบบยังตรวจสอบต่อ — โอนเพิ่มได้ที่ address เดิม", en: "Still checking — send more to same address" },
+  crypto_payment_success: { th: "✅ ชำระสำเร็จ!", en: "✅ Payment Successful!" },
+  crypto_redirect_dashboard: { th: "กำลังกลับไปหน้า Dashboard...", en: "Redirecting to Dashboard..." },
+  crypto_expired: { th: "⏰ หมดเวลา — กรุณาสร้างรายการใหม่", en: "⏰ Expired — Please create a new order" },
+  crypto_cancel_btn: { th: "❌ ยกเลิก", en: "❌ Cancel" },
+  crypto_contact: { th: "ติดต่อ: Line: @harvestfarm", en: "Contact: Line: @harvestfarm" },
+  crypto_back: { th: "← เลือกแพคเกจใหม่", en: "← Select new package" },
+  crypto_create_qr: { th: "สร้าง QR Code", en: "Create QR Code" },
+  crypto_network_label: { th: "เครือข่าย", en: "Network" },
+  crypto_amount_thb: { th: "จำนวนเงิน (THB)", en: "Amount (THB)" },
+  crypto_amount_usdt: { th: "จำนวน USDT", en: "USDT Amount" },
+  crypto_rate: { th: "อัตราแลกเปลี่ยน", en: "Exchange Rate" },
+
+  // ── Wallet System ──
+  wallet_title: { th: "Crypto Wallet", en: "Crypto Wallet" },
+  wallet_balance: { th: "ยอดคงเหลือ", en: "Balance" },
+  wallet_topup: { th: "📥 เติมเงิน", en: "📥 Top Up" },
+  wallet_buy: { th: "ซื้อเลย", en: "Buy Now" },
+  wallet_insufficient: { th: "ยอดไม่พอ — เติมเงินก่อน", en: "Insufficient balance — top up first" },
+  wallet_purchase_success: { th: "ซื้อแพคเกจสำเร็จ!", en: "Package purchased!" },
+  wallet_topup_any: { th: "💡 โอนเท่าไหร่ก็ได้ — เข้ากระเป๋า", en: "💡 Send any amount — credited to your wallet" },
 } as const;
 
 // ── Helper: translate a key ──

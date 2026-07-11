@@ -171,3 +171,53 @@ export const ALL_SYSTEMS: string[] = Array.from(
   { length: 20 },
   (_, i) => `Sys_${i + 1}`
 );
+
+// ── Crypto ──
+export type CryptoNetwork = "trc20" | "bep20" | "erc20";
+
+export const USDT_CONTRACTS: Record<CryptoNetwork, string> = {
+  trc20: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+  bep20: "0x55d398326f99059fF775485246999027B3197955",
+  erc20: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+};
+
+export const CRYPTO_NETWORK_INFO: { key: CryptoNetwork; label: string; fee: string; explorer: string; decimals: number }[] = [
+  { key: "trc20", label: "TRC-20", fee: "~$1", explorer: "https://tronscan.org/#/transaction/", decimals: 6 },
+  { key: "bep20", label: "BEP-20 (BSC)", fee: "~$0.10", explorer: "https://bscscan.com/tx/", decimals: 18 },
+  { key: "erc20", label: "ERC-20 (Ethereum)", fee: "~$3-10", explorer: "https://etherscan.io/tx/", decimals: 6 },
+];
+
+// ── Crypto Wallet (ระบบกระเป๋าเงิน) ──
+export interface CryptoWallet {
+  email: string;
+  usdt_balance: number;
+  updated_at: string;
+}
+
+// ── Crypto Topup (รายการเติมเงิน) ──
+export interface CryptoTopup {
+  id: string;
+  email: string;
+  network: CryptoNetwork;
+  wallet_address: string;
+  txid: string;
+  amount: number;
+  status: "pending" | "paid" | "failed";
+  created_at: string;
+  paid_at: string;
+  expires_at: string;
+}
+
+// ── USDT Prices (ปรับได้ตามอัตราตลาด) ──
+export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
+  none: 0,
+  free_ib: 0,
+  free: 0,
+  test_1: 0.01,
+  "1000_2m": 11,
+  "2490_3m": 31,
+  "3900_6m": 81,
+  "4900_1y": 176,
+  ib_vps_2200: 66,
+  live_with_us: 301,
+};

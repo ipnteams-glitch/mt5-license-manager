@@ -95,3 +95,37 @@ export async function notifyVpsOrder(
     console.error("Notify VPS failed:", e);
   }
 }
+
+// 💰 แจ้งแอดมินเมื่อมีคริปโตเข้า (auto-verify ล้มเหลว → fallback)
+export async function notifyCryptoPayment(
+  email: string,
+  packageName: string,
+  amountUsdt: number,
+  network: string,
+  paymentId: string,
+  txid: string,
+  status: "paid" | "mismatch",
+) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!botToken || !chatId) return;
+  try {
+    const emoji = status === "paid" ? "✅" : "⚠️";
+    const text = [
+      `${emoji} Crypto Payment (${status === "paid" ? "สำเร็จ" : "ยอดไม่ตรง"})`,
+      `👤 ${email}`,
+      `📦 ${packageName}`,
+      `💰 ${amountUsdt} USDT`,
+      `🔗 ${network.toUpperCase()}`,
+      `🔑 ${txid.slice(0, 16)}...`,
+      status === "mismatch" ? `⚠️ ยอดเงินไม่ตรง — ตรวจสอบด่วน!` : "",
+    ].filter(Boolean).join("\n");
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text }),
+    });
+  } catch (e) {
+    console.error("Notify crypto failed:", e);
+  }
+ }
