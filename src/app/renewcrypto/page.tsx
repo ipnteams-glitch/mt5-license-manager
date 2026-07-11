@@ -198,7 +198,7 @@ export default function RenewCryptoPage() {
             {CRYPTO_NETWORK_INFO.map(net => (
               <button key={net.key} onClick={() => setTopupNetwork(net.key)}
                 className={`flex-1 rounded-lg border-2 p-2 text-xs ${topupNetwork === net.key ? "border-blue-500 bg-blue-50" : "border-zinc-200"}`}>
-                <p className="font-semibold">{net.label}</p><p className="text-zinc-700">{net.fee}</p>
+                <p className="font-semibold text-zinc-800">{net.label}</p><p className="text-zinc-700">{net.fee}</p>
               </button>
             ))}
           </div>
