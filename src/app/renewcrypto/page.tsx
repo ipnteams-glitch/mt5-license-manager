@@ -125,7 +125,7 @@ export default function RenewCryptoPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setBalance(data.new_balance);
-      alert(`${data.message}\n${data.package_label}\nหมดอายุ ${new Date(data.expiry_date).toLocaleDateString("th-TH")}`);
+      alert(`${data.message}\n${data.package_label}\n\u0e2b\u0e21\u0e14\u0e2d\u0e32\u0e22\u0e38 ${new Date(data.expiry_date).toLocaleDateString("th-TH")}`);
       window.location.href = "https://mt5.harvestfarm.site/dashboard";
     } catch (err: any) {
       setError(err.message);
@@ -143,12 +143,12 @@ export default function RenewCryptoPage() {
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
         <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg text-center">
           <h1 className="text-xl font-bold text-zinc-800 mb-1">{t("wallet_topup")}</h1>
-          <p className="text-sm text-zinc-500 mb-4">{t("wallet_topup_any")}</p>
+          <p className="text-sm text-zinc-700 mb-4">{t("wallet_topup_any")}</p>
 
           {topupPoll === "paid" ? (
             <div className="mb-4 rounded-lg bg-green-50 p-4">
               <p className="text-lg font-bold text-green-600">✅ +{topupAmount} USDT</p>
-              <p className="text-sm text-zinc-400">{t("crypto_redirect_dashboard")}</p>
+              <p className="text-sm text-zinc-700">{t("crypto_redirect_dashboard")}</p>
             </div>
           ) : topupPoll === "expired" ? (
             <div className="mb-4 rounded-lg bg-red-50 p-4">
@@ -166,12 +166,12 @@ export default function RenewCryptoPage() {
                 <button onClick={() => copyAddr(topupData.wallet_address)} className="shrink-0 rounded bg-blue-600 px-2 py-1 text-xs text-white">{copied ? t("crypto_copied") : t("crypto_copy_address")}</button>
               </div>
               <p className="mb-4 rounded-lg bg-amber-50 p-2 text-xs text-amber-700">{t("crypto_warning_network", { network: topupData.network_label })}</p>
-              <div className="mb-4 flex items-center justify-center gap-2 text-sm text-zinc-400">
+              <div className="mb-4 flex items-center justify-center gap-2 text-sm text-zinc-700">
                 <div className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
                 <span>{t("crypto_checking")}</span>
               </div>
-              <p className="text-sm text-zinc-400">⏱️ {fmtTime(timeLeft)}</p>
-              <button onClick={cancelTopup} className="mt-3 w-full rounded-lg border py-2 text-sm text-zinc-500 hover:bg-zinc-50">{t("crypto_cancel_btn")}</button>
+              <p className="text-sm text-zinc-700">⏱️ {fmtTime(timeLeft)}</p>
+              <button onClick={cancelTopup} className="mt-3 w-full rounded-lg border py-2 text-sm text-zinc-700 hover:bg-zinc-50">{t("crypto_cancel_btn")}</button>
             </>
           )}
         </div>
@@ -198,7 +198,7 @@ export default function RenewCryptoPage() {
             {CRYPTO_NETWORK_INFO.map(net => (
               <button key={net.key} onClick={() => setTopupNetwork(net.key)}
                 className={`flex-1 rounded-lg border-2 p-2 text-xs ${topupNetwork === net.key ? "border-blue-500 bg-blue-50" : "border-zinc-200"}`}>
-                <p className="font-semibold">{net.label}</p><p className="text-zinc-400">{net.fee}</p>
+                <p className="font-semibold">{net.label}</p><p className="text-zinc-700">{net.fee}</p>
               </button>
             ))}
           </div>
@@ -223,16 +223,16 @@ export default function RenewCryptoPage() {
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <p className="font-semibold text-zinc-800">{pkg.name}</p>
-                    <p className="text-xs text-zinc-500 whitespace-pre-line">{pkg.label}</p>
+                    <p className="text-xs text-zinc-700 whitespace-pre-line">{pkg.label}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-blue-600">{usdtPrice} USDT</p>
-                    <p className="text-xs text-zinc-400">{pkg.max_ports >= 999 ? t("unlimited") : `${pkg.max_ports} ${t("port_suffix")}`}</p>
+                    <p className="text-xs text-zinc-700">{pkg.max_ports >= 999 ? t("unlimited") : `${pkg.max_ports} ${t("port_suffix")}`}</p>
                   </div>
                 </div>
                 <button onClick={() => buyPackage(key)} disabled={!canBuy || buying === key}
                   className={`w-full rounded-lg py-2 text-sm font-semibold disabled:cursor-not-allowed ${
-                    canBuy ? "bg-green-600 text-white hover:bg-green-700" : "bg-zinc-200 text-zinc-400"
+                    canBuy ? "bg-green-600 text-white hover:bg-green-700" : "bg-zinc-200 text-zinc-700"
                   }`}>
                   {buying === key ? t("loading") : canBuy ? t("wallet_buy") : t("wallet_insufficient")}
                 </button>
@@ -242,7 +242,7 @@ export default function RenewCryptoPage() {
         </div>
 
         <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"}
-          className="mt-4 w-full text-sm text-zinc-500 hover:underline">{t("back_to_dashboard")}</button>
+          className="mt-4 w-full text-sm text-zinc-700 hover:underline">{t("back_to_dashboard")}</button>
       </div>
     </div>
   );
