@@ -10,9 +10,6 @@ const t = (key: TKey, vars?: Record<string, string | number>) => translate(key, 
 
 export default function RenewCryptoPage() {
   const { data: session, status } = useSession();
-  if (status === "loading") return <Spinner />;
-  const isLoggedIn = !!session;
-
   const [view, setView] = useState<"main" | "topup">("main");
   const [balance, setBalance] = useState(0);
   const [buying, setBuying] = useState<PackageType | null>(null);
@@ -31,7 +28,6 @@ export default function RenewCryptoPage() {
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
   const visiblePackages = (isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES).filter(k => k !== "free");
 
-  // Fetch balance
   useEffect(() => { fetchBalance(); }, []);
   async function fetchBalance() {
     try {
