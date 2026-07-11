@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { PackageType, CryptoNetwork } from "@/types";
 import { t as translate, type TKey } from "@/lib/i18n";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES, CRYPTO_NETWORK_INFO, PACKAGE_USDT_PRICES } from "@/types";
@@ -11,8 +11,10 @@ const t = (key: TKey, vars?: Record<string, string | number>) => translate(key, 
 
 export default function RenewCryptoPage() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
   if (status === "loading") return <Spinner />;
-  if (!session) redirect("/login");
+  if (!session) { router.push("/login"); return null; }
 
   const [view, setView] = useState<"main" | "topup">("main");
   const [balance, setBalance] = useState(0);
