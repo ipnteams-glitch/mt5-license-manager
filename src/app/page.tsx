@@ -42,7 +42,7 @@ export default function LandingPage() {
         </p>
 
         {/* Buttons */}
-        <div className="flex gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => {
               setLoading("signup");
