@@ -178,7 +178,10 @@ export default function RenewCryptoPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
       <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-lg">
-        <h1 className="text-xl font-bold text-zinc-800 mb-1">{t("wallet_title")}</h1>
+        <div className="mb-4">
+          <h1 className="text-xl font-bold text-zinc-800">{t("wallet_title")}</h1>
+          <p className="text-xs text-zinc-600 truncate">{session?.user?.email}</p>
+        </div>
 
         {/* Balance Card */}
         <div className="mb-4 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 p-4 text-white">
