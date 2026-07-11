@@ -455,10 +455,6 @@ export default function RenewPage() {
           {activating ? t("loading") : selected === "free" ? t("activate_free") : t("create_qr")}
         </button>
 
-        <button onClick={() => setStep("method")} className="mt-2 w-full text-sm text-blue-600 hover:underline">
-          {t("crypto_back")}
-        </button>
-
         <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"} className="mt-3 w-full text-sm text-zinc-500 hover:underline">
           {t("back_to_dashboard")}
         </button>
