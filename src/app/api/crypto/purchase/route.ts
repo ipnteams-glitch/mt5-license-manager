@@ -1,6 +1,7 @@
 // POST /api/crypto/purchase — ซื้อแพ็คเกจด้วย USDT (ตัดเงินจาก wallet)
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { purchasePackage, getWallet } from "@/lib/crypto-wallets";
@@ -19,6 +20,7 @@ export async function POST(req: Request) {
 
     const result = await purchasePackage(session.user.email, pkg as PackageType);
     const pkgInfo = PACKAGES[pkg as PackageType];
+    revalidatePath("/dashboard");
 
     return NextResponse.json({
       success: true,

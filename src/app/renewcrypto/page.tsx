@@ -120,8 +120,7 @@ export default function RenewCryptoPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setBalance(data.new_balance);
-      alert(`${data.message}\n${data.package_label}\n\u0e2b\u0e21\u0e14\u0e2d\u0e32\u0e22\u0e38 ${new Date(data.expiry_date).toLocaleDateString("th-TH")}`);
-      window.location.href = "https://mt5.harvestfarm.site/dashboard";
+      window.location.href = "https://mt5.harvestfarm.site/dashboard?t=" + Date.now();
     } catch (err: any) {
       setError(err.message);
     } finally {
