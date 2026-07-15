@@ -56,7 +56,7 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-zinc-800">🏷️ ตัวแทน: {agent.name}</h1>
-            <p className="text-sm text-zinc-600">{agent.email}</p>
+            <p className="text-sm text-zinc-600">{agent.email} | รหัส: <span className="font-mono font-semibold text-blue-600">{agent.agent_code}</span></p>
           </div>
           <button
             onClick={() => router.push("/dashboard")}
