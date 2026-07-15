@@ -1,6 +1,7 @@
 "use client";
 
-import type { Agent, Payment } from "@/types";
+import { useState, useEffect } from "react";
+import type { Agent, Payment, AgentWithdrawal } from "@/types";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -11,6 +12,42 @@ type Props = {
 
 export default function AgentClient({ agent, sales, pendingCommission }: Props) {
   const router = useRouter();
+  const [wdAmount, setWdAmount] = useState("");
+  const [wdSubmitting, setWdSubmitting] = useState(false);
+  const [wdMsg, setWdMsg] = useState("");
+  const [withdrawals, setWithdrawals] = useState<AgentWithdrawal[]>([]);
+  const available = agent.commission_earned - agent.commission_paid;
+
+  useEffect(() => {
+    fetch("/api/agent/manage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "list_withdrawals" }),
+    }).then(r => r.json()).then(d => { if (d.withdrawals) setWithdrawals(d.withdrawals); }).catch(() => {});
+  }, []);
+
+  async function handleWithdraw(e: React.FormEvent) {
+    e.preventDefault();
+    const amt = parseFloat(wdAmount);
+    if (!amt || amt <= 0) return;
+    setWdSubmitting(true); setWdMsg("");
+    try {
+      const res = await fetch("/api/agent/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "withdraw", amount: amt }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setWdMsg("✅ สร้างรายการถอนแล้ว — รอแอดมินตรวจสอบ");
+        setWdAmount("");
+        setWithdrawals(prev => [data.withdrawal, ...prev]);
+      } else {
+        setWdMsg("❌ " + (data.error || "ไม่สำเร็จ"));
+      }
+    } catch { setWdMsg("❌ ไม่สำเร็จ"); }
+    finally { setWdSubmitting(false); }
+  }
 
   return (
     <div className="min-h-screen bg-zinc-50 p-4">
@@ -62,6 +99,59 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
             <p className="text-2xl font-bold text-green-600">฿{agent.commission_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
           </div>
         </div>
+
+        {/* Withdraw Form */}
+        <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
+          <h2 className="font-semibold text-zinc-800 mb-2">💸 ถอนค่าคอมมิชชั่น</h2>
+          <p className="text-sm text-zinc-500 mb-3">
+            ยอดที่ถอนได้: <span className="font-bold text-green-600">฿{available.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+          </p>
+          {!agent.bank_name && (
+            <p className="text-sm text-red-500 mb-3">⚠️ ยังไม่ได้ระบุบัญชีธนาคาร — กรุณาแจ้งแอดมิน</p>
+          )}
+          <form onSubmit={handleWithdraw} className="flex gap-2">
+            <input type="number" value={wdAmount} onChange={e => setWdAmount(e.target.value)}
+              placeholder="จำนวนเงิน" step="0.01" min="0" max={available}
+              className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800" disabled={!agent.bank_name} />
+            <button type="submit" disabled={wdSubmitting || !agent.bank_name}
+              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50">
+              {wdSubmitting ? "..." : "ถอน"}
+            </button>
+          </form>
+          {wdMsg && <p className="mt-2 text-sm text-zinc-700">{wdMsg}</p>}
+        </div>
+
+        {/* Withdrawal History */}
+        {withdrawals.length > 0 && (
+          <div className="mb-6 rounded-xl bg-white shadow-sm">
+            <div className="border-b p-4">
+              <h2 className="font-semibold text-zinc-800">📤 ประวัติการถอน ({withdrawals.length})</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs font-semibold text-zinc-500">
+                    <th className="px-4 py-2">วันที่</th>
+                    <th className="px-4 py-2 text-right">จำนวน</th>
+                    <th className="px-4 py-2">สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map(w => (
+                    <tr key={w.id} className="border-b border-zinc-50">
+                      <td className="px-4 py-2 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                      <td className="px-4 py-2 text-right font-medium">฿{w.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      <td className="px-4 py-2">
+                        {w.status === "paid" ? <span className="text-green-600 font-medium">✅ จ่ายแล้ว ({w.paid_at ? new Date(w.paid_at).toLocaleDateString("en-GB") : ""})</span>
+                          : <span className="text-amber-600 font-medium">⏳ รอดำเนินการ</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Pending */}
         {pendingCommission > 0 && (

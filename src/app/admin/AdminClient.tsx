@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Member, Port, PackageType, Payment, Agent } from "@/types";
+import type { Member, Port, PackageType, Payment, Agent, AgentWithdrawal } from "@/types";
 import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES } from "@/types";
@@ -32,6 +32,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   // Commission detail (read-only)
   const [detailAgent, setDetailAgent] = useState<string | null>(null);
+  const [pendingWds, setPendingWds] = useState<AgentWithdrawal[]>([]);
+  const [markingWd, setMarkingWd] = useState<string | null>(null);
 
   async function handleSaveAgent(e: React.FormEvent) {
     e.preventDefault();
