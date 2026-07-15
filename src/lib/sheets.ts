@@ -1153,6 +1153,8 @@ export async function getAgentByEmail(email: string): Promise<Agent | null> {
 export async function saveAgent(agent: Agent): Promise<void> {
   await initAgentsSheet(); const agents = await getAllAgents();
   const idx = agents.findIndex(a => a.agent_code === agent.agent_code);
+  const emailIdx = agents.findIndex(a => a.email === agent.email && a.agent_code !== agent.agent_code);
+  if (emailIdx >= 0) throw new Error("อีเมลนี้มีในระบบแล้ว (" + agents[emailIdx].agent_code + ")");
   const sheets = await getSheets(); const sid = sheetId();
   if (idx >= 0) {
     agents[idx] = agent;

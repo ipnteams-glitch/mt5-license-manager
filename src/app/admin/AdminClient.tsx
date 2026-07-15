@@ -27,7 +27,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   // Agent state
   const [agentList, setAgentList] = useState(agents);
   const [showAddAgent, setShowAddAgent] = useState(false);
-  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
+  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 10, commission_percent: 10, discount_vps_percent: 10, commission_vps_percent: 10, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
   const [agentSaving, setAgentSaving] = useState(false);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   // Commission detail (read-only)
