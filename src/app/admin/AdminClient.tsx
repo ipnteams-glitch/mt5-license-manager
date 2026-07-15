@@ -512,6 +512,11 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
             {/* Commission Detail */}
             {detailAgent && (
               <div className="mt-4 rounded-lg bg-zinc-50 p-4">
+                {agentList.find(a => a.agent_code === detailAgent)?.bank_name && (
+                  <p className="text-sm text-zinc-600 mb-2">
+                    🏦 {agentList.find(a => a.agent_code === detailAgent)?.bank_name}: {agentList.find(a => a.agent_code === detailAgent)?.bank_account}
+                  </p>
+                )}
                 <h3 className="font-semibold text-black mb-2">📋 ค่าคอม — {detailAgent}</h3>
                 {paymentList.filter(p => p.agent_code?.toLowerCase() === detailAgent.toLowerCase() && p.status === "paid").length === 0 ? (
                   <p className="text-sm text-zinc-400">ยังไม่มีรายการค่าคอม</p>
