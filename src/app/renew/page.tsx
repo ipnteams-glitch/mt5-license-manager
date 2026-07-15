@@ -477,20 +477,21 @@ export default function RenewPage() {
         {selected && (
           <div className="mt-4">
             <label className="block text-sm font-medium text-zinc-700 mb-1">🏷️ โค้ดตัวแทน (ถ้ามี)</label>
-            <div className="flex gap-2">
+            <div className="flex">
               <input
                 type="text"
                 value={agentCode}
                 onChange={(e) => { setAgentCode(e.target.value); setAgentInfo(null); }}
-                onBlur={() => validateAgentCode(agentCode)}
                 placeholder="กรอกโค้ดตัวแทน"
-                className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
+                className="flex-1 rounded-l-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
               />
               {validatingAgent && (
-                <div className="flex items-center">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
-                </div>
+                <div className="flex items-center px-2"><div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" /></div>
               )}
+              <button onClick={() => validateAgentCode(agentCode)} disabled={validatingAgent}
+                className="rounded-r-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+                {validatingAgent ? "..." : "Apply"}
+              </button>
             </div>
             {agentInfo && (
               <div className="mt-2 text-sm">
