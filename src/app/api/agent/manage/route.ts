@@ -26,10 +26,41 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { action, ...agentData } = body;
+    const session = await auth();
 
     if (action === "mark_paid") {
       if (!body.agent_code) return NextResponse.json({ error: "ต้องระบุ agent_code" }, { status: 400 });
       await markAgentCommissionPaid(body.agent_code);
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === "withdraw") {
+      const agent = await getAgentByEmail(session?.user?.email || "");
+      if (!agent) return NextResponse.json({ error: "Not an agent" }, { status: 403 });
+      const amount = Number(body.amount);
+      if (!amount || amount <= 0) return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+      const wd = await createWithdrawal(agent, amount);
+      return NextResponse.json({ success: true, withdrawal: wd });
+    }
+
+    if (action === "list_withdrawals") {
+      const agent = await getAgentByEmail(session?.user?.email || "");
+      if (!agent) {
+        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e: string) => e.trim());
+        if (!adminEmails.includes(session?.user?.email || "")) return NextResponse.json({ error: "Not an agent" }, { status: 403 });
+        if (!body.agent_code) return NextResponse.json({ error: "Missing agent_code" }, { status: 400 });
+        const wds = await getWithdrawals(body.agent_code);
+        return NextResponse.json({ withdrawals: wds });
+      }
+      const wds = await getWithdrawals(agent.agent_code);
+      return NextResponse.json({ withdrawals: wds });
+    }
+
+    if (action === "mark_withdrawal_paid") {
+      const admins = (process.env.ADMIN_EMAILS || "").split(",").map((e: string) => e.trim());
+      if (!admins.includes(session?.user?.email || "")) return NextResponse.json({ error: "Admin only" }, { status: 403 });
+      if (!body.withdrawal_id) return NextResponse.json({ error: "Missing withdrawal_id" }, { status: 400 });
+      await markWithdrawalPaid(body.withdrawal_id);
       return NextResponse.json({ success: true });
     }
 
