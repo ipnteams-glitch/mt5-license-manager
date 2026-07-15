@@ -30,6 +30,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
   const [agentSaving, setAgentSaving] = useState(false);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
+  // Commission detail (read-only)
+  const [detailAgent, setDetailAgent] = useState<string | null>(null);
 
   async function handleSaveAgent(e: React.FormEvent) {
     e.preventDefault();
