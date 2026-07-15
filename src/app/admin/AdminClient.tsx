@@ -34,6 +34,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   const [detailAgent, setDetailAgent] = useState<string | null>(null);
   const [pendingWds, setPendingWds] = useState<AgentWithdrawal[]>([]);
   const [markingWd, setMarkingWd] = useState<string | null>(null);
+  const [showWdHistory, setShowWdHistory] = useState(false);
+  const [wdPage, setWdPage] = useState(0);
 
   async function handleSaveAgent(e: React.FormEvent) {
     e.preventDefault();
@@ -548,24 +550,43 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
             {/* Pending Withdrawals */}
             {detailAgent && (
               <div className="mt-2">
-                <button onClick={async () => { try { const r = await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "list_withdrawals", agent_code: detailAgent }) }); const d = await r.json(); setPendingWds(d.withdrawals?.filter((w: any) => w.status === "pending") || []); } catch {} }} className="text-xs text-blue-500 hover:text-blue-700">🔄 โหลดรายการถอน</button>
-                {pendingWds.length > 0 && (
-                  <table className="w-full text-xs mt-2">
-                    <thead><tr className="border-b text-xs text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">ธนาคาร</th><th className="px-2 py-1">เลขบัญชี</th><th className="px-2 py-1"></th></tr></thead>
-                    <tbody>
-                      {pendingWds.map((w: any) => (
-                        <tr key={w.id} className="border-b border-zinc-100">
-                          <td className="px-2 py-1 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
-                          <td className="px-2 py-1 text-right font-medium">฿{w.amount.toLocaleString()}</td>
-                          <td className="px-2 py-1">{w.bank_name}</td>
-                          <td className="px-2 py-1 font-mono text-xs">{w.bank_account}</td>
-                          <td className="px-2 py-1">
-                            <button onClick={async () => { setMarkingWd(w.id); try { await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "mark_withdrawal_paid", withdrawal_id: w.id }) }); setPendingWds((prev: any) => prev.filter((x: any) => x.id !== w.id)); } catch {} setMarkingWd(null); }} disabled={markingWd === w.id} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">{markingWd === w.id ? "..." : "จ่ายแล้ว"}</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <button onClick={async () => { try { const r = await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "list_withdrawals", agent_code: detailAgent }) }); const d = await r.json(); setPendingWds(d.withdrawals || []); } catch {} setShowWdHistory(false); }} className="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700">🔄 โหลดรายการถอน</button>
+                <button onClick={() => { setShowWdHistory(!showWdHistory); setWdPage(0); }} className="ml-2 rounded border border-zinc-300 px-3 py-1 text-xs text-zinc-600 hover:bg-zinc-50">{showWdHistory ? "ซ่อนประวัติ" : "📜 ประวัติ"}</button>
+                <button onClick={async () => { try { const r = await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "list_withdrawals", agent_code: detailAgent }) }); const d = await r.json(); setPendingWds(d.withdrawals || []); setShowWdHistory(!showWdHistory); setWdPage(0); } catch {} }} className="ml-2 rounded border border-zinc-300 px-3 py-1 text-xs text-zinc-600 hover:bg-zinc-50">{showWdHistory ? "ซ่อนประวัติ" : "📜 ประวัติการถอน"}</button>
+                {pendingWds.filter((w: any) => w.status === "pending").length > 0 && (
+                  <>
+                    <p className="text-xs font-semibold text-amber-700 mt-2">⏳ รอชำระ ({pendingWds.filter((w: any) => w.status === "pending").length})</p>
+                    <table className="w-full text-xs mt-1">
+                      <thead><tr className="border-b text-xs text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">ธนาคาร</th><th className="px-2 py-1">เลขบัญชี</th><th className="px-2 py-1"></th></tr></thead>
+                      <tbody>
+                        {pendingWds.filter((w: any) => w.status === "pending").map((w: any) => (
+                          <tr key={w.id} className="border-b border-zinc-100">
+                            <td className="px-2 py-1 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                            <td className="px-2 py-1 text-right font-medium">฿{w.amount.toLocaleString()}</td>
+                            <td className="px-2 py-1">{w.bank_name}</td>
+                            <td className="px-2 py-1 font-mono text-xs">{w.bank_account}</td>
+                            <td className="px-2 py-1">
+                              <button onClick={async () => { setMarkingWd(w.id); try { await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "mark_withdrawal_paid", withdrawal_id: w.id }) }); setPendingWds((prev: any) => prev.filter((x: any) => x.id !== w.id)); } catch {} setMarkingWd(null); }} disabled={markingWd === w.id} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">{markingWd === w.id ? "..." : "ชำระแล้ว"}</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+                {showWdHistory && (
+                  <>
+                    {(() => { const all = pendingWds; const pages = Math.ceil(all.length / 10); const page = all.slice(wdPage * 10, (wdPage + 1) * 10); return page.length === 0 ? <p className="text-xs text-zinc-400 mt-2">ไม่มีประวัติ</p> : (
+                      <>
+                        <table className="w-full text-xs mt-2"><thead><tr className="border-b text-xs text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">สถานะ</th></tr></thead><tbody>{page.map((w: any) => (<tr key={w.id} className="border-b border-zinc-100"><td className="px-2 py-1 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td><td className="px-2 py-1 text-right">฿{w.amount.toLocaleString()}</td><td className="px-2 py-1">{w.status === "paid" ? <span className="text-green-600">✅ ชำระแล้ว</span> : <span className="text-amber-600">⏳ รอ</span>}</td></tr>))}</tbody></table>
+                        <div className="flex justify-between mt-2">
+                          <button onClick={() => setWdPage(Math.max(0, wdPage - 1))} disabled={wdPage === 0} className="text-xs text-blue-500 disabled:text-zinc-300">← ก่อนหน้า</button>
+                          <span className="text-xs text-zinc-500">หน้า {wdPage + 1}/{pages}</span>
+                          <button onClick={() => setWdPage(Math.min(pages - 1, wdPage + 1))} disabled={wdPage >= pages - 1} className="text-xs text-blue-500 disabled:text-zinc-300">ถัดไป →</button>
+                        </div>
+                      </>
+                    ); })()}
+                  </>
                 )}
               </div>
             )}
