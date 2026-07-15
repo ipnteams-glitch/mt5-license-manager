@@ -210,8 +210,11 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
     const { getAgentByCode } = await import("./sheets");
     const agent = await getAgentByCode(agent_code);
     if (agent) {
-      price = Math.round(price * (1 - agent.discount_percent / 100) * 100) / 100;
-      agentCommission = Math.round(price * (agent.commission_percent / 100) * 100) / 100;
+      const isVps = pkg === "ib_vps_2200";
+      const discountPct = isVps ? agent.discount_vps_percent : agent.discount_percent;
+      const commissionPct = isVps ? agent.commission_vps_percent : agent.commission_percent;
+      price = Math.round(price * (1 - discountPct / 100) * 100) / 100;
+      agentCommission = Math.round(price * (commissionPct / 100) * 100) / 100;
     }
   }
   if (!price) throw new Error("ราคา USDT ไม่ถูกต้อง");

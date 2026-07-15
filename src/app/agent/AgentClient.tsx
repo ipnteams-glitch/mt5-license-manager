@@ -32,12 +32,20 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
         {/* Stats Cards */}
         <div className="mb-6 grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-white p-4 shadow-sm">
-            <p className="text-xs text-zinc-500">ส่วนลดลูกค้า</p>
+            <p className="text-xs text-zinc-500">ส่วนลดแพคเกจ</p>
             <p className="text-2xl font-bold text-blue-600">{agent.discount_percent}%</p>
           </div>
           <div className="rounded-xl bg-white p-4 shadow-sm">
-            <p className="text-xs text-zinc-500">ค่าคอมมิชชั่น</p>
+            <p className="text-xs text-zinc-500">ค่าคอมแพคเกจ</p>
             <p className="text-2xl font-bold text-green-600">{agent.commission_percent}%</p>
+          </div>
+          <div className="rounded-xl bg-white p-4 shadow-sm">
+            <p className="text-xs text-zinc-500">ส่วนลด VPS</p>
+            <p className="text-2xl font-bold text-blue-600">{agent.discount_vps_percent}%</p>
+          </div>
+          <div className="rounded-xl bg-white p-4 shadow-sm">
+            <p className="text-xs text-zinc-500">ค่าคอม VPS</p>
+            <p className="text-2xl font-bold text-green-600">{agent.commission_vps_percent}%</p>
           </div>
           <div className="rounded-xl bg-white p-4 shadow-sm">
             <p className="text-xs text-zinc-500">💰 ยอดคอมสะสม</p>

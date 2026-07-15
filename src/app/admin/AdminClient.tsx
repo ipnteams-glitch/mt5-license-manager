@@ -27,7 +27,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   // Agent state
   const [agentList, setAgentList] = useState(agents);
   const [showAddAgent, setShowAddAgent] = useState(false);
-  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" });
+  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" });
   const [agentSaving, setAgentSaving] = useState(false);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
 
@@ -431,7 +431,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
           <div className="rounded-xl bg-white shadow-sm p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-semibold text-black">🏷️ ตัวแทน ({agentList.length})</h2>
-              <button onClick={() => { setShowAddAgent(true); setAgentForm({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" }); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">+ เพิ่ม</button>
+              <button onClick={() => { setShowAddAgent(true); setAgentForm({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" }); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">+ เพิ่ม</button>
             </div>
 
             {showAddAgent && (
@@ -441,6 +441,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                 <input value={agentForm.email} onChange={e => setAgentForm({...agentForm, email: e.target.value})} placeholder="Gmail" className="rounded border px-2 py-1 text-sm text-black" required />
                 <input value={agentForm.discount_percent || ""} onChange={e => setAgentForm({...agentForm, discount_percent: Number(e.target.value)})} placeholder="ส่วนลด %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
                 <input value={agentForm.commission_percent || ""} onChange={e => setAgentForm({...agentForm, commission_percent: Number(e.target.value)})} placeholder="ค่าคอม %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
+                <input value={agentForm.discount_vps_percent || ""} onChange={e => setAgentForm({...agentForm, discount_vps_percent: Number(e.target.value)})} placeholder="ส่วนลด VPS %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
+                <input value={agentForm.commission_vps_percent || ""} onChange={e => setAgentForm({...agentForm, commission_vps_percent: Number(e.target.value)})} placeholder="ค่าคอม VPS %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
                 <div className="flex gap-2">
                   <button type="submit" disabled={agentSaving} className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50">{agentSaving ? "..." : "บันทึก"}</button>
                   <button type="button" onClick={() => setShowAddAgent(false)} className="rounded border border-zinc-200 px-3 py-1 text-sm text-black">ยกเลิก</button>
@@ -456,6 +458,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     <th className="px-2 py-1">ชื่อ</th>
                     <th className="px-2 py-1">ส่วนลด</th>
                     <th className="px-2 py-1">ค่าคอม</th>
+                    <th className="px-2 py-1">ลด VPS</th>
+                    <th className="px-2 py-1">คอม VPS</th>
                     <th className="px-2 py-1 text-right">ยอดสะสม</th>
                     <th className="px-2 py-1 text-right">จ่ายแล้ว</th>
                     <th className="px-2 py-1 text-right">คงค้าง</th>
@@ -471,6 +475,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                         <td className="px-2 py-1 text-black">{a.name}</td>
                         <td className="px-2 py-1 text-black">{a.discount_percent}%</td>
                         <td className="px-2 py-1 text-black">{a.commission_percent}%</td>
+                        <td className="px-2 py-1 text-black">{a.discount_vps_percent}%</td>
+                        <td className="px-2 py-1 text-black">{a.commission_vps_percent}%</td>
                         <td className="px-2 py-1 text-right text-black">฿{a.commission_earned.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-green-600">฿{a.commission_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-amber-600">฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
@@ -488,7 +494,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     );
                   })}
                   {agentList.length === 0 && (
-                    <tr><td colSpan={8} className="px-2 py-4 text-center text-zinc-400">{t("no_data")}</td></tr>
+                    <tr><td colSpan={10} className="px-2 py-4 text-center text-zinc-400">{t("no_data")}</td></tr>
                   )}
                 </tbody>
               </table>

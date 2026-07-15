@@ -44,6 +44,8 @@ export async function POST(req: Request) {
       email: body.email.trim(),
       discount_percent: Number(body.discount_percent) || 0,
       commission_percent: Number(body.commission_percent) || 0,
+      discount_vps_percent: Number(body.discount_vps_percent) || 0,
+      commission_vps_percent: Number(body.commission_vps_percent) || 0,
       commission_earned: Number(body.commission_earned) || 0,
       commission_paid: Number(body.commission_paid) || 0,
       created_at: body.created_at || new Date().toISOString(),

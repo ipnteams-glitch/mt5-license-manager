@@ -43,6 +43,8 @@ export interface Agent {
   email: string;
   discount_percent: number;
   commission_percent: number;
+  discount_vps_percent: number;
+  commission_vps_percent: number;
   commission_earned: number;
   commission_paid: number;
   created_at: string;

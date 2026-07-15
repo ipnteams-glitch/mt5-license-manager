@@ -1,4 +1,4 @@
-// GET /api/agent/validate?code=XXX — ตรวจสอบโค้ดตัวแทน + คำนวณส่วนลด
+// GET /api/agent/validate?code=XXX&package=YYY
 import { getAgentByCode } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
@@ -19,18 +19,26 @@ export async function GET(req: Request) {
       return NextResponse.json({ valid: false, reason: "ไม่พบโค้ดตัวแทนนี้" });
     }
 
+    const isVps = pkg === "ib_vps_2200";
+    const discountPct = isVps ? agent.discount_vps_percent : agent.discount_percent;
+    const commissionPct = isVps ? agent.commission_vps_percent : agent.commission_percent;
+
     const response: any = {
       valid: true,
       agent_code: agent.agent_code,
       agent_name: agent.name,
-      discount_percent: agent.discount_percent,
+      discount_percent: discountPct,
+      // also return raw values for UI display
+      discount_pkg_percent: agent.discount_percent,
+      discount_vps_percent: agent.discount_vps_percent,
+      commission_pkg_percent: agent.commission_percent,
+      commission_vps_percent: agent.commission_vps_percent,
     };
 
-    // ถ้ามี package → คำนวณราคาหลังหักส่วนลด
     if (pkg && PACKAGES[pkg]) {
       const originalPrice = PACKAGES[pkg].price;
-      const discountedPrice = Math.round(originalPrice * (1 - agent.discount_percent / 100));
-      const commission = Math.round(discountedPrice * (agent.commission_percent / 100) * 100) / 100;
+      const discountedPrice = Math.round(originalPrice * (1 - discountPct / 100));
+      const commission = Math.round(discountedPrice * (commissionPct / 100) * 100) / 100;
       response.original_price = originalPrice;
       response.discounted_price = discountedPrice;
       response.commission = commission;

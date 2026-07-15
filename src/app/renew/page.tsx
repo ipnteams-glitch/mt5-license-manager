@@ -27,7 +27,7 @@ export default function RenewPage() {
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [error, setError] = useState("");
   const [agentCode, setAgentCode] = useState("");
-  const [agentInfo, setAgentInfo] = useState<{ agent_code: string; agent_name: string; discount_percent: number; discounted_price: number } | null>(null);
+  const [agentInfo, setAgentInfo] = useState<{ agent_code: string; agent_name: string; discount_percent: number; discounted_price: number; discount_pkg_percent: number; discount_vps_percent: number; commission_pkg_percent: number; commission_vps_percent: number } | null>(null);
   const [validatingAgent, setValidatingAgent] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [activating, setActivating] = useState(false);
@@ -493,10 +493,16 @@ export default function RenewPage() {
               )}
             </div>
             {agentInfo && (
-              <p className="mt-2 text-sm text-green-600">
-                ✅ {agentInfo.agent_name} — ส่วนลด {agentInfo.discount_percent}% 
-                เหลือ <span className="font-bold">฿{agentInfo.discounted_price.toLocaleString()}</span>
-              </p>
+              <div className="mt-2 text-sm">
+                <p className="text-green-600">
+                  ✅ {agentInfo.agent_name} — ส่วนลด {agentInfo.discount_percent}% 
+                  เหลือ <span className="font-bold">฿{agentInfo.discounted_price.toLocaleString()}</span>
+                </p>
+                <p className="text-xs text-zinc-500 mt-1">
+                  แพคเกจ: ส่วนลด {agentInfo.discount_pkg_percent}% / ค่าคอม {agentInfo.commission_pkg_percent}%
+                  {agentInfo.discount_vps_percent > 0 && <> | VPS: ส่วนลด {agentInfo.discount_vps_percent}% / ค่าคอม {agentInfo.commission_vps_percent}%</>}
+                </p>
+              </div>
             )}
           </div>
         )}

@@ -1122,23 +1122,23 @@ export async function setPortSystems(
 const AGENTS_SHEET = "agents";
 
 function agentFromRow(row: string[]): Agent {
-  return { agent_code: row[0] || "", name: row[1] || "", email: row[2] || "", discount_percent: parseFloat(row[3]) || 0, commission_percent: parseFloat(row[4]) || 0, commission_earned: parseFloat(row[5]) || 0, commission_paid: parseFloat(row[6]) || 0, created_at: row[7] || "" };
+  return { agent_code: row[0] || "", name: row[1] || "", email: row[2] || "", discount_percent: parseFloat(row[3]) || 0, commission_percent: parseFloat(row[4]) || 0, discount_vps_percent: parseFloat(row[5]) || 0, commission_vps_percent: parseFloat(row[6]) || 0, commission_earned: parseFloat(row[7]) || 0, commission_paid: parseFloat(row[8]) || 0, created_at: row[9] || "" };
 }
 function agentToRow(a: Agent): string[] {
-  return [a.agent_code, a.name, a.email, String(a.discount_percent), String(a.commission_percent), String(a.commission_earned), String(a.commission_paid), a.created_at];
+  return [a.agent_code, a.name, a.email, String(a.discount_percent), String(a.commission_percent), String(a.discount_vps_percent), String(a.commission_vps_percent), String(a.commission_earned), String(a.commission_paid), a.created_at];
 }
 async function initAgentsSheet(): Promise<void> {
   const sheets = await getSheets(); const sid = sheetId();
   try { await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A1` }); } catch {
     const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
     await sheets.spreadsheets.batchUpdate({ spreadsheetId: sid, requestBody: { requests: [{ addSheet: { properties: { title: AGENTS_SHEET } } }] } });
-    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:H`, valueInputOption: "RAW", requestBody: { values: [["agent_code","name","email","discount_percent","commission_percent","commission_earned","commission_paid","created_at"]] } });
+    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:J`, valueInputOption: "RAW", requestBody: { values: [["agent_code","name","email","discount_percent","commission_percent","discount_vps_percent","commission_vps_percent","commission_earned","commission_paid","created_at"]] } });
   }
 }
 export async function getAllAgents(): Promise<Agent[]> {
   const cached = getCache<Agent[]>("agents", 120_000); if (cached) return cached;
   await initAgentsSheet(); const sheets = await getSheets();
-  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!A:H` });
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!A:J` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
   const agents = rows.slice(1).filter(r => r[0]).map(agentFromRow);
   setCache("agents", agents); return agents;
@@ -1156,9 +1156,9 @@ export async function saveAgent(agent: Agent): Promise<void> {
   const sheets = await getSheets(); const sid = sheetId();
   if (idx >= 0) {
     agents[idx] = agent;
-    await sheets.spreadsheets.values.update({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A${idx + 2}:H${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
+    await sheets.spreadsheets.values.update({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A${idx + 2}:J${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
   } else {
-    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:H`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
+    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:J`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
   }
   invalidateCache("agents");
 }
@@ -1176,14 +1176,14 @@ export async function markAgentCommissionPaid(code: string): Promise<void> {
   if (idx === -1) throw new Error("Agent not found");
   agents[idx].commission_paid = agents[idx].commission_earned;
   const sheets = await getSheets();
-  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!G${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_paid)]] } });
+  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!I${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_paid)]] } });
   invalidateCache("agents");
 }
 export async function addAgentCommission(code: string, amount: number): Promise<void> {
   const agents = await getAllAgents(); const idx = agents.findIndex(a => a.agent_code === code);
   if (idx === -1) return; agents[idx].commission_earned += amount;
   const sheets = await getSheets();
-  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!F${idx + 2}:G${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_earned), String(agents[idx].commission_paid)]] } });
+  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!H${idx + 2}:I${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_earned), String(agents[idx].commission_paid)]] } });
   invalidateCache("agents");
 }
 export async function getPaymentsByAgentCode(code: string): Promise<Payment[]> {
