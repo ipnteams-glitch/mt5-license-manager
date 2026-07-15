@@ -544,6 +544,31 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                 )}
               </div>
             )}
+
+            {/* Pending Withdrawals */}
+            {detailAgent && (
+              <div className="mt-2">
+                <button onClick={async () => { try { const r = await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "list_withdrawals", agent_code: detailAgent }) }); const d = await r.json(); setPendingWds(d.withdrawals?.filter((w: any) => w.status === "pending") || []); } catch {} }} className="text-xs text-blue-500 hover:text-blue-700">🔄 โหลดรายการถอน</button>
+                {pendingWds.length > 0 && (
+                  <table className="w-full text-xs mt-2">
+                    <thead><tr className="border-b text-xs text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">ธนาคาร</th><th className="px-2 py-1">เลขบัญชี</th><th className="px-2 py-1"></th></tr></thead>
+                    <tbody>
+                      {pendingWds.map((w: any) => (
+                        <tr key={w.id} className="border-b border-zinc-100">
+                          <td className="px-2 py-1 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                          <td className="px-2 py-1 text-right font-medium">฿{w.amount.toLocaleString()}</td>
+                          <td className="px-2 py-1">{w.bank_name}</td>
+                          <td className="px-2 py-1 font-mono text-xs">{w.bank_account}</td>
+                          <td className="px-2 py-1">
+                            <button onClick={async () => { setMarkingWd(w.id); try { await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "mark_withdrawal_paid", withdrawal_id: w.id }) }); setPendingWds((prev: any) => prev.filter((x: any) => x.id !== w.id)); } catch {} setMarkingWd(null); }} disabled={markingWd === w.id} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">{markingWd === w.id ? "..." : "จ่ายแล้ว"}</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>
