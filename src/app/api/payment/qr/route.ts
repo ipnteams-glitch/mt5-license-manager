@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const promoNow = new Date();
     const isJune2026 = promoNow.getFullYear() === 2026 && promoNow.getMonth() === 5;
     const isEligible = isPromo && isJune2026 && promoPackages.includes(pkg as string);
-    const finalPrice = isEligible
+    let finalPrice = isEligible
       ? (promoPrices[pkg as string] ?? Math.round(pkgInfo.price * 0.5))
       : pkgInfo.price;
 
