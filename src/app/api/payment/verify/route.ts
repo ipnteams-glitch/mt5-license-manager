@@ -57,6 +57,12 @@ export async function POST(req: Request) {
 async function completePayment(txnId: string, email: string, pkg: string, amount: number) {
   await markPaymentPaid(txnId);
 
+  // ponytail: credit agent commission
+  const paid = await getPaymentById(txnId);
+  if (paid?.agent_code && paid?.agent_commission && paid.agent_commission > 0) {
+    addAgentCommission(paid.agent_code, paid.agent_commission).catch((e: any) => console.error("Agent commission failed:", e));
+  }
+
   const member = await getMemberByEmail(email);
   if (!member) return;
 
