@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { createPayment, getMemberByEmail, canUpgrade } from "@/lib/sheets";
+import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode } from "@/lib/sheets";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   if (!session?.user?.email) return NextResponse.json({ error: "กรุณาล็อคอิน" }, { status: 401 });
 
   try {
-    const { package: pkg, promo } = await req.json();
+    const { package: pkg, promo, agent_code } = await req.json();
     if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType)) {
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
     }

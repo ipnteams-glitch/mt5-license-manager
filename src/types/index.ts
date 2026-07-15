@@ -32,6 +32,20 @@ export interface Payment {
   created_at: string;
   paid_at?: string;
   qr_payload?: string;
+  agent_code?: string;
+  agent_commission?: number;
+}
+
+// ── Agent (ตัวแทนขาย) ──
+export interface Agent {
+  agent_code: string;
+  name: string;
+  email: string;
+  discount_percent: number;
+  commission_percent: number;
+  commission_earned: number;
+  commission_paid: number;
+  created_at: string;
 }
 
 // ── Package Types ──
@@ -87,7 +101,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 15900,
   },
   ib_vps_2200: {
-    key: "ib_vps_2200", name: "Private VPS", name_en: "Private VPS", price: 2200, duration_days: 365, max_ports: 999,
+    key: "ib_vps_2200", name: "Private VPS", name_en: "Private VPS", price: 2500, duration_days: 365, max_ports: 999,
     label: "vCPU 2 / RAM 4GB / 1 Year\nOnly VIP | Life | IB", rank: 8,
   },
   live_with_us: {
@@ -218,6 +232,6 @@ export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
   "2490_3m": 31,
   "3900_6m": 81,
   "4900_1y": 176,
-  ib_vps_2200: 66,
+  ib_vps_2200: 74,
   live_with_us: 301,
 };

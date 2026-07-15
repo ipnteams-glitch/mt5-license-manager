@@ -199,10 +199,21 @@ export async function markTopupFailed(id: string): Promise<void> {
 }
 
 // ── Purchase (ตัดเงิน + อัปเกรด) ──
-export async function purchasePackage(email: string, pkg: PackageType): Promise<{
+export async function purchasePackage(email: string, pkg: PackageType, agent_code?: string): Promise<{
   memberName: string; packageLabel: string; expiryDate: string; newBalance: number;
 }> {
-  const price = PACKAGE_USDT_PRICES[pkg];
+  let price = PACKAGE_USDT_PRICES[pkg];
+
+  // ponytail: agent discount
+  let agentCommission = 0;
+  if (agent_code) {
+    const { getAgentByCode } = await import("./sheets");
+    const agent = await getAgentByCode(agent_code);
+    if (agent) {
+      price = Math.round(price * (1 - agent.discount_percent / 100) * 100) / 100;
+      agentCommission = Math.round(price * (agent.commission_percent / 100) * 100) / 100;
+    }
+  }
   if (!price) throw new Error("ราคา USDT ไม่ถูกต้อง");
 
   const wallet = await getWallet(email);
@@ -238,6 +249,11 @@ export async function purchasePackage(email: string, pkg: PackageType): Promise<
     invalidateCache("members");
     sendPaymentSuccessEmail(email, member.name, pkgInfo.label, expiryStr).catch(() => {});
     notifyVpsOrder(email, member.name, pkgInfo.label, expiryStr, "").catch(() => {});
+    // ponytail: credit agent commission
+    if (agentCommission > 0 && agent_code) {
+      const { addAgentCommission } = await import("./sheets");
+      addAgentCommission(agent_code, agentCommission).catch(e => console.error("Agent commission failed:", e));
+    }
     return { memberName: member.name, packageLabel: pkgInfo.label, expiryDate: expiryStr, newBalance };
   }
 
@@ -251,5 +267,10 @@ export async function purchasePackage(email: string, pkg: PackageType): Promise<
   invalidateCache("members");
 
   sendPaymentSuccessEmail(email, member.name, pkgInfo.label, expiry).catch(() => {});
+  // ponytail: credit agent commission
+  if (agentCommission > 0 && agent_code) {
+    const { addAgentCommission } = await import("./sheets");
+    addAgentCommission(agent_code, agentCommission).catch(e => console.error("Agent commission failed:", e));
+  }
   return { memberName: member.name, packageLabel: pkgInfo.label, expiryDate: expiry, newBalance };
 }

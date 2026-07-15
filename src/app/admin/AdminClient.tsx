@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { Member, Port, PackageType, Payment } from "@/types";
+import type { Member, Port, PackageType, Payment, Agent } from "@/types";
 import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES } from "@/types";
 
-type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist: { name: string; broker: string; created_at: string }[] };
+type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist: { name: string; broker: string; created_at: string }[]; agents: Agent[] };
 
-export default function AdminClient({ members, ports, payments, whitelist }: Props) {
+export default function AdminClient({ members, ports, payments, whitelist, agents }: Props) {
   const { t } = useT();
   const [memberList, setMemberList] = useState(members);
   const [editing, setEditing] = useState<string | null>(null);
@@ -16,13 +16,67 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
   const [expiryDate, setExpiryDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<"members" | "ports" | "payments" | "whitelist">("members");
+  const [activeTab, setActiveTab] = useState<"members" | "ports" | "payments" | "whitelist" | "agents">("members");
   const [paymentList, setPaymentList] = useState(payments);
   const [verifyingPayId, setVerifyingPayId] = useState<string | null>(null);
   const [wlList, setWlList] = useState(whitelist);
   const [wlName, setWlName] = useState("");
   const [wlBroker, setWlBroker] = useState("");
   const [wlAdding, setWlAdding] = useState(false);
+
+  // Agent state
+  const [agentList, setAgentList] = useState(agents);
+  const [showAddAgent, setShowAddAgent] = useState(false);
+  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" });
+  const [agentSaving, setAgentSaving] = useState(false);
+  const [markingPaid, setMarkingPaid] = useState<string | null>(null);
+
+  async function handleSaveAgent(e: React.FormEvent) {
+    e.preventDefault();
+    if (!agentForm.agent_code.trim() || !agentForm.name.trim() || !agentForm.email.trim()) return;
+    setAgentSaving(true);
+    try {
+      const res = await fetch("/api/agent/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(agentForm),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      setAgentList(prev => {
+        const idx = prev.findIndex(a => a.agent_code === data.agent.agent_code);
+        if (idx >= 0) { const next = [...prev]; next[idx] = data.agent; return next; }
+        return [...prev, data.agent];
+      });
+      setShowAddAgent(false);
+      setMsg(t("saving_success"));
+    } catch { setMsg(t("save_failed")); }
+    finally { setAgentSaving(false); }
+  }
+
+  async function handleDeleteAgent(code: string) {
+    try {
+      const res = await fetch(`/api/agent/manage?code=${encodeURIComponent(code)}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed");
+      setAgentList(prev => prev.filter(a => a.agent_code !== code));
+      setMsg("ลบตัวแทนแล้ว");
+    } catch { setMsg("ลบไม่สำเร็จ"); }
+  }
+
+  async function handleMarkPaid(code: string) {
+    setMarkingPaid(code);
+    try {
+      const res = await fetch("/api/agent/manage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "mark_paid", agent_code: code }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setAgentList(prev => prev.map(a => a.agent_code === code ? { ...a, commission_paid: a.commission_earned } : a));
+      setMsg("✅ จ่ายคอมมิชชั่นแล้ว");
+    } catch { setMsg("❌ ไม่สำเร็จ"); }
+    finally { setMarkingPaid(null); }
+  }
 
   async function handleAddWhitelist(e: React.FormEvent) {
     e.preventDefault();
@@ -159,13 +213,13 @@ export default function AdminClient({ members, ports, payments, whitelist }: Pro
 
       <main className="mx-auto max-w-5xl px-6 py-3">
         <div className="mb-6 flex gap-2">
-          {(["members", "ports", "payments", "whitelist"] as const).map((tab) => (
+          {(["members", "ports", "payments", "whitelist", "agents"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`rounded-lg px-4 py-2 text-base font-medium ${activeTab === tab ? "bg-blue-600 text-white" : "bg-white text-black hover:bg-zinc-100"}`}
             >
-              {tab === "members" ? t("admin_tab_members") : tab === "ports" ? t("admin_tab_ports") : tab === "payments" ? t("admin_tab_payments") : t("admin_whitelist_count", { count: wlList.length })}
+              {tab === "members" ? t("admin_tab_members") : tab === "ports" ? t("admin_tab_ports") : tab === "payments" ? t("admin_tab_payments") : tab === "whitelist" ? t("admin_whitelist_count", { count: wlList.length }) : "🏷️ ตัวแทน"}
             </button>
           ))}
         </div>

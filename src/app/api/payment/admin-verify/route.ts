@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, setAddonIbVpsExpiry } from "@/lib/sheets";
+import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, setAddonIbVpsExpiry, addAgentCommission } from "@/lib/sheets";
 import { canUpgrade, calculateNewExpiry } from "@/lib/sheets";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
@@ -26,6 +26,11 @@ export async function POST(req: Request) {
 
     // Mark as paid (ข้าม EasySlip)
     await markPaymentPaid(txn_id);
+
+    // ponytail: credit agent commission
+    if (payment.agent_code && payment.agent_commission && payment.agent_commission > 0) {
+      addAgentCommission(payment.agent_code, payment.agent_commission).catch(e => console.error("Agent commission failed:", e));
+    }
 
     // IB+VPS is an add-on — handle before main package logic
     if (payment.package === "ib_vps_2200") {

@@ -23,6 +23,9 @@ export default function RenewCryptoPage() {
   const [topupAmount, setTopupAmount] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(1800);
   const [copied, setCopied] = useState(false);
+  const [agentCode, setAgentCode] = useState("");
+  const [agentInfo, setAgentInfo] = useState<{ agent_code: string; agent_name: string; discount_percent: number; discounted_price: number; commission: number } | null>(null);
+  const [validatingAgent, setValidatingAgent] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
@@ -107,6 +110,26 @@ export default function RenewCryptoPage() {
     setView("main");
   }
 
+  // Validate agent code
+  async function validateAgentCode(code: string, pkg: PackageType) {
+    if (!code.trim()) { setAgentInfo(null); return; }
+    setValidatingAgent(true);
+    try {
+      const res = await fetch(`/api/agent/validate?code=${encodeURIComponent(code.trim())}&package=${pkg}`);
+      const data = await res.json();
+      if (data.valid) {
+        setAgentInfo(data);
+      } else {
+        setAgentInfo(null);
+        setError(data.reason || "โค้ดไม่ถูกต้อง");
+      }
+    } catch {
+      setAgentInfo(null);
+    } finally {
+      setValidatingAgent(false);
+    }
+  }
+
   // Purchase
   async function buyPackage(pkg: PackageType) {
     setBuying(pkg);
@@ -115,7 +138,7 @@ export default function RenewCryptoPage() {
       const res = await fetch("/api/crypto/purchase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ package: pkg }),
+        body: JSON.stringify({ package: pkg, agent_code: agentInfo?.agent_code }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -207,6 +230,35 @@ export default function RenewCryptoPage() {
         </button>
 
         {error && <p className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</p>}
+
+        {/* Agent Code Input */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-zinc-700 mb-1">🏷️ โค้ดตัวแทน (ถ้ามี)</label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={agentCode}
+              onChange={(e) => { setAgentCode(e.target.value); setAgentInfo(null); }}
+              onBlur={() => {
+                // Validate against first visible package
+                if (visiblePackages.length > 0) validateAgentCode(agentCode, visiblePackages[0]);
+              }}
+              placeholder="กรอกโค้ดตัวแทน"
+              className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
+            />
+            {validatingAgent && (
+              <div className="flex items-center">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
+              </div>
+            )}
+          </div>
+          {agentInfo && (
+            <p className="mt-2 text-sm text-green-600">
+              ✅ {agentInfo.agent_name} — ส่วนลด {agentInfo.discount_percent}% | 
+              ค่าคอม {agentInfo.commission} USDT
+            </p>
+          )}
+        </div>
 
         {/* Package List */}
         <p className="text-sm font-medium text-zinc-700 mb-3">{t("renew_select")}</p>

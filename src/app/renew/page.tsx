@@ -26,6 +26,9 @@ export default function RenewPage() {
   const [txnId, setTxnId] = useState("");
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [error, setError] = useState("");
+  const [agentCode, setAgentCode] = useState("");
+  const [agentInfo, setAgentInfo] = useState<{ agent_code: string; agent_name: string; discount_percent: number; discounted_price: number } | null>(null);
+  const [validatingAgent, setValidatingAgent] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [activating, setActivating] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -64,6 +67,29 @@ export default function RenewPage() {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  }
+
+  // ponytail: validate agent code (debounced via onBlur)
+  async function validateAgentCode(code: string) {
+    if (!code.trim() || !selected) {
+      setAgentInfo(null);
+      return;
+    }
+    setValidatingAgent(true);
+    try {
+      const res = await fetch(`/api/agent/validate?code=${encodeURIComponent(code.trim())}&package=${selected}`);
+      const data = await res.json();
+      if (data.valid) {
+        setAgentInfo(data);
+      } else {
+        setAgentInfo(null);
+        setError(data.reason || "โค้ดไม่ถูกต้อง");
+      }
+    } catch {
+      setAgentInfo(null);
+    } finally {
+      setValidatingAgent(false);
+    }
   }
 
   async function handleAdminVerify() {
@@ -117,7 +143,7 @@ export default function RenewPage() {
       const res = await fetch("/api/payment/qr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ package: selected }),
+        body: JSON.stringify({ package: selected, agent_code: agentInfo?.agent_code }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || t("error_occurred"));
@@ -446,6 +472,34 @@ export default function RenewPage() {
           })}
 
         </div>
+
+        {/* Agent Code Input */}
+        {selected && (
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">🏷️ โค้ดตัวแทน (ถ้ามี)</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={agentCode}
+                onChange={(e) => { setAgentCode(e.target.value); setAgentInfo(null); }}
+                onBlur={() => validateAgentCode(agentCode)}
+                placeholder="กรอกโค้ดตัวแทน"
+                className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
+              />
+              {validatingAgent && (
+                <div className="flex items-center">
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
+                </div>
+              )}
+            </div>
+            {agentInfo && (
+              <p className="mt-2 text-sm text-green-600">
+                ✅ {agentInfo.agent_name} — ส่วนลด {agentInfo.discount_percent}% 
+                เหลือ <span className="font-bold">฿{agentInfo.discounted_price.toLocaleString()}</span>
+              </p>
+            )}
+          </div>
+        )}
 
         <button
           onClick={handleActivate}

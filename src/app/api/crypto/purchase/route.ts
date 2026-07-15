@@ -11,14 +11,14 @@ export async function POST(req: Request) {
   if (!session?.user?.email) return NextResponse.json({ error: "กรุณาล็อคอิน" }, { status: 401 });
 
   try {
-    const { package: pkg } = await req.json();
+    const { package: pkg, agent_code } = await req.json();
     if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType))
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
 
     if (TEST_PACKAGES.includes(pkg as PackageType) && session.user.email !== "ipnteams@gmail.com")
       return NextResponse.json({ error: "สำหรับทดสอบเท่านั้น" }, { status: 403 });
 
-    const result = await purchasePackage(session.user.email, pkg as PackageType);
+    const result = await purchasePackage(session.user.email, pkg as PackageType, agent_code);
     const pkgInfo = PACKAGES[pkg as PackageType];
     revalidatePath("/dashboard");
 

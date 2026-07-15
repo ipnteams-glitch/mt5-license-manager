@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import { v4 as uuidv4 } from "uuid";
-import type { Member, Port, Payment, PackageType, PortfolioAccount, PortSystem } from "@/types";
+import type { Member, Port, Payment, PackageType, PortfolioAccount, PortSystem, Agent } from "@/types";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import { getCache, setCache, invalidateCache, invalidateCachePrefix } from "./cache";
 
@@ -85,7 +85,7 @@ function paymentFromRow(row: string[]): Payment {
   };
 }
 function paymentToRow(p: Payment): string[] {
-  return [p.id, p.email, p.package, String(p.amount), String(p.satang), p.status, p.created_at, p.paid_at || "", p.qr_payload || ""];
+  return [p.id, p.email, p.package, String(p.amount), String(p.satang), p.status, p.created_at, p.paid_at || "", p.qr_payload || "", p.agent_code || "", String(p.agent_commission ?? "")];
 }
 
 // ── Members ──
@@ -360,7 +360,7 @@ export async function getAllPayments(): Promise<Payment[]> {
   if (cached) return cached;
   const sheets = await getSheets();
   try {
-    const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I` });
+    const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:K` });
     const rows = res.data.values; if (!rows || rows.length <= 1) return [];
     // ดึงเฉพาะ 200 รายการล่าสุด (ข้าม header แถวแรก)
     const dataRows = rows.slice(1);
@@ -373,7 +373,7 @@ export async function getAllPayments(): Promise<Payment[]> {
   }
 }
 
-export async function createPayment(email: string, pkg: PackageType, price: number, qrPayload?: string): Promise<Payment> {
+export async function createPayment(email: string, pkg: PackageType, price: number, qrPayload?: string, agent_code?: string, agent_commission?: number): Promise<Payment> {
   // จองสตางค์ — อ่าน pending เลือกค่าที่ไม่ซ้ำ
   const all = await getAllPayments();
   const now = new Date();
@@ -478,7 +478,7 @@ export async function markPaymentPaid(txnId: string): Promise<Payment> {
   all[idx].paid_at = new Date().toISOString();
   const sheets = await getSheets();
   await sheets.spreadsheets.values.update({
-    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:I${idx + 2}`,
+    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:K${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [paymentToRow(all[idx])] },
   });
   invalidateCache("payments");
@@ -492,7 +492,7 @@ export async function markPaymentFailed(txnId: string): Promise<Payment> {
   all[idx].status = "failed";
   const sheets = await getSheets();
   await sheets.spreadsheets.values.update({
-    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:I${idx + 2}`,
+    spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A${idx + 2}:K${idx + 2}`,
     valueInputOption: "RAW", requestBody: { values: [paymentToRow(all[idx])] },
   });
   invalidateCache("payments");
@@ -707,7 +707,7 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
       requestBody: {
         data: [
           {
-            range: `${PAYMENTS_SHEET}!A${payIdx + 2}:I${payIdx + 2}`,
+            range: `${PAYMENTS_SHEET}!A${payIdx + 2}:K${payIdx + 2}`,
             values: [paymentToRow(payments[payIdx])],
           },
           {
@@ -744,7 +744,7 @@ export async function approvePaymentAndUpgrade(txnId: string): Promise<{
     requestBody: {
       data: [
         {
-          range: `${PAYMENTS_SHEET}!A${payIdx + 2}:I${payIdx + 2}`,
+          range: `${PAYMENTS_SHEET}!A${payIdx + 2}:K${payIdx + 2}`,
           values: [paymentToRow(payments[payIdx])],
         },
         {
@@ -1115,6 +1115,80 @@ export async function setPortSystems(
   }
   invalidateCache("port_systems");
   return ps;
+}
+
+// ── Agents (ตัวแทนขาย) ──
+
+const AGENTS_SHEET = "agents";
+
+function agentFromRow(row: string[]): Agent {
+  return { agent_code: row[0] || "", name: row[1] || "", email: row[2] || "", discount_percent: parseFloat(row[3]) || 0, commission_percent: parseFloat(row[4]) || 0, commission_earned: parseFloat(row[5]) || 0, commission_paid: parseFloat(row[6]) || 0, created_at: row[7] || "" };
+}
+function agentToRow(a: Agent): string[] {
+  return [a.agent_code, a.name, a.email, String(a.discount_percent), String(a.commission_percent), String(a.commission_earned), String(a.commission_paid), a.created_at];
+}
+async function initAgentsSheet(): Promise<void> {
+  const sheets = await getSheets(); const sid = sheetId();
+  try { await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A1` }); } catch {
+    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
+    await sheets.spreadsheets.batchUpdate({ spreadsheetId: sid, requestBody: { requests: [{ addSheet: { properties: { title: AGENTS_SHEET } } }] } });
+    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:H`, valueInputOption: "RAW", requestBody: { values: [["agent_code","name","email","discount_percent","commission_percent","commission_earned","commission_paid","created_at"]] } });
+  }
+}
+export async function getAllAgents(): Promise<Agent[]> {
+  const cached = getCache<Agent[]>("agents", 120_000); if (cached) return cached;
+  await initAgentsSheet(); const sheets = await getSheets();
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!A:H` });
+  const rows = res.data.values; if (!rows || rows.length <= 1) return [];
+  const agents = rows.slice(1).filter(r => r[0]).map(agentFromRow);
+  setCache("agents", agents); return agents;
+}
+export async function getAgentByCode(code: string): Promise<Agent | null> {
+  const agents = await getAllAgents();
+  return agents.find(a => a.agent_code.toLowerCase() === code.toLowerCase().trim()) || null;
+}
+export async function getAgentByEmail(email: string): Promise<Agent | null> {
+  const agents = await getAllAgents(); return agents.find(a => a.email === email) || null;
+}
+export async function saveAgent(agent: Agent): Promise<void> {
+  await initAgentsSheet(); const agents = await getAllAgents();
+  const idx = agents.findIndex(a => a.agent_code === agent.agent_code);
+  const sheets = await getSheets(); const sid = sheetId();
+  if (idx >= 0) {
+    agents[idx] = agent;
+    await sheets.spreadsheets.values.update({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A${idx + 2}:H${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
+  } else {
+    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:H`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
+  }
+  invalidateCache("agents");
+}
+export async function deleteAgent(code: string): Promise<void> {
+  const agents = await getAllAgents(); const idx = agents.findIndex(a => a.agent_code === code);
+  if (idx === -1) return; const sheets = await getSheets();
+  const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sheetId() });
+  const sheet = spreadsheet.data.sheets?.find(s => s.properties?.title === AGENTS_SHEET);
+  if (!sheet?.properties?.sheetId) return;
+  await sheets.spreadsheets.batchUpdate({ spreadsheetId: sheetId(), requestBody: { requests: [{ deleteDimension: { range: { sheetId: sheet.properties.sheetId, dimension: "ROWS", startIndex: idx + 1, endIndex: idx + 2 } } }] } });
+  invalidateCache("agents");
+}
+export async function markAgentCommissionPaid(code: string): Promise<void> {
+  const agents = await getAllAgents(); const idx = agents.findIndex(a => a.agent_code === code);
+  if (idx === -1) throw new Error("Agent not found");
+  agents[idx].commission_paid = agents[idx].commission_earned;
+  const sheets = await getSheets();
+  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!G${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_paid)]] } });
+  invalidateCache("agents");
+}
+export async function addAgentCommission(code: string, amount: number): Promise<void> {
+  const agents = await getAllAgents(); const idx = agents.findIndex(a => a.agent_code === code);
+  if (idx === -1) return; agents[idx].commission_earned += amount;
+  const sheets = await getSheets();
+  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!F${idx + 2}:G${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_earned), String(agents[idx].commission_paid)]] } });
+  invalidateCache("agents");
+}
+export async function getPaymentsByAgentCode(code: string): Promise<Payment[]> {
+  const all = await getAllPayments();
+  return all.filter(p => p.agent_code && p.agent_code.toLowerCase() === code.toLowerCase() && p.status === "paid");
 }
 
 // Brokers
