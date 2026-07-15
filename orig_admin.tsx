@@ -487,10 +487,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                         <td className="px-2 py-1 text-right text-green-600">฿{a.commission_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-amber-600">฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right space-x-1">
-                          <button onClick={() => setDetailAgent(detailAgent === a.agent_code ? null : a.agent_code)} className="text-xs text-blue-500 hover:text-blue-700">
-                            {detailAgent === a.agent_code ? "ซ่อน" : "📋"}
-                          </button>
-                         {pending > 0 && (
+                          {pending > 0 && (
                             <button onClick={() => handleMarkPaid(a.agent_code)} disabled={markingPaid === a.agent_code}
                               className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">
                               {markingPaid === a.agent_code ? "..." : "จ่ายแล้ว"}
@@ -508,37 +505,6 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                 </tbody>
               </table>
             </div>
-
-            {/* Commission Detail */}
-            {detailAgent && (
-              <div className="mt-4 rounded-lg bg-zinc-50 p-4">
-                <h3 className="font-semibold text-black mb-2">📋 ค่าคอม — {detailAgent}</h3>
-                {paymentList.filter(p => p.agent_code?.toLowerCase() === detailAgent.toLowerCase() && p.status === "paid").length === 0 ? (
-                  <p className="text-sm text-zinc-400">ยังไม่มีรายการค่าคอม</p>
-                ) : (
-                  (() => {
-                    const list = paymentList.filter(p => p.agent_code?.toLowerCase() === detailAgent.toLowerCase() && p.status === "paid");
-                    const total = list.reduce((s, p) => s + (p.agent_commission || 0), 0);
-                    return (
-                      <>
-                        <table className="w-full text-xs mb-3">
-                          <thead><tr className="border-b text-left text-xs font-semibold text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1">ลูกค้า</th><th className="px-2 py-1">แพคเกจ</th><th className="px-2 py-1 text-right">ค่าคอม</th></tr></thead>
-                          <tbody>{list.map(p => (
-                            <tr key={p.id} className="border-b border-zinc-100">
-                              <td className="px-2 py-1 text-zinc-600">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-GB")}</td>
-                              <td className="px-2 py-1 text-black">{p.email}</td>
-                              <td className="px-2 py-1 text-black">{p.package}</td>
-                              <td className="px-2 py-1 text-right text-green-600 font-medium">฿{(p.agent_commission || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                            </tr>
-                          ))}</tbody>
-                        </table>
-                        <p className="text-sm font-semibold text-amber-700">💰 รวม: ฿{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({list.length} รายการ)</p>
-                      </>
-                    );
-                  })()
-                )}
-              </div>
-            )}
           </div>
         )}
       </main>
