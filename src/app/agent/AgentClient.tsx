@@ -109,15 +109,10 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
           {!agent.bank_name && (
             <p className="text-sm text-red-500 mb-3">⚠️ ยังไม่ได้ระบุบัญชีธนาคาร — กรุณาแจ้งแอดมิน</p>
           )}
-          <form onSubmit={handleWithdraw} className="flex gap-2">
-            <input type="number" value={wdAmount} onChange={e => setWdAmount(e.target.value)}
-              placeholder="จำนวนเงิน" step="0.01" min="0" max={available}
-              className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800" disabled={!agent.bank_name} />
-            <button type="submit" disabled={wdSubmitting || !agent.bank_name}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50">
-              {wdSubmitting ? "..." : "ถอน"}
-            </button>
-          </form>
+          <button onClick={handleWithdraw} disabled={wdSubmitting || available <= 0 || !agent.bank_name}
+            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50">
+            {wdSubmitting ? "กำลังดำเนินการ..." : `💰 ถอนทั้งหมด ฿${available.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+          </button>
           {wdMsg && <p className="mt-2 text-sm text-zinc-700">{wdMsg}</p>}
         </div>
 
