@@ -48,6 +48,8 @@ export interface Agent {
   commission_earned: number;
   commission_paid: number;
   created_at: string;
+  bank_name: string;
+  bank_account: string;
 }
 
 // ── Package Types ──

@@ -1122,23 +1122,23 @@ export async function setPortSystems(
 const AGENTS_SHEET = "agents";
 
 function agentFromRow(row: string[]): Agent {
-  return { agent_code: row[0] || "", name: row[1] || "", email: row[2] || "", discount_percent: parseFloat(row[3]) || 0, commission_percent: parseFloat(row[4]) || 0, discount_vps_percent: parseFloat(row[5]) || 0, commission_vps_percent: parseFloat(row[6]) || 0, commission_earned: parseFloat(row[7]) || 0, commission_paid: parseFloat(row[8]) || 0, created_at: row[9] || "" };
+  return { agent_code: row[0] || "", name: row[1] || "", email: row[2] || "", discount_percent: parseFloat(row[3]) || 0, commission_percent: parseFloat(row[4]) || 0, discount_vps_percent: parseFloat(row[5]) || 0, commission_vps_percent: parseFloat(row[6]) || 0, commission_earned: parseFloat(row[7]) || 0, commission_paid: parseFloat(row[8]) || 0, created_at: row[9] || "", bank_name: row[10] || "", bank_account: row[11] || "" };
 }
 function agentToRow(a: Agent): string[] {
-  return [a.agent_code, a.name, a.email, String(a.discount_percent), String(a.commission_percent), String(a.discount_vps_percent), String(a.commission_vps_percent), String(a.commission_earned), String(a.commission_paid), a.created_at];
+  return [a.agent_code, a.name, a.email, String(a.discount_percent), String(a.commission_percent), String(a.discount_vps_percent), String(a.commission_vps_percent), String(a.commission_earned), String(a.commission_paid), a.created_at, a.bank_name, a.bank_account];
 }
 async function initAgentsSheet(): Promise<void> {
   const sheets = await getSheets(); const sid = sheetId();
   try { await sheets.spreadsheets.values.get({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A1` }); } catch {
     const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sid });
     await sheets.spreadsheets.batchUpdate({ spreadsheetId: sid, requestBody: { requests: [{ addSheet: { properties: { title: AGENTS_SHEET } } }] } });
-    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:J`, valueInputOption: "RAW", requestBody: { values: [["agent_code","name","email","discount_percent","commission_percent","discount_vps_percent","commission_vps_percent","commission_earned","commission_paid","created_at"]] } });
+    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:L`, valueInputOption: "RAW", requestBody: { values: [["agent_code","name","email","discount_percent","commission_percent","discount_vps_percent","commission_vps_percent","commission_earned","commission_paid","created_at","bank_name","bank_account"]] } });
   }
 }
 export async function getAllAgents(): Promise<Agent[]> {
   const cached = getCache<Agent[]>("agents", 120_000); if (cached) return cached;
   await initAgentsSheet(); const sheets = await getSheets();
-  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!A:J` });
+  const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!A:L` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
   const agents = rows.slice(1).filter(r => r[0]).map(agentFromRow);
   setCache("agents", agents); return agents;
@@ -1156,9 +1156,9 @@ export async function saveAgent(agent: Agent): Promise<void> {
   const sheets = await getSheets(); const sid = sheetId();
   if (idx >= 0) {
     agents[idx] = agent;
-    await sheets.spreadsheets.values.update({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A${idx + 2}:J${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
+    await sheets.spreadsheets.values.update({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A${idx + 2}:L${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
   } else {
-    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:J`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
+    await sheets.spreadsheets.values.append({ spreadsheetId: sid, range: `${AGENTS_SHEET}!A:L`, valueInputOption: "RAW", requestBody: { values: [agentToRow(agent)] } });
   }
   invalidateCache("agents");
 }

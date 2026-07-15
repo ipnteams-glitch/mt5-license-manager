@@ -49,6 +49,8 @@ export async function POST(req: Request) {
       commission_earned: Number(body.commission_earned) || 0,
       commission_paid: Number(body.commission_paid) || 0,
       created_at: body.created_at || new Date().toISOString(),
+      bank_name: body.bank_name || "",
+      bank_account: body.bank_account || "",
     };
 
     await saveAgent(agent);

@@ -47,6 +47,12 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
             <p className="text-xs text-zinc-500">ค่าคอม VPS</p>
             <p className="text-2xl font-bold text-green-600">{agent.commission_vps_percent}%</p>
           </div>
+          {agent.bank_name && (
+            <div className="rounded-xl bg-white p-4 shadow-sm col-span-2">
+              <p className="text-xs text-zinc-500">🏦 บัญชีธนาคาร</p>
+              <p className="text-lg font-semibold text-zinc-800">{agent.bank_name}: {agent.bank_account}</p>
+            </div>
+          )}
           <div className="rounded-xl bg-white p-4 shadow-sm">
             <p className="text-xs text-zinc-500">💰 ยอดคอมสะสม</p>
             <p className="text-2xl font-bold text-zinc-800">฿{agent.commission_earned.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>

@@ -27,7 +27,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   // Agent state
   const [agentList, setAgentList] = useState(agents);
   const [showAddAgent, setShowAddAgent] = useState(false);
-  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" });
+  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
   const [agentSaving, setAgentSaving] = useState(false);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
 
@@ -431,7 +431,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
           <div className="rounded-xl bg-white shadow-sm p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-semibold text-black">🏷️ ตัวแทน ({agentList.length})</h2>
-              <button onClick={() => { setShowAddAgent(true); setAgentForm({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "" }); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">+ เพิ่ม</button>
+              <button onClick={() => { setShowAddAgent(true); setAgentForm({ agent_code: "", name: "", email: "", discount_percent: 0, commission_percent: 0, discount_vps_percent: 0, commission_vps_percent: 0, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" }); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">+ เพิ่ม</button>
             </div>
 
             {showAddAgent && (
@@ -443,6 +443,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                 <input value={agentForm.commission_percent || ""} onChange={e => setAgentForm({...agentForm, commission_percent: Number(e.target.value)})} placeholder="ค่าคอม %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
                 <input value={agentForm.discount_vps_percent || ""} onChange={e => setAgentForm({...agentForm, discount_vps_percent: Number(e.target.value)})} placeholder="ส่วนลด VPS %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
                 <input value={agentForm.commission_vps_percent || ""} onChange={e => setAgentForm({...agentForm, commission_vps_percent: Number(e.target.value)})} placeholder="ค่าคอม VPS %" type="number" className="rounded border px-2 py-1 text-sm text-black" />
+                <input value={agentForm.bank_name} onChange={e => setAgentForm({...agentForm, bank_name: e.target.value})} placeholder="ชื่อธนาคาร" className="rounded border px-2 py-1 text-sm text-black" />
+                <input value={agentForm.bank_account} onChange={e => setAgentForm({...agentForm, bank_account: e.target.value})} placeholder="เลขบัญชี" className="rounded border px-2 py-1 text-sm text-black" />
                 <div className="flex gap-2">
                   <button type="submit" disabled={agentSaving} className="rounded bg-green-600 px-3 py-1 text-sm text-white disabled:opacity-50">{agentSaving ? "..." : "บันทึก"}</button>
                   <button type="button" onClick={() => setShowAddAgent(false)} className="rounded border border-zinc-200 px-3 py-1 text-sm text-black">ยกเลิก</button>
