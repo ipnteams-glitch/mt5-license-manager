@@ -1,0 +1,20 @@
+diff --git a/src/types/index.ts b/src/types/index.ts  
+--- a/src/types/index.ts  
++++ b/src/types/index.ts  
+@@ -52,6 +52,18 @@  
+   bank_account: string;  
+ }  
+ECHO is on.
++// Agent Withdrawal  
++export interface AgentWithdrawal {  
++  id: string;  
++  agent_code: string;  
++  amount: number;  
++  status: \"pending\" | \"paid\";  
++  bank_name: string;  
++  bank_account: string;  
++  created_at: string;  
++  paid_at?: string;  
++}  
++  
+ // Package Types  

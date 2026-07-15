@@ -52,6 +52,18 @@ export interface Agent {
   bank_account: string;
 }
 
+// ── Agent Withdrawal (ถอนค่าคอม) ──
+export interface AgentWithdrawal {
+  id: string;
+  agent_code: string;
+  amount: number;
+  status: "pending" | "paid";
+  bank_name: string;
+  bank_account: string;
+  created_at: string;
+  paid_at?: string;
+}
+
 // ── Package Types ──
 export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
 
