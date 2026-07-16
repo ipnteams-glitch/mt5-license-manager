@@ -526,13 +526,6 @@ export async function setPortSystems(
   return sys;
 }
 
-export async function approvePaymentAndUpgrade(txnId: string): Promise<{
-  memberEmail: string; memberName: string; packageLabel: string; expiryDate: string;
-}> {
-  const payment = await getPaymentById(txnId);
-  if (!payment) throw new Error("Payment not found");
-  if (payment.status !== "pending") throw new Error("Payment already processed");
-
   const member = await getMemberByEmail(payment.email);
   if (!member) throw new Error("Member not found");
 
