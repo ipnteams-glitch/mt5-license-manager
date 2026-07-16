@@ -245,8 +245,10 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
           status: "paid", paid_at: new Date().toISOString(),
           agent_code: agent_code || null, agent_commission: agentCommission,
           qr_payload: JSON.stringify({ method: "crypto", usdt: price, rate, thb: agentCommission }),
-        }).then(() => console.log("[crypto] payment recorded in Supabase"))
-          .catch((e: any) => console.error("[crypto] Supabase payment insert failed:", e));
+        }).then(
+          () => console.log("[crypto] payment recorded in Supabase"),
+          (e: any) => console.error("[crypto] Supabase payment insert failed:", e)
+        );
       }
     }
   }
