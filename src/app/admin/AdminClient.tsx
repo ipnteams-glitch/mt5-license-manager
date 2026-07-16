@@ -216,7 +216,10 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-600 text-base font-bold text-white">A</div>
             <span className="font-semibold text-zinc-800">Admin Panel</span>
           </div>
-          <a href="/dashboard" className="text-base text-blue-600 hover:underline">Dashboard</a>
+          <div className="flex items-center gap-3">
+            <button onClick={() => window.location.reload()} className="text-sm px-3 py-1 rounded border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors">🔄 Refresh</button>
+            <a href="/dashboard" className="text-base text-blue-600 hover:underline">Dashboard</a>
+          </div>
         </div>
       </header>
 
