@@ -82,8 +82,6 @@ function paymentFromRow(row: string[]): Payment {
     status: (row[5] as "pending" | "paid" | "failed") || "pending",
     created_at: row[6] || "", paid_at: row[7] || "",
     qr_payload: row[8] || "",
-    agent_code: row[9] || undefined,
-    agent_commission: row[10] ? parseFloat(row[10]) : undefined,
   };
 }
 function paymentToRow(p: Payment): string[] {
