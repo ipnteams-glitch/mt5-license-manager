@@ -11,6 +11,25 @@ import { notifyVpsOrder } from "./notify";
 const WALLETS_SHEET = "crypto_wallets";
 const TOPUPS_SHEET = "crypto_topups";
 
+// ── Exchange Rate (USD → THB) ──
+let _usdThbRate: number | null = null;
+let _usdThbRateFetched = 0;
+
+async function getUsdThbRate(): Promise<number> {
+  // ponytail: cache 1 hour — free API, don't hammer it
+  if (_usdThbRate !== null && Date.now() - _usdThbRateFetched < 3_600_000) return _usdThbRate;
+  try {
+    const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+    const json = await res.json() as { rates: { THB: number } };
+    _usdThbRate = json.rates.THB;
+    _usdThbRateFetched = Date.now();
+    return _usdThbRate;
+  } catch {
+    // ponytail: fallback to cached or approximate
+    return _usdThbRate ?? 34;
+  }
+}
+
 // ── Auth ──
 function getAuth() {
   const key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -215,6 +234,11 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
       const commissionPct = isVps ? agent.commission_vps_percent : agent.commission_percent;
       price = Math.round(price * (1 - discountPct / 100) * 100) / 100;
       agentCommission = Math.round(price * (commissionPct / 100) * 100) / 100;
+      // ponytail: convert USDT commission to THB for agent bookkeeping
+      if (agentCommission > 0) {
+        const rate = await getUsdThbRate();
+        agentCommission = Math.round(agentCommission * rate * 100) / 100;
+      }
     }
   }
   if (!price) throw new Error("ราคา USDT ไม่ถูกต้อง");
