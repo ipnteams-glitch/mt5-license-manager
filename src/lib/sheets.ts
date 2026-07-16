@@ -1186,6 +1186,7 @@ export async function markAgentCommissionPaid(code: string): Promise<void> {
 export async function addAgentCommission(code: string, amount: number): Promise<void> {
   const agents = await getAllAgents(); const idx = agents.findIndex(a => a.agent_code === code);
   if (idx === -1) return; agents[idx].commission_earned += amount;
+  console.log("[addAgentCommission]", code, "+", amount, "total:", agents[idx].commission_earned);
   const sheets = await getSheets();
   await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!H${idx + 2}:I${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_earned), String(agents[idx].commission_paid)]] } });
   invalidateCache("agents");

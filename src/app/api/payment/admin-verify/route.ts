@@ -27,9 +27,13 @@ export async function POST(req: Request) {
     // Mark as paid (ข้าม EasySlip)
     await markPaymentPaid(txn_id);
 
+    console.log("[admin-verify] payment.agent_code:", payment.agent_code, "agent_commission:", payment.agent_commission);
     // ponytail: credit agent commission
     if (payment.agent_code && payment.agent_commission && payment.agent_commission > 0) {
+      console.log("[admin-verify] crediting agent commission:", payment.agent_code, payment.agent_commission);
       addAgentCommission(payment.agent_code, payment.agent_commission).catch(e => console.error("Agent commission failed:", e));
+    } else {
+      console.log("[admin-verify] SKIP agent commission — no agent_code or commission");
     }
 
     // IB+VPS is an add-on — handle before main package logic
