@@ -202,7 +202,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
             <span className="font-semibold text-zinc-800">Admin Panel</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => window.location.reload()} className="text-sm px-3 py-1 rounded border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors">🔄 Refresh</button>
+            <button onClick={() => window.location.reload()} className="text-sm px-3 py-1 rounded border border-zinc-200 bg-white text-black hover:bg-zinc-50 hover:border-zinc-300 transition-colors">🔄 Refresh</button>
             <a href="/dashboard" className="text-base text-blue-600 hover:underline">Dashboard</a>
           </div>
         </div>
@@ -382,7 +382,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                   })}
                 {paymentList.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-3 text-center text-base text-zinc-400">{t("no_data")}</td>
+                    <td colSpan={6} className="px-4 py-3 text-center text-base text-black/50">{t("no_data")}</td>
                   </tr>
                 )}
               </tbody>
@@ -412,14 +412,14 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     <tr key={i} className="border-b border-zinc-100">
                       <td className="px-2 py-1 font-medium text-black">{w.name}</td>
                       <td className="px-2 py-1 text-black">{w.broker}</td>
-                      <td className="px-2 py-1 text-zinc-500">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                      <td className="px-2 py-1 text-black">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
                       <td className="px-2 py-1 text-right">
                         <button onClick={() => handleRemoveWhitelist(i)} className="text-xs text-red-500 hover:text-red-700">🗑</button>
                       </td>
                     </tr>
                   ))}
                   {wlList.length === 0 && (
-                    <tr><td colSpan={4} className="px-2 py-4 text-center text-zinc-400">{t("no_data")}</td></tr>
+                    <tr><td colSpan={4} className="px-2 py-4 text-center text-black/50">{t("no_data")}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -493,7 +493,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     );
                   })}
                   {agentList.length === 0 && (
-                    <tr><td colSpan={10} className="px-2 py-4 text-center text-zinc-400">{t("no_data")}</td></tr>
+                    <tr><td colSpan={10} className="px-2 py-4 text-center text-black/50">{t("no_data")}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -503,13 +503,13 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
             {detailAgent && (
               <div className="mt-4 rounded-lg bg-zinc-50 p-4">
                 {agentList.find(a => a.agent_code === detailAgent)?.bank_name && (
-                  <p className="text-sm text-zinc-600 mb-2">
+                  <p className="text-sm text-black mb-2">
                     🏦 {agentList.find(a => a.agent_code === detailAgent)?.bank_name}: {agentList.find(a => a.agent_code === detailAgent)?.bank_account}
                   </p>
                 )}
                 <h3 className="font-semibold text-black mb-2">📋 ค่าคอม — {detailAgent}</h3>
                 {paymentList.filter(p => p.agent_code?.toLowerCase() === detailAgent.toLowerCase() && p.status === "paid").length === 0 ? (
-                  <p className="text-sm text-zinc-400">ยังไม่มีรายการค่าคอม</p>
+                  <p className="text-sm text-black/50">ยังไม่มีรายการค่าคอม</p>
                 ) : (
                   (() => {
                     const list = paymentList.filter(p => p.agent_code?.toLowerCase() === detailAgent.toLowerCase() && p.status === "paid");
@@ -517,10 +517,10 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     return (
                       <>
                         <table className="w-full text-xs mb-3">
-                          <thead><tr className="border-b text-left text-xs font-semibold text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1">ลูกค้า</th><th className="px-2 py-1">แพคเกจ</th><th className="px-2 py-1 text-right">ค่าคอม</th></tr></thead>
+                          <thead><tr className="border-b text-left text-xs font-semibold text-black"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1">ลูกค้า</th><th className="px-2 py-1">แพคเกจ</th><th className="px-2 py-1 text-right">ค่าคอม</th></tr></thead>
                           <tbody>{list.map(p => (
                             <tr key={p.id} className="border-b border-zinc-100">
-                              <td className="px-2 py-1 text-zinc-600">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-GB")}</td>
+                              <td className="px-2 py-1 text-black">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-GB")}</td>
                               <td className="px-2 py-1 text-black">{p.email}</td>
                               <td className="px-2 py-1 text-black">{p.package}</td>
                               <td className="px-2 py-1 text-right text-green-600 font-medium">฿{(p.agent_commission || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
@@ -552,11 +552,11 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                   <>
                     <p className="text-xs font-semibold text-amber-700 mt-2">⏳ รอชำระ ({pendingWds.filter((w: any) => w.status === "pending").length})</p>
                     <table className="w-full text-xs mt-1">
-                      <thead><tr className="border-b text-xs text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">ธนาคาร</th><th className="px-2 py-1">เลขบัญชี</th><th className="px-2 py-1"></th></tr></thead>
+                      <thead><tr className="border-b text-xs text-black font-semibold"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">ธนาคาร</th><th className="px-2 py-1">เลขบัญชี</th><th className="px-2 py-1"></th></tr></thead>
                       <tbody>
                         {pendingWds.filter((w: any) => w.status === "pending").map((w: any) => (
                           <tr key={w.id} className="border-b border-zinc-100">
-                            <td className="px-2 py-1 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                            <td className="px-2 py-1 text-black">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
                             <td className="px-2 py-1 text-right font-medium">฿{w.amount.toLocaleString()}</td>
                             <td className="px-2 py-1">{w.bank_name}</td>
                             <td className="px-2 py-1 font-mono text-xs">{w.bank_account}</td>
@@ -571,13 +571,13 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                 )}
                 {showWdHistory && (
                   <>
-                    {(() => { const all = pendingWds; const pages = Math.ceil(all.length / 10); const page = all.slice(wdPage * 10, (wdPage + 1) * 10); return page.length === 0 ? <p className="text-xs text-zinc-400 mt-2">ไม่มีประวัติ</p> : (
+                    {(() => { const all = pendingWds; const pages = Math.ceil(all.length / 10); const page = all.slice(wdPage * 10, (wdPage + 1) * 10); return page.length === 0 ? <p className="text-xs text-black/50 mt-2">ไม่มีประวัติ</p> : (
                       <>
-                        <table className="w-full text-xs mt-2"><thead><tr className="border-b text-xs text-zinc-500"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">สถานะ</th></tr></thead><tbody>{page.map((w: any) => (<tr key={w.id} className="border-b border-zinc-100"><td className="px-2 py-1 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td><td className="px-2 py-1 text-right">฿{w.amount.toLocaleString()}</td><td className="px-2 py-1">{w.status === "paid" ? <span className="text-green-600">✅ ชำระแล้ว</span> : <span className="text-amber-600">⏳ รอ</span>}</td></tr>))}</tbody></table>
+                        <table className="w-full text-xs mt-2"><thead><tr className="border-b text-xs text-black font-semibold"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1 text-right">จำนวน</th><th className="px-2 py-1">สถานะ</th></tr></thead><tbody>{page.map((w: any) => (<tr key={w.id} className="border-b border-zinc-100"><td className="px-2 py-1 text-black">{new Date(w.created_at).toLocaleDateString("en-GB")}</td><td className="px-2 py-1 text-right font-medium text-black">฿{w.amount.toLocaleString()}</td><td className="px-2 py-1">{w.status === "paid" ? <span className="text-green-600">✅ ชำระแล้ว</span> : <span className="text-amber-600">⏳ รอ</span>}</td></tr>))}</tbody></table>
                         <div className="flex justify-between mt-2">
-                          <button onClick={() => setWdPage(Math.max(0, wdPage - 1))} disabled={wdPage === 0} className="text-xs text-blue-500 disabled:text-zinc-300">← ก่อนหน้า</button>
-                          <span className="text-xs text-zinc-500">หน้า {wdPage + 1}/{pages}</span>
-                          <button onClick={() => setWdPage(Math.min(pages - 1, wdPage + 1))} disabled={wdPage >= pages - 1} className="text-xs text-blue-500 disabled:text-zinc-300">ถัดไป →</button>
+                          <button onClick={() => setWdPage(Math.max(0, wdPage - 1))} disabled={wdPage === 0} className="text-xs text-blue-600 disabled:text-black disabled:opacity-40">← ก่อนหน้า</button>
+                          <span className="text-xs text-black">หน้า {wdPage + 1}/{pages}</span>
+                          <button onClick={() => setWdPage(Math.min(pages - 1, wdPage + 1))} disabled={wdPage >= pages - 1} className="text-xs text-blue-600 disabled:text-black disabled:opacity-40">ถัดไป →</button>
                         </div>
                       </>
                     ); })()}
