@@ -528,14 +528,16 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                           ))}</tbody>
                         </table>
                         <p className="text-sm font-semibold text-amber-700">💰 รวม: ฿{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({list.length} รายการ)</p>
-                        {(() => {
-                          const ag = agentList.find(a => a.agent_code === detailAgent);
-                          const pending = ag ? ag.commission_earned - ag.commission_paid : 0;
-                          return pending > 0 ? (
-                            <p className="mt-3 border-t pt-3 text-sm text-amber-600">⏳ คงค้าง: ฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })} — รอ agent กดถอน</p>
-                          ) : (
-                            <p className="mt-3 border-t pt-3 text-sm text-green-600">✅ จ่ายครบแล้ว</p>
+                        {(() => { const ag = agentList.find(a => a.agent_code === detailAgent);
+                          const agentPendingWds = pendingWds.filter((w: any) => w.status === "pending" && w.agent_code === detailAgent);
+                          const pendingTotal = agentPendingWds.reduce((s: number, w: any) => s + w.amount, 0);
+                          if (pendingTotal > 0) return (
+                            <p className="mt-3 border-t pt-3 text-sm text-amber-600 font-semibold">⏳ รอชำระ: ฿{pendingTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({agentPendingWds.length} รายการ)</p>
                           );
+                          const p = ag ? ag.commission_earned - ag.commission_paid : 0;
+                          return p <= 0 ? (
+                            <p className="mt-3 border-t pt-3 text-sm text-green-600">✅ จ่ายครบแล้ว</p>
+                          ) : null;
                         })()}
                       </>
                     );
