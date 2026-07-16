@@ -15,7 +15,8 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
   const [wdSubmitting, setWdSubmitting] = useState(false);
   const [wdMsg, setWdMsg] = useState("");
   const [withdrawals, setWithdrawals] = useState<AgentWithdrawal[]>([]);
-  const available = agent.commission_earned - agent.commission_paid;
+  // ponytail: subtract pending withdrawals to show true available balance
+  const available = agent.commission_earned - agent.commission_paid - withdrawals.filter(w => w.status === "pending").reduce((s, w) => s + w.amount, 0);
 
   useEffect(() => {
     fetch("/api/agent/manage", {
