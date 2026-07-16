@@ -31,7 +31,12 @@ export async function POST(req: Request) {
     // ponytail: credit agent commission
     if (payment.agent_code && payment.agent_commission && payment.agent_commission > 0) {
       console.log("[admin-verify] crediting agent commission:", payment.agent_code, payment.agent_commission);
-      addAgentCommission(payment.agent_code, payment.agent_commission).catch(e => console.error("Agent commission failed:", e));
+      try {
+        await addAgentCommission(payment.agent_code, payment.agent_commission);
+        console.log("[admin-verify] addAgentCommission SUCCESS");
+      } catch (e: any) {
+        console.error("[admin-verify] addAgentCommission FAILED:", e.message || e);
+      }
     } else {
       console.log("[admin-verify] SKIP agent commission — no agent_code or commission");
     }
