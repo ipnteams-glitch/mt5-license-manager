@@ -32,7 +32,6 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   const [showAddAgent, setShowAddAgent] = useState(false);
   const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 10, commission_percent: 10, discount_vps_percent: 10, commission_vps_percent: 5, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
   const [agentSaving, setAgentSaving] = useState(false);
-  const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   // Commission detail (read-only)
   const [detailAgent, setDetailAgent] = useState<string | null>(null);
   const [pendingWds, setPendingWds] = useState<AgentWithdrawal[]>([]);
@@ -72,20 +71,6 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     } catch { setMsg("ลบไม่สำเร็จ"); }
   }
 
-  async function handleMarkPaid(code: string) {
-    setMarkingPaid(code);
-    try {
-      const res = await fetch("/api/agent/manage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "mark_paid", agent_code: code }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      setAgentList(prev => prev.map(a => a.agent_code === code ? { ...a, commission_paid: a.commission_earned } : a));
-      setMsg("✅ จ่ายคอมมิชชั่นแล้ว");
-    } catch { setMsg("❌ ไม่สำเร็จ"); }
-    finally { setMarkingPaid(null); }
-  }
 
   async function handleAddWhitelist(e: React.FormEvent) {
     e.preventDefault();
@@ -547,15 +532,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                           const ag = agentList.find(a => a.agent_code === detailAgent);
                           const pending = ag ? ag.commission_earned - ag.commission_paid : 0;
                           return pending > 0 ? (
-                            <div className="mt-3 flex items-center gap-2 border-t pt-3">
-                              <span className="text-sm text-zinc-600">
-                                💰 คงค้าง: ฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                              </span>
-                              <button onClick={() => handleMarkPaid(detailAgent!)} disabled={markingPaid === detailAgent}
-                                className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50">
-                                {markingPaid === detailAgent ? "..." : "จ่ายแล้ว"}
-                              </button>
-                            </div>
+                            <p className="mt-3 border-t pt-3 text-sm text-amber-600">⏳ คงค้าง: ฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })} — รอ agent กดถอน</p>
                           ) : (
                             <p className="mt-3 border-t pt-3 text-sm text-green-600">✅ จ่ายครบแล้ว</p>
                           );
