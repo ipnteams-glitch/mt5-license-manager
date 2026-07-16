@@ -43,8 +43,21 @@ export async function POST(req: Request) {
       ? (promoPrices[pkg as string] ?? Math.round(pkgInfo.price * 0.5))
       : pkgInfo.price;
 
+    // ponytail: agent discount
+    let agentCommission = 0;
+    if (agent_code) {
+      const agent = await getAgentByCode(agent_code);
+      if (agent) {
+        const isVps = pkg === "ib_vps_2200";
+        const discountPct = isVps ? agent.discount_vps_percent : agent.discount_percent;
+        const commissionPct = isVps ? agent.commission_vps_percent : agent.commission_percent;
+        finalPrice = Math.round(finalPrice * (1 - discountPct / 100));
+        agentCommission = Math.round(finalPrice * (commissionPct / 100) * 100) / 100;
+      }
+    }
+
     // สร้าง payment
-    const payment = await createPayment(session.user.email, pkg as PackageType, finalPrice);
+    const payment = await createPayment(session.user.email, pkg as PackageType, finalPrice, undefined, agent_code || undefined, agentCommission || undefined);
 
     // สร้าง QR ผ่าน EasySlip
     const qrRes = await fetch("https://bill-payment-api.easyslip.com/", {
