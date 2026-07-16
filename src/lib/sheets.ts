@@ -397,6 +397,8 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
     id: uuidv4(), email, package: pkg, amount: totalAmount, satang,
     status: "pending", created_at: new Date().toISOString(),
     qr_payload: qrPayload || "",
+    agent_code: agent_code || undefined,
+    agent_commission: agent_commission || undefined,
   };
   const sheets = await getSheets();
 
