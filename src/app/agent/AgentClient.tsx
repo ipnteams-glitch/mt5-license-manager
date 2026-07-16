@@ -174,10 +174,18 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
                     <th className="px-4 py-2">แพคเกจ</th>
                     <th className="px-4 py-2 text-right">จ่าย</th>
                     <th className="px-4 py-2 text-right">ค่าคอม</th>
+                    <th className="px-4 py-2">ช่องทาง</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sales.map((s, i) => (
+                  {sales.map((s, i) => {
+                    // ponytail: parse qr_payload for crypto conversion detail
+                    let cryptoMeta: { method?: string; usdt?: number; rate?: number; thb?: number } | null = null;
+                    if (s.qr_payload) {
+                      try { cryptoMeta = JSON.parse(s.qr_payload); } catch {}
+                    }
+                    const isCrypto = cryptoMeta?.method === "crypto";
+                    return (
                     <tr key={i} className="border-b border-zinc-50 hover:bg-zinc-50">
                       <td className="px-4 py-2 text-zinc-600 whitespace-nowrap">
                         {new Date(s.paid_at || s.created_at).toLocaleDateString("en-GB")}
@@ -188,13 +196,35 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
                       <td className="px-4 py-2 text-zinc-700">{s.email}</td>
                       <td className="px-4 py-2 text-zinc-600">{s.package_label}</td>
                       <td className="px-4 py-2 text-right font-medium text-zinc-800">
-                        ฿{s.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {isCrypto ? (
+                          <span title={`${cryptoMeta!.usdt} USDT × ${cryptoMeta!.rate} = ฿${cryptoMeta!.thb}`}>
+                            ${cryptoMeta!.usdt} <span className="text-xs text-zinc-400">USDT</span>
+                          </span>
+                        ) : (
+                          <>฿{s.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</>
+                        )}
                       </td>
                       <td className="px-4 py-2 text-right font-medium text-green-600">
-                        ฿{(s.agent_commission || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {isCrypto && cryptoMeta ? (
+                          <span title={`${cryptoMeta.usdt} USDT × ${cryptoMeta.rate} = ฿${cryptoMeta.thb}`}>
+                            ฿{cryptoMeta.thb!.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </span>
+                        ) : (
+                          <>฿{(s.agent_commission || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        {isCrypto ? (
+                          <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700"
+                            title={`${cryptoMeta!.usdt} USDT × ${cryptoMeta!.rate} = ฿${cryptoMeta!.thb}`}
+                          >💰 USDT</span>
+                        ) : (
+                          <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700">📱 พร้อมเพย์</span>
+                        )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

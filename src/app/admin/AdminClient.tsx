@@ -517,15 +517,40 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     return (
                       <>
                         <table className="w-full text-xs mb-3">
-                          <thead><tr className="border-b text-left text-xs font-semibold text-black"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1">ลูกค้า</th><th className="px-2 py-1">แพคเกจ</th><th className="px-2 py-1 text-right">ค่าคอม</th></tr></thead>
-                          <tbody>{list.map(p => (
+                          <thead><tr className="border-b text-left text-xs font-semibold text-black"><th className="px-2 py-1">วันที่</th><th className="px-2 py-1">ลูกค้า</th><th className="px-2 py-1">แพคเกจ</th><th className="px-2 py-1 text-right">ค่าคอม</th><th className="px-2 py-1">ช่องทาง</th></tr></thead>
+                          <tbody>{list.map(p => {
+                            // ponytail: parse qr_payload for crypto conversion detail
+                            let cryptoMeta: { method?: string; usdt?: number; rate?: number; thb?: number } | null = null;
+                            if (p.qr_payload) {
+                              try { cryptoMeta = JSON.parse(p.qr_payload); } catch {}
+                            }
+                            const isCrypto = cryptoMeta?.method === "crypto";
+                            return (
                             <tr key={p.id} className="border-b border-zinc-100">
                               <td className="px-2 py-1 text-black">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-GB")}</td>
                               <td className="px-2 py-1 text-black">{p.email}</td>
                               <td className="px-2 py-1 text-black">{p.package}</td>
-                              <td className="px-2 py-1 text-right text-green-600 font-medium">฿{(p.agent_commission || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                              <td className="px-2 py-1 text-right text-green-600 font-medium">
+                                {isCrypto && cryptoMeta ? (
+                                  <span title={`${cryptoMeta.usdt} USDT × ${cryptoMeta.rate} = ฿${cryptoMeta.thb}`}>
+                                    ฿{cryptoMeta.thb!.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                  </span>
+                                ) : (
+                                  <>฿{(p.agent_commission || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</>
+                                )}
+                              </td>
+                              <td className="px-2 py-1">
+                                {isCrypto ? (
+                                  <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs font-medium text-purple-700"
+                                    title={`${cryptoMeta!.usdt} USDT × ${cryptoMeta!.rate} = ฿${cryptoMeta!.thb}`}
+                                  >💰 USDT</span>
+                                ) : (
+                                  <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700">📱 พร้อมเพย์</span>
+                                )}
+                              </td>
                             </tr>
-                          ))}</tbody>
+                            );
+                          })}</tbody>
                         </table>
                         <p className="text-sm font-semibold text-amber-700">💰 รวม: ฿{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({list.length} รายการ)</p>
                         {(() => { const ag = agentList.find(a => a.agent_code === detailAgent);
