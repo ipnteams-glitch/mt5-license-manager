@@ -81,7 +81,11 @@ export async function removePort(id: string): Promise<void> {
 }
 export async function findPortByAccount(account: string, broker?: string): Promise<Port | null> {
   const q = supabase.from("ports").select("*").eq("mt5_account", account);
-  if (broker) q.eq("mt5_broker", broker);
+  q.eq("status", "active");
+  if (broker) {
+    const pattern = "%" + broker.replace(/%/g, "\\%") + "%";
+    q.or("mt5_broker.ilike." + pattern);
+  }
   const { data } = await q.limit(1);
   return (data?.[0] as Port) || null;
 }
