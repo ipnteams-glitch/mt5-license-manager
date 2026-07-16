@@ -401,7 +401,7 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
   // เขียน payment ลง sheet (อาจต้องลองใหม่ถ้า sheet ยังไม่มี)
   try {
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I`,
+      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:K`,
       valueInputOption: "RAW", requestBody: { values: [paymentToRow(payment)] },
     });
   } catch {
@@ -426,7 +426,7 @@ export async function createPayment(email: string, pkg: PackageType, price: numb
     });
     // ลองเขียนอีกครั้ง
     await sheets.spreadsheets.values.append({
-      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:I`,
+      spreadsheetId: sheetId(), range: `${PAYMENTS_SHEET}!A:K`,
       valueInputOption: "RAW", requestBody: { values: [paymentToRow(payment)] },
     });
   }
