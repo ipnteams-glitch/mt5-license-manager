@@ -1138,12 +1138,11 @@ async function initAgentsSheet(): Promise<void> {
   }
 }
 export async function getAllAgents(): Promise<Agent[]> {
-  const cached = getCache<Agent[]>("agents", 1_000); if (cached) return cached;
   await initAgentsSheet(); const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!A:L` });
   const rows = res.data.values; if (!rows || rows.length <= 1) return [];
   const agents = rows.slice(1).filter(r => r[0]).map(agentFromRow);
-  setCache("agents", agents); return agents;
+  return agents;
 }
 export async function getAgentByCode(code: string): Promise<Agent | null> {
   const agents = await getAllAgents();
