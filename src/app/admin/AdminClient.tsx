@@ -352,8 +352,11 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                           {new Date(p.created_at).toLocaleString("th-TH", { hour: "2-digit", minute: "2-digit" })}
                         </td>
                         <td className="px-2 py-1 text-xs text-black">{p.email}</td>
-                        <td className="px-2 py-1 text-xs font-semibold text-black">{PACKAGES[p.package]?.name || p.package}</td>
-                        <td className="px-2 py-1 font-mono text-xs font-bold text-black">{p.amount.toFixed(2)} ฿</td>
+                        <td className="px-2 py-1 text-xs font-semibold text-black">
+                          {PACKAGES[p.package]?.name || p.package}
+                          {PACKAGES[p.package]?.price && <span className="text-zinc-400 ml-1">({PACKAGES[p.package].price.toLocaleString()} ฿)</span>}
+                        </td>
+                        <td className="px-2 py-1 font-mono text-xs font-bold text-black">{PACKAGES[p.package]?.price?.toLocaleString() || p.amount.toFixed(2)} ฿</td>
                         <td className="px-2 py-1">
                           <span
                             className={`rounded-full px-1.5 py-0.5 text-xs font-medium ${
