@@ -492,12 +492,6 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                           <button onClick={() => setDetailAgent(detailAgent === a.agent_code ? null : a.agent_code)} className="text-xs text-blue-500 hover:text-blue-700">
                             {detailAgent === a.agent_code ? "ซ่อน" : "📋"}
                           </button>
-                         {pending > 0 && (
-                            <button onClick={() => handleMarkPaid(a.agent_code)} disabled={markingPaid === a.agent_code}
-                              className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">
-                              {markingPaid === a.agent_code ? "..." : "จ่ายแล้ว"}
-                            </button>
-                          )}
                           <button onClick={() => { setAgentForm(a); setShowAddAgent(true); }} className="text-xs text-blue-500 hover:text-blue-700">✏️</button>
                           <button onClick={() => handleDeleteAgent(a.agent_code)} className="text-xs text-red-500 hover:text-red-700">🗑</button>
                         </td>
@@ -540,6 +534,23 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                           ))}</tbody>
                         </table>
                         <p className="text-sm font-semibold text-amber-700">💰 รวม: ฿{total.toLocaleString(undefined, { minimumFractionDigits: 2 })} ({list.length} รายการ)</p>
+                        {(() => {
+                          const ag = agentList.find(a => a.agent_code === detailAgent);
+                          const pending = ag ? ag.commission_earned - ag.commission_paid : 0;
+                          return pending > 0 ? (
+                            <div className="mt-3 flex items-center gap-2 border-t pt-3">
+                              <span className="text-sm text-zinc-600">
+                                💰 คงค้าง: ฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                              </span>
+                              <button onClick={() => handleMarkPaid(detailAgent!)} disabled={markingPaid === detailAgent}
+                                className="rounded bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700 disabled:opacity-50">
+                                {markingPaid === detailAgent ? "..." : "จ่ายแล้ว"}
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="mt-3 border-t pt-3 text-sm text-green-600">✅ จ่ายครบแล้ว</p>
+                          );
+                        })()}
                       </>
                     );
                   })()
