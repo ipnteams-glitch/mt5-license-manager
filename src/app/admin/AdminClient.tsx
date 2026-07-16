@@ -557,9 +557,9 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                         {pendingWds.filter((w: any) => w.status === "pending").map((w: any) => (
                           <tr key={w.id} className="border-b border-zinc-100">
                             <td className="px-2 py-1 text-black">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
-                            <td className="px-2 py-1 text-right font-medium">฿{w.amount.toLocaleString()}</td>
-                            <td className="px-2 py-1">{w.bank_name}</td>
-                            <td className="px-2 py-1 font-mono text-xs">{w.bank_account}</td>
+                            <td className="px-2 py-1 text-right font-medium text-black">฿{w.amount.toLocaleString()}</td>
+                            <td className="px-2 py-1 text-black">{w.bank_name}</td>
+                            <td className="px-2 py-1 font-mono text-xs text-black">{w.bank_account}</td>
                             <td className="px-2 py-1">
                               <button onClick={async () => { setMarkingWd(w.id); try { await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "mark_withdrawal_paid", withdrawal_id: w.id }) }); setPendingWds((prev: any) => prev.filter((x: any) => x.id !== w.id)); } catch {} setMarkingWd(null); }} disabled={markingWd === w.id} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">{markingWd === w.id ? "..." : "ชำระแล้ว"}</button>
                             </td>
