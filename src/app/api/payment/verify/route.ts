@@ -1,6 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, getEasySlipApiKey, addAgentCommission } from "@/lib/sheets";
-import { canUpgrade, calculateNewExpiry } from "@/lib/sheets";
+import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, getEasySlipApiKey, addAgentCommission, canUpgrade, calculateNewExpiry } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { sendPaymentSuccessEmail } from "@/lib/mail";

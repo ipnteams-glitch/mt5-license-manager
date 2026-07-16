@@ -412,6 +412,84 @@ export async function getEasySlipApiKey(): Promise<string> {
 }
 
 // ═══════════════════════════════════════════════════
+// Missing functions & aliases
+// ═══════════════════════════════════════════════════
+
+export async function getPortsByEmail(email: string): Promise<Port[]> {
+  const { data } = await supabase.from("ports").select("*").eq("member_email", email).order("created_at");
+  return (data || []) as Port[];
+}
+
+export async function markPaymentFailed(txnId: string): Promise<Payment> {
+  const payment = await getPaymentById(txnId);
+  if (!payment) throw new Error("Payment not found");
+  await supabase.from("payments").update({ status: "failed" }).eq("id", txnId);
+  return payment;
+}
+
+export const getPortSystems = getSystemsByPort;
+
+export async function setPortSystems(
+  portId: string, memberEmail: string, mt5Account: string, broker: string,
+  systems: string, password?: string, multiplier?: string, vpsId?: string
+): Promise<PortSystem> {
+  const existing = await getSystemsByPort(mt5Account);
+  const sys: PortSystem = {
+    id: existing?.id || uuidv4(),
+    port_id: portId, member_email: memberEmail, mt5_account: mt5Account,
+    broker: broker || "", systems, password: password || "",
+    multiplier: multiplier || "1.0", vps_id: vpsId || "",
+    status: "active", heartbeat: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    created_at: existing?.created_at || new Date().toISOString(),
+  };
+  await savePortSystem(sys);
+  return sys;
+}
+
+export async function pushPortfolioData(mt5Account: string, data: { balance: number; floating_pl: number; total_profit: number; broker?: string }): Promise<void> {
+  const { data: existing } = await supabase.from("portfolio").select("id").eq("mt5_account", mt5Account).single();
+  if (existing) {
+    await supabase.from("portfolio").update({ balance: data.balance, floating_pl: data.floating_pl, total_profit: data.total_profit, broker: data.broker || "", last_updated: new Date().toISOString() }).eq("id", existing.id);
+  } else {
+    await supabase.from("portfolio").insert({ mt5_account: mt5Account, member_email: "", broker: data.broker || "", balance: data.balance, floating_pl: data.floating_pl, total_profit: data.total_profit });
+  }
+}
+
+export async function approvePaymentAndUpgrade(txnId: string): Promise<{ memberEmail: string; memberName: string; packageLabel: string; expiryDate: string }> {
+  const payment = await getPaymentById(txnId);
+  if (!payment) throw new Error("Payment not found");
+  if (payment.status !== "pending") throw new Error("Payment already processed");
+  const member = await getMemberByEmail(payment.email);
+  if (!member) throw new Error("Member not found");
+  const pkg = payment.package as PackageType;
+  const pkgInfo = PACKAGES[pkg];
+  await markPaymentPaid(txnId);
+  if (pkg === "ib_vps_2200") {
+    const addonExpiry = new Date(); addonExpiry.setFullYear(addonExpiry.getFullYear() + 1);
+    const expiryStr = addonExpiry.toISOString();
+    await setAddonIbVpsExpiry(payment.email, expiryStr);
+    if (payment.agent_code && payment.agent_commission && payment.agent_commission > 0) {
+      await addAgentCommission(payment.agent_code, payment.agent_commission);
+    }
+    const { sendPaymentSuccessEmail } = await import("./mail");
+    const { notifyVpsOrder } = await import("./notify");
+    sendPaymentSuccessEmail(payment.email, member.name, pkgInfo.label, expiryStr).catch(() => {});
+    notifyVpsOrder(payment.email, member.name, pkgInfo.label, expiryStr, txnId).catch(() => {});
+    return { memberEmail: payment.email, memberName: member.name, packageLabel: pkgInfo.label, expiryDate: expiryStr };
+  }
+  const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
+  const { expiry, maxPorts } = calculateNewExpiry(member, pkg);
+  await updateMemberPackage(payment.email, pkg, maxPorts, expiry);
+  if (payment.agent_code && payment.agent_commission && payment.agent_commission > 0) {
+    await addAgentCommission(payment.agent_code, payment.agent_commission);
+  }
+  const { sendPaymentSuccessEmail } = await import("./mail");
+  sendPaymentSuccessEmail(payment.email, member.name, pkgInfo.label, expiry).catch(() => {});
+  return { memberEmail: payment.email, memberName: member.name, packageLabel: pkgInfo.label, expiryDate: expiry };
+}
+
+// ═══════════════════════════════════════════════════
 // Missing functions (aliases + complex flows)
 // ═══════════════════════════════════════════════════
 

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getAllPayments } from "@/lib/sheets";
+import { getAllPayments } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // GET /api/payment/has-paid — เช็คว่า user เคยจ่ายสำเร็จหรือยัง

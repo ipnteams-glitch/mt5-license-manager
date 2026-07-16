@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPaymentById, markPaymentFailed } from "@/lib/sheets";
+import { getPaymentById, markPaymentFailed } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {

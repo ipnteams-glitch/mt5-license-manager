@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPortsByEmail, getPortSystems } from "@/lib/sheets";
+import { getPortsByEmail, getPortSystems } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // GET /api/ports/status — status of all user ports (for dashboard)

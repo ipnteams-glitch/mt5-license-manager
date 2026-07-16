@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { addPort, deletePort, getAllPorts, getMemberByEmail, getPortSystems } from "@/lib/sheets";
+import { addPort, deletePort, getAllPorts, getMemberByEmail, getPortSystems } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // POST /api/ports — เพิ่มพอร์ต MT5

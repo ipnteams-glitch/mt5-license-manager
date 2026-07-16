@@ -1,4 +1,4 @@
-import { pushPortfolioData } from "@/lib/sheets";
+import { pushPortfolioData } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // GET /api/portfolio/push?mt5_account=xxx&balance=xxx&floating_pl=xxx&total_profit=xxx

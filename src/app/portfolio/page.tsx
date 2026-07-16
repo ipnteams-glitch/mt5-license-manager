@@ -11,7 +11,7 @@ export default function PortfolioPage() {
 /* --- โค้ดเดิม (ปิดใช้งานชั่วคราว) ---
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getPortfolioByEmail } from "@/lib/sheets";
+import { getPortfolioByEmail } from "@/lib/supabase";
 import type { PortfolioAccount } from "@/types";
 import PortfolioClient from "./PortfolioClient";
 

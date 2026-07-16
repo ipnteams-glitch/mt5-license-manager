@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPaymentById, markPaymentFailed, approvePaymentAndUpgrade } from "@/lib/sheets";
+import { getPaymentById, markPaymentFailed, approvePaymentAndUpgrade } from "@/lib/supabase";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { retry } from "@/lib/retry";
 import { notifyVpsOrder } from "@/lib/notify";

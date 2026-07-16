@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPaymentById, getEasySlipApiKey, approvePaymentAndUpgrade } from "@/lib/sheets";
+import { getPaymentById, getEasySlipApiKey, approvePaymentAndUpgrade } from "@/lib/supabase";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";

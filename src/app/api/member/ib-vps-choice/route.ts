@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { getAllMembers } from "@/lib/sheets";
+import { getAllMembers } from "@/lib/supabase";
 import { invalidateCache } from "@/lib/cache";
 import { google } from "googleapis";
 
