@@ -12,7 +12,6 @@ type Props = {
 
 export default function AgentClient({ agent, sales, pendingCommission }: Props) {
   const router = useRouter();
-  const [wdAmount, setWdAmount] = useState("");
   const [wdSubmitting, setWdSubmitting] = useState(false);
   const [wdMsg, setWdMsg] = useState("");
   const [withdrawals, setWithdrawals] = useState<AgentWithdrawal[]>([]);
@@ -28,7 +27,7 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
 
   async function handleWithdraw(e: React.FormEvent) {
     e.preventDefault();
-    const amt = parseFloat(wdAmount);
+    const amt = available;
     if (!amt || amt <= 0) return;
     setWdSubmitting(true); setWdMsg("");
     try {
@@ -40,7 +39,6 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
       const data = await res.json();
       if (data.success) {
         setWdMsg("✅ สร้างรายการถอนแล้ว — รอแอดมินตรวจสอบ");
-        setWdAmount("");
         setWithdrawals(prev => [data.withdrawal, ...prev]);
       } else {
         setWdMsg("❌ " + (data.error || "ไม่สำเร็จ"));

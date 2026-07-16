@@ -132,13 +132,15 @@ export default function RenewCryptoPage() {
 
   // Purchase
   async function buyPackage(pkg: PackageType) {
+    // ponytail: re-validate agent code
+    const validCode = agentInfo && agentCode.trim() === agentInfo.agent_code ? agentCode.trim() : undefined;
     setBuying(pkg);
     setError("");
     try {
       const res = await fetch("/api/crypto/purchase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ package: pkg, agent_code: agentInfo?.agent_code }),
+        body: JSON.stringify({ package: pkg, agent_code: validCode }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -234,22 +236,22 @@ export default function RenewCryptoPage() {
         {/* Agent Code Input */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-zinc-700 mb-1">🏷️ โค้ดตัวแทน (ถ้ามี)</label>
-          <div className="flex gap-2">
+          <div className="flex">
             <input
               type="text"
               value={agentCode}
               onChange={(e) => { setAgentCode(e.target.value); setAgentInfo(null); }}
-              onBlur={() => {
-                // Validate against first visible package
-                if (visiblePackages.length > 0) validateAgentCode(agentCode, visiblePackages[0]);
-              }}
               placeholder="กรอกโค้ดตัวแทน"
-              className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
+              className="flex-1 rounded-l-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none"
             />
+            <button onClick={() => { if (visiblePackages.length > 0) validateAgentCode(agentCode, visiblePackages[0]); }} disabled={validatingAgent}
+              className="rounded-r-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+              {validatingAgent ? "..." : "Apply"}
+            </button>
+          </div>
+          <div className="mt-1 flex items-center">
             {validatingAgent && (
-              <div className="flex items-center">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
-              </div>
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-300 border-t-blue-600" />
             )}
           </div>
           {agentInfo && (
@@ -265,7 +267,8 @@ export default function RenewCryptoPage() {
           {visiblePackages.map(key => {
             const pkg = PACKAGES[key];
             const usdtPrice = PACKAGE_USDT_PRICES[key];
-            const canBuy = balance >= usdtPrice;
+            const discountedUsdt = agentInfo ? Math.round(usdtPrice * (1 - agentInfo.discount_percent / 100) * 100) / 100 : usdtPrice;
+            const canBuy = balance >= discountedUsdt;
             return (
               <div key={key} className="rounded-xl border-2 border-zinc-200 p-4">
                 <div className="flex justify-between items-center mb-2">
@@ -274,7 +277,14 @@ export default function RenewCryptoPage() {
                     <p className="text-xs text-zinc-700 whitespace-pre-line">{pkg.label}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-blue-600">{usdtPrice} USDT</p>
+                    {agentInfo ? (
+                      <>
+                        <p className="text-xs text-zinc-400 line-through">{usdtPrice} USDT</p>
+                        <p className="text-lg font-bold text-green-600">{discountedUsdt} USDT</p>
+                      </>
+                    ) : (
+                      <p className="text-lg font-bold text-blue-600">{usdtPrice} USDT</p>
+                    )}
                     <p className="text-xs text-zinc-700">{pkg.max_ports >= 999 ? t("unlimited") : `${pkg.max_ports} ${t("port_suffix")}`}</p>
                   </div>
                 </div>
