@@ -1,4 +1,4 @@
-import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts } from "@/lib/sheets";
+import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 

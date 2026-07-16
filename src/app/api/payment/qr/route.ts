@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode } from "@/lib/sheets";
+import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode } from "@/lib/supabase";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";

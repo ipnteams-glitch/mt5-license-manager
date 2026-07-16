@@ -1,6 +1,6 @@
 // /agent — Agent Dashboard (server component)
 import { auth } from "@/lib/auth";
-import { getAgentByEmail, getPaymentsByAgentCode } from "@/lib/sheets";
+import { getAgentByEmail, getPaymentsByAgentCode } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import { redirect } from "next/navigation";
 import AgentClient from "./AgentClient";

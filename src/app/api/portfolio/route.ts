@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPortfolioByEmail, addPortfolioAccount, deletePortfolioAccount } from "@/lib/sheets";
+import { getPortfolioByEmail, addPortfolioAccount, deletePortfolioAccount } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // Cache จัดการโดย sheets.ts (in-memory, 10s TTL) — ไม่ต้อง cache ซ้ำที่นี่

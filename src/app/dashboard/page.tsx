@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/sheets";
+import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";

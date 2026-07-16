@@ -1,4 +1,4 @@
-import { getAllBrokers } from "@/lib/sheets";
+import { getAllBrokers } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // GET /api/brokers

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { addWhitelist, removeWhitelist } from "@/lib/sheets";
+import { addWhitelist, removeWhitelist } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {

@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
-import { upsertMember } from "@/lib/sheets";
+import { upsertMember } from "@/lib/supabase";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

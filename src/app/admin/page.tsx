@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getAllMembers, getAllPorts, getAllPayments, getAllWhitelist, getAllAgents } from "@/lib/sheets";
+import { getAllMembers, getAllPorts, getAllPayments, getAllWhitelist, getAllAgents } from "@/lib/supabase";
 import type { Member, Port, Payment, Agent } from "@/types";
 import AdminClient from "./AdminClient";
 

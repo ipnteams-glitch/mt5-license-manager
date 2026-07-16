@@ -1,5 +1,5 @@
 // GET /api/agent/validate?code=XXX&package=YYY
-import { getAgentByCode } from "@/lib/sheets";
+import { getAgentByCode } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { updateMemberPackage } from "@/lib/sheets";
+import { updateMemberPackage } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";

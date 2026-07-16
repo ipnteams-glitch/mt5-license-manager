@@ -1,4 +1,4 @@
-import { getEaVersion } from "@/lib/sheets";
+import { getEaVersion } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // GET /api/ea-version — ดูเวอร์ชั่น EA ล่าสุดจาก Google Drive
