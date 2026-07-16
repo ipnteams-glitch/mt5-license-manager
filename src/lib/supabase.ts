@@ -131,7 +131,15 @@ export async function getAllWhitelist(): Promise<{ name: string; broker: string;
   return (data || []) as any[];
 }
 export function checkWhitelist(wl: { name: string; broker: string }[], name: string, broker: string): boolean {
-  return wl.some(w => w.name === name && w.broker === broker);
+  const inputWords = name.trim().toLowerCase().split(/\s+/).sort();
+  const brokerLower = broker.trim().toLowerCase();
+  return wl.some((w) => {
+    const wlWords = w.name.trim().toLowerCase().split(/\s+/).sort();
+    const nameMatch = inputWords.length === wlWords.length && inputWords.every((word, i) => word === wlWords[i]);
+    const wlBroker = w.broker.trim().toLowerCase();
+    const brokerMatch = brokerLower.includes(wlBroker) || wlBroker.includes(brokerLower);
+    return nameMatch && brokerMatch;
+  });
 }
 export async function addWhitelist(name: string, broker: string): Promise<void> {
   await supabase.from("whitelist").insert({ name, broker });
