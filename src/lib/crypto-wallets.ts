@@ -238,6 +238,15 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
       if (agentCommission > 0) {
         const rate = await getUsdThbRate();
         agentCommission = Math.round(agentCommission * rate * 100) / 100;
+        // ponytail: also record in Supabase for agent/admin visibility
+        const { supabase } = await import("./supabase-client");
+        supabase.from("payments").insert({
+          email, package: pkg, amount: price, satang: 0,
+          status: "paid", paid_at: new Date().toISOString(),
+          agent_code: agent_code || null, agent_commission: agentCommission,
+          qr_payload: JSON.stringify({ method: "crypto", usdt: price, rate, thb: agentCommission }),
+        }).then(() => console.log("[crypto] payment recorded in Supabase"))
+          .catch((e: any) => console.error("[crypto] Supabase payment insert failed:", e));
       }
     }
   }
