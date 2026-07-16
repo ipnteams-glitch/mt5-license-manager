@@ -5,6 +5,8 @@ import { PACKAGES } from "@/types";
 import { redirect } from "next/navigation";
 import AgentClient from "./AgentClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AgentPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/login");

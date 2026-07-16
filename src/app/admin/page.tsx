@@ -4,6 +4,8 @@ import { getAllMembers, getAllPorts, getAllPayments, getAllWhitelist, getAllAgen
 import type { Member, Port, Payment, Agent } from "@/types";
 import AdminClient from "./AdminClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const session = await auth();
   if (!session?.user?.email) redirect("/login");
