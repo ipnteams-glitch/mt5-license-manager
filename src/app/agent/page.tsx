@@ -26,14 +26,11 @@ export default async function AgentPage() {
 
   const sales = await getPaymentsByAgentCode(agent.agent_code);
   // ponytail: reconcile commission_earned from payments (handles agent re-add after deletion)
-  const trueEarned = sales
-    .filter(s => s.status === "paid")
-    .reduce((sum, s) => sum + (s.agent_commission || 0), 0);
-  if (trueEarned > agent.commission_earned) {
-    const { reconcileAgentCommission } = await import("@/lib/sheets");
-    reconcileAgentCommission(agent.agent_code, trueEarned).catch(() => {});
-    agent = { ...agent, commission_earned: trueEarned };
-  }
+  const { reconcileAgentCommission } = await import("@/lib/sheets");
+  await reconcileAgentCommission(agent.agent_code);
+  // ponytail: re-read agent after reconcile
+  const refreshed = await getAgentByEmail(session.user.email);
+  if (refreshed) agent = refreshed;
   const pending = agent.commission_earned - agent.commission_paid;
 
   // Enrich sales with package labels

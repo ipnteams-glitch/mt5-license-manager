@@ -1193,12 +1193,16 @@ export async function addAgentCommission(code: string, amount: number): Promise<
   invalidateCache("agents");
 }
 // ponytail: reconcile commission_earned from payments (agent re-added after deletion)
-export async function reconcileAgentCommission(code: string, trueEarned: number): Promise<void> {
+export async function reconcileAgentCommission(code: string): Promise<void> {
   const agents = await getAllAgents(); const idx = agents.findIndex(a => a.agent_code === code);
   if (idx === -1) return;
-  agents[idx].commission_earned = trueEarned;
+  // ponytail: sum from payments + withdrawals (handles deleted + re-added agent)
+  const payments = await getPaymentsByAgentCode(code);
+  agents[idx].commission_earned = payments.reduce((s, p) => s + (p.agent_commission || 0), 0);
+  const wds = await getWithdrawals(code);
+  agents[idx].commission_paid = wds.filter(w => w.status === "paid").reduce((s, w) => s + w.amount, 0);
   const sheets = await getSheets();
-  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!H${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(trueEarned)]] } });
+  await sheets.spreadsheets.values.update({ spreadsheetId: sheetId(), range: `${AGENTS_SHEET}!H${idx + 2}:I${idx + 2}`, valueInputOption: "RAW", requestBody: { values: [[String(agents[idx].commission_earned), String(agents[idx].commission_paid)]] } });
   invalidateCache("agents");
 }
 export async function getPaymentsByAgentCode(code: string): Promise<Payment[]> {
