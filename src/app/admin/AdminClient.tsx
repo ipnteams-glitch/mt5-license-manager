@@ -487,7 +487,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                             {detailAgent === a.agent_code ? "ซ่อน" : "📋"}
                           </button>
                           <button onClick={() => { setAgentForm(a); setShowAddAgent(true); }} className="text-xs text-blue-500 hover:text-blue-700">✏️</button>
-                          <button onClick={() => handleDeleteAgent(a.agent_code)} className="text-xs text-red-500 hover:text-red-700">🗑</button>
+                          <button onClick={() => { if (window.confirm("ลบตัวแทน " + a.name + "?")) handleDeleteAgent(a.agent_code); }} className="text-xs text-red-500 hover:text-red-700">🗑</button>
                         </td>
                       </tr>
                     );
