@@ -134,7 +134,7 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
                   {withdrawals.map(w => (
                     <tr key={w.id} className="border-b border-zinc-50">
                       <td className="px-4 py-2 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
-                      <td className="px-4 py-2 text-right font-medium">฿{w.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                      <td className="px-4 py-2 text-right font-medium text-black">฿{w.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                       <td className="px-4 py-2">
                         {w.status === "paid" ? <span className="text-green-600 font-medium">✅ จ่ายแล้ว ({w.paid_at ? new Date(w.paid_at).toLocaleDateString("en-GB") : ""})</span>
                           : <span className="text-amber-600 font-medium">⏳ รอดำเนินการ</span>}
