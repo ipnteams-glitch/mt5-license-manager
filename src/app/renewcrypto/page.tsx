@@ -256,7 +256,7 @@ export default function RenewCryptoPage() {
           </div>
           {agentInfo && (
             <p className="mt-2 text-sm text-green-600">
-              ส่วนลด {agentInfo.discount_percent}% | ค่าคอม {agentInfo.commission} USDT
+              ส่วนลด {agentInfo.discount_percent}%
             </p>
           )}
         </div>
