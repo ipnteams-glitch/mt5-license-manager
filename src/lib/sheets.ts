@@ -42,8 +42,8 @@ function sheetId(): string {
 export async function getEasySlipApiKey(): Promise<string> {
   const sheets = await getSheets();
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: "1r7WhFV8Nl0kgtKiHMQYArjD8zWzXIHDMwWIO6IbTSj8",
-    range: "A2",
+    spreadsheetId: sheetId(),
+    range: "API_KEY!A2",
   });
   return res.data.values?.[0]?.[0] || "";
 }
