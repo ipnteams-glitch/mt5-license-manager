@@ -21,7 +21,7 @@ async function getUsdThbRate(): Promise<number> {
   try {
     const res = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
     const json = await res.json() as { rates: { THB: number } };
-    _usdThbRate = json.rates.THB;
+    _usdThbRate = json.rates.THB - 1; // ponytail: หัก 1 บาท เผื่อส่วนต่าง USDT→บาท
     _usdThbRateFetched = Date.now();
     return _usdThbRate;
   } catch {
