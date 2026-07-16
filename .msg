@@ -1,1 +1,1 @@
-fix: remove agent cache entirely, read from sheet every time  
+fix: sync agentList with agents prop  
