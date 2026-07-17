@@ -77,7 +77,7 @@ export default function RegisterClient({ email, name, refCode }: Props) {
           <div>
             <label className="block text-sm font-medium text-zinc-600">ชื่อตัวแทน (ตรงกับบัญชีธนาคาร)</label>
             <input type="text" value={agentName} onChange={e => setAgentName(e.target.value)} required
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-black focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
           </div>
 
           {/* Agent Code */}
@@ -85,7 +85,7 @@ export default function RegisterClient({ email, name, refCode }: Props) {
             <label className="block text-sm font-medium text-zinc-600">รหัสตัวแทน</label>
             <div className="mt-1 flex gap-2">
               <input type="text" value={agentCode} readOnly maxLength={5}
-                className="flex-1 rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 font-mono text-sm uppercase text-zinc-500" />
+                className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 font-mono text-sm text-black uppercase" />
               <button type="button" onClick={regenCode}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50">
                 🎲 สุ่มใหม่
