@@ -1,0 +1,68 @@
+
+> mt5-license-manager@0.1.0 build
+> next build
+
+▲ Next.js 16.2.7 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 23.4s
+  Running TypeScript ...
+  Finished TypeScript in 33.2s ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/41) ...
+  Generating static pages using 15 workers (10/41) 
+  Generating static pages using 15 workers (20/41) 
+  Generating static pages using 15 workers (30/41) 
+✓ Generating static pages using 15 workers (41/41) in 4.2s
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /agent
+├ ƒ /api/admin/members
+├ ƒ /api/admin/whitelist
+├ ƒ /api/agent/manage
+├ ƒ /api/agent/register
+├ ƒ /api/agent/validate
+├ ƒ /api/approve
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/brokers
+├ ƒ /api/crypto/balance
+├ ƒ /api/crypto/purchase
+├ ƒ /api/crypto/topup
+├ ƒ /api/crypto/topup-cancel
+├ ƒ /api/crypto/topup-confirm
+├ ƒ /api/crypto/topup-poll
+├ ƒ /api/ea-version
+├ ƒ /api/member/ib-vps-choice
+├ ƒ /api/payment/activate-free
+├ ƒ /api/payment/admin-verify
+├ ƒ /api/payment/cancel
+├ ƒ /api/payment/has-paid
+├ ƒ /api/payment/qr
+├ ƒ /api/payment/upload-slip
+├ ƒ /api/payment/verify
+├ ƒ /api/portfolio
+├ ƒ /api/portfolio/push
+├ ƒ /api/ports
+├ ƒ /api/ports/notify-delete
+├ ƒ /api/ports/status
+├ ƒ /api/ports/systems
+├ ƒ /api/ports/test-login
+├ ƒ /api/telegram-webhook
+├ ƒ /api/verify-port
+├ ƒ /dashboard
+├ ○ /login
+├ ○ /portfolio
+├ ƒ /register
+├ ○ /renew
+├ ○ /renew/june-promo
+└ ○ /renewcrypto
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

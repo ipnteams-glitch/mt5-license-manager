@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 type Props = { email: string; name: string; refCode: string };
 
-// ponytail: 5-char agent code generator
 function generateCode(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let code = "";
@@ -76,7 +75,7 @@ export default function RegisterClient({ email, name, refCode }: Props) {
 
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-zinc-600">ชื่อร้าน / ชื่อตัวแทน</label>
+            <label className="block text-sm font-medium text-zinc-600">ชื่อตัวแทน (ตรงกับบัญชีธนาคาร)</label>
             <input type="text" value={agentName} onChange={e => setAgentName(e.target.value)} required
               className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
           </div>
@@ -85,9 +84,8 @@ export default function RegisterClient({ email, name, refCode }: Props) {
           <div>
             <label className="block text-sm font-medium text-zinc-600">รหัสตัวแทน</label>
             <div className="mt-1 flex gap-2">
-              <input type="text" value={agentCode} onChange={e => setAgentCode(e.target.value.toUpperCase())}
-                maxLength={5} required
-                className="flex-1 rounded-lg border border-zinc-300 px-3 py-2 font-mono text-sm uppercase focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+              <input type="text" value={agentCode} readOnly maxLength={5}
+                className="flex-1 rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 font-mono text-sm uppercase text-zinc-500" />
               <button type="button" onClick={regenCode}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50">
                 🎲 สุ่มใหม่
@@ -108,9 +106,9 @@ export default function RegisterClient({ email, name, refCode }: Props) {
             <p className="text-xs font-medium text-blue-700 mb-2">📋 อัตราคอมมิชชั่น (อัตโนมัติ)</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div><span className="text-zinc-500">คอมมิชชั่น:</span> <span className="font-semibold text-blue-700">10%</span></div>
-              <div><span className="text-zinc-500">ส่วนลด:</span> <span className="font-semibold text-blue-700">0%</span></div>
-              <div><span className="text-zinc-500">คอม VPS:</span> <span className="font-semibold text-blue-700">5%</span></div>
-              <div><span className="text-zinc-500">ส่วนลด VPS:</span> <span className="font-semibold text-blue-700">0%</span></div>
+              <div><span className="text-zinc-500">ส่วนลด:</span> <span className="font-semibold text-blue-700">5%</span></div>
+              <div><span className="text-zinc-500">คอม VPS:</span> <span className="font-semibold text-blue-700">10%</span></div>
+              <div><span className="text-zinc-500">ส่วนลด VPS:</span> <span className="font-semibold text-blue-700">5%</span></div>
             </div>
             <p className="mt-1 text-[10px] text-zinc-400">* ปรับเปลี่ยนโดยแอดมินเท่านั้น</p>
           </div>
