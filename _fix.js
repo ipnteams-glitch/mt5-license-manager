@@ -1,0 +1,1 @@
+const fs=require('fs');let t=fs.readFileSync('src/lib/crypto-wallets.ts','utf8');t=t.replace('pkg === \\\"ib_vps_2200\\\", member.package','false, member.package');fs.writeFileSync('src/lib/crypto-wallets.ts',t);  
