@@ -105,9 +105,9 @@ export default function RegisterClient({ email, name, refCode }: Props) {
           <div className="rounded-lg bg-blue-50 p-3">
             <p className="text-xs font-medium text-blue-700 mb-2">📋 อัตราคอมมิชชั่น (อัตโนมัติ)</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div><span className="text-zinc-500">คอมมิชชั่น:</span> <span className="font-semibold text-blue-700">10%</span></div>
+              <div><span className="text-zinc-500">คอมมิชชั่น:</span> <span className="font-semibold text-blue-700">15%</span></div>
               <div><span className="text-zinc-500">ส่วนลด:</span> <span className="font-semibold text-blue-700">5%</span></div>
-              <div><span className="text-zinc-500">คอม VPS:</span> <span className="font-semibold text-blue-700">10%</span></div>
+              <div><span className="text-zinc-500">คอม VPS:</span> <span className="font-semibold text-blue-700">5%</span></div>
               <div><span className="text-zinc-500">ส่วนลด VPS:</span> <span className="font-semibold text-blue-700">5%</span></div>
             </div>
             <p className="mt-1 text-[10px] text-zinc-400">* ปรับเปลี่ยนโดยแอดมินเท่านั้น</p>

@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         await addAgentCommission(payment.agent_code, payment.agent_commission);
         console.log("[admin-verify] addAgentCommission SUCCESS");
       // ponytail: MLM upline commission
-      distributeCommission(payment.amount, payment.agent_code, isNewCustomer).catch(e => console.error("[MLM] distribute failed:", e));
+      distributeCommission(payment.amount, payment.agent_code, payment.package === "ib_vps_2200", isNewCustomer).catch(e => console.error("[MLM] distribute failed:", e));
       } catch (e: any) {
         console.error("[admin-verify] addAgentCommission FAILED:", e.message || e);
       }

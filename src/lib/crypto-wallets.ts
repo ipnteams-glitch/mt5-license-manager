@@ -197,7 +197,7 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
       addAgentCommission(agent_code, agentCommission).catch((e: unknown) => console.error("Agent commission failed:", e));
       // ponytail: MLM upline commission (convert USDT → THB)
       const saleTHB = Math.round(price * rate * 100) / 100;
-      distributeCommission(saleTHB, agent_code, member.package === "none").catch(e => console.error("[MLM] crypto distribute failed:", e));
+      distributeCommission(saleTHB, agent_code, true, member.package === "none").catch(e => console.error("[MLM] crypto distribute failed:", e));
     }
     return { memberName: member.name, packageLabel: pkgInfo.label, expiryDate: expiryStr, newBalance };
   }
@@ -211,7 +211,7 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
     addAgentCommission(agent_code, agentCommission).catch((e: unknown) => console.error("Agent commission failed:", e));
     // ponytail: MLM upline commission (convert USDT → THB)
     const saleTHB = Math.round(price * rate * 100) / 100;
-    distributeCommission(saleTHB, agent_code, member.package === "none").catch(e => console.error("[MLM] crypto distribute failed:", e));
+    distributeCommission(saleTHB, agent_code, pkg === "ib_vps_2200", member.package === "none").catch(e => console.error("[MLM] crypto distribute failed:", e));
   }
   return { memberName: member.name, packageLabel: pkgInfo.label, expiryDate: expiry, newBalance };
 }

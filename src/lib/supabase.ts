@@ -208,82 +208,65 @@ export async function addAgentCommission(code: string, amount: number): Promise<
   });
 }
 
-// ponytail: MLM commission split — 70/30 recursive, max 3 levels
-const MLM_MAX_DEPTH = 3;
-const MLM_KEEP_PCT = 0.70;     // agent keeps 70%
-const MLM_UP_PCT = 0.30;        // 30% goes upline
+// ── Ponytail: MLM commission — uplinePool 5% flat, depth-based 70/30 split ──
+const UPLINE_POOL_PCT = 0.05;   // 5% of (saleAmount - commission)
 const NEW_CUSTOMER_BONUS = 50;  // THB
 
 export async function distributeCommission(
-  saleAmount: number,       // THB
+  saleAmount: number,       // already-discounted, THB
   sellingAgentCode: string,
+  isVps: boolean,
   isNewCustomer: boolean
 ): Promise<void> {
-  // ponytail: feature flag — skip entirely if not enabled
   if (process.env.MLM_ENABLED !== "true") return;
-
   try {
     const seller = await getAgentByCode(sellingAgentCode);
-    if (!seller || seller.commission_percent <= 0) return;
-
-    const isVps = false;  // ponytail: VPS commission handled separately by caller
+    if (!seller) return;
     const pct = isVps ? seller.commission_vps_percent : seller.commission_percent;
-    const baseCommission = Math.round(saleAmount * (pct / 100) * 100) / 100;
-
-    // ── Walk up the tree ──
-    let pool = baseCommission;
-    let currentCode: string | null = sellingAgentCode;
-    let level = 1;
-
-    while (currentCode && level <= MLM_MAX_DEPTH && pool > 0.01) {
-      const agent = await getAgentByCode(currentCode);
-      if (!agent) break;
-
-      const keep = Math.round(pool * MLM_KEEP_PCT * 100) / 100;
-      pool = Math.round(pool * MLM_UP_PCT * 100) / 100;
-
-      await addAgentCommission(currentCode, keep);
-      // ponytail: update the level in commissions (override the default level:1 set by addAgentCommission)
-      if (level > 1) {
-        // Get the most recent commission row for this agent and update its level
-        const { data: latest } = await supabase.from("commissions")
-          .select("id").eq("agent_code", currentCode)
-          .order("created_at", { ascending: false }).limit(1).maybeSingle();
-        if (latest) {
-          await supabase.from("commissions").update({ level, source: "upline" }).eq("id", latest.id);
-        }
-      }
-
-      if (!agent.parent_code) {
-        // ponytail: last in chain — get remaining pool
-        if (pool > 0.01 && level < MLM_MAX_DEPTH) {
-          await addAgentCommission(currentCode, pool);
-          const { data: l2 } = await supabase.from("commissions")
-            .select("id").eq("agent_code", currentCode)
-            .order("created_at", { ascending: false }).limit(1).maybeSingle();
-          if (l2) await supabase.from("commissions").update({ level: level + 1, source: "upline_remainder" }).eq("id", l2.id);
-        }
-        break;
-      }
-
-      currentCode = agent.parent_code;
-      level++;
+    if (pct <= 0) return;
+    const commission = Math.round(saleAmount * (pct / 100) * 100) / 100;
+    const remaining = saleAmount - commission;
+    const uplinePool = Math.round(remaining * UPLINE_POOL_PCT * 100) / 100;
+    if (uplinePool <= 0.01) return;
+    const chain: string[] = [];
+    let current: string | null = seller.parent_code || null;
+    while (current && chain.length < 2) {
+      const ag = await getAgentByCode(current);
+      if (!ag) break;
+      chain.push(current);
+      current = ag.parent_code || null;
     }
-
-    // ── New customer bonus (seller only, full amount) ──
+    if (chain.length === 0) { /* depth 1 — no upline */ }
+    else if (chain.length === 1) {
+      await addAgentCommission(chain[0], uplinePool);
+      const { data: l } = await supabase.from("commissions")
+        .select("id").eq("agent_code", chain[0])
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (l) await supabase.from("commissions").update({ level: 2, source: "upline" }).eq("id", l.id);
+    } else {
+      const parentAmt = Math.round(uplinePool * 0.70 * 100) / 100;
+      const gpAmt = Math.round(uplinePool * 0.30 * 100) / 100;
+      await addAgentCommission(chain[0], parentAmt);
+      const { data: l1 } = await supabase.from("commissions")
+        .select("id").eq("agent_code", chain[0])
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (l1) await supabase.from("commissions").update({ level: 2, source: "upline" }).eq("id", l1.id);
+      await addAgentCommission(chain[1], gpAmt);
+      const { data: l2 } = await supabase.from("commissions")
+        .select("id").eq("agent_code", chain[1])
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (l2) await supabase.from("commissions").update({ level: 3, source: "upline" }).eq("id", l2.id);
+    }
     if (isNewCustomer && NEW_CUSTOMER_BONUS > 0) {
       await supabase.from("commissions").insert({
         agent_code: sellingAgentCode, amount: NEW_CUSTOMER_BONUS, level: 0, source: "new_customer_bonus",
       });
       const sa = await getAgentByCode(sellingAgentCode);
-      if (sa) {
-        await supabase.from("agents").update({
-          commission_earned: sa.commission_earned + NEW_CUSTOMER_BONUS,
-        }).eq("agent_code", sellingAgentCode);
-      }
+      if (sa) await supabase.from("agents").update({
+        commission_earned: sa.commission_earned + NEW_CUSTOMER_BONUS,
+      }).eq("agent_code", sellingAgentCode);
     }
   } catch (e) {
-    // ponytail: fire-and-forget — MLM failure must never block payment
     console.error("[MLM] distributeCommission failed:", e);
   }
 }
