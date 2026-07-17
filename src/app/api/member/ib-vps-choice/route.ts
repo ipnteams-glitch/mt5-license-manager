@@ -1,15 +1,6 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { getAllMembers } from "@/lib/supabase";
-import { invalidateCache } from "@/lib/cache";
-import { google } from "googleapis";
-
-function getAuth() {
-  const key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  if (!key || !email) throw new Error("Missing credentials");
-  return new google.auth.GoogleAuth({ credentials: JSON.parse(key), scopes: ["https://www.googleapis.com/auth/spreadsheets"] });
-}
+import { getMemberByEmail, setIbVpsChoice } from "@/lib/supabase";
 
 // POST /api/member/ib-vps-choice  { choice: "1" | "2" }
 export async function POST(req: Request) {
@@ -24,26 +15,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid choice" }, { status: 400 });
     }
 
-    const members = await getAllMembers();
-    const idx = members.findIndex((m) => m.email === session.user!.email);
-    if (idx < 0) {
+    const member = await getMemberByEmail(session.user.email);
+    if (!member) {
       return NextResponse.json({ error: "Member not found" }, { status: 404 });
     }
 
-    const sid = process.env.GOOGLE_SHEET_ID;
-    if (!sid) throw new Error("Missing GOOGLE_SHEET_ID");
-
-    const auth = getAuth();
-    const sheets = google.sheets({ version: "v4", auth });
-
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: sid,
-      range: `members!I${idx + 2}`,
-      valueInputOption: "RAW",
-      requestBody: { values: [[choice]] },
-    });
-
-    invalidateCache("members");
+    await setIbVpsChoice(session.user.email, choice);
 
     // Notify Telegram
     const token = process.env.TELEGRAM_BOT_TOKEN;

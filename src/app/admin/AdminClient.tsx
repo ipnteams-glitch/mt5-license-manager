@@ -29,12 +29,6 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   useEffect(() => {
     setAgentList(agents);
   }, [agents]);
-
-  useEffect(() => {
-    setShowWdHistory(false);
-    setPendingWds([]);
-    setWdPage(0);
-  }, [detailAgent]);
   const [showAddAgent, setShowAddAgent] = useState(false);
   const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 10, commission_percent: 10, discount_vps_percent: 10, commission_vps_percent: 5, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
   const [agentSaving, setAgentSaving] = useState(false);
@@ -44,6 +38,11 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   const [markingWd, setMarkingWd] = useState<string | null>(null);
   const [showWdHistory, setShowWdHistory] = useState(false);
   const [wdPage, setWdPage] = useState(0);
+  useEffect(() => {
+    setShowWdHistory(false);
+    setPendingWds([]);
+    setWdPage(0);
+  }, [detailAgent]);
 
   async function handleSaveAgent(e: React.FormEvent) {
     e.preventDefault();
@@ -489,7 +488,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                         <td className="px-2 py-1 text-right text-green-600">฿{a.commission_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-amber-600">฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right space-x-1">
-                          <button onClick={() => if(detailAgent===a.agent_code){setDetailAgent(null)}else{setDetailAgent(a.agent_code);setShowWdHistory(false);setPendingWds([]);setWdPage(0)}} className="text-xs text-blue-500 hover:text-blue-700">
+                          <button onClick={() => { if(detailAgent===a.agent_code){setDetailAgent(null)}else{setDetailAgent(a.agent_code);setShowWdHistory(false);setPendingWds([]);setWdPage(0)}}} className="text-xs text-blue-500 hover:text-blue-700">
                             {detailAgent === a.agent_code ? "ซ่อน" : "📋"}
                           </button>
                           <button onClick={() => { setAgentForm(a); setShowAddAgent(true); }} className="text-xs text-blue-500 hover:text-blue-700">✏️</button>
