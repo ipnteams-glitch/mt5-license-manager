@@ -68,7 +68,7 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
         {/* Referral Link — ponytail: MLM agent recruitment */}
         <div className="mb-6 rounded-xl bg-blue-50 p-4 shadow-sm">
           <h2 className="font-semibold text-blue-800 mb-2">🔗 ลิงค์แนะนำเพื่อน</h2>
-          <p className="text-xs text-blue-600 mb-2">ส่งลิงค์นี้ให้เพื่อนสมัครตัวแทน — เพื่อนจะได้เป็น downline ของคุณ</p>
+          <p className="text-xs text-blue-600 mb-2">ส่งลิงค์นี้ให้เพื่อนสมัครตัวแทน</p>
           <div className="flex gap-2">
             <input type="text" readOnly
               value={`${typeof window !== "undefined" ? window.location.origin : ""}/register?ref=${agent.agent_code}`}
