@@ -483,7 +483,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                         <td className="px-2 py-1 text-right text-green-600">฿{a.commission_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-amber-600">฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right space-x-1">
-                          <button onClick={() => setDetailAgent(detailAgent === a.agent_code ? null : a.agent_code)} className="text-xs text-blue-500 hover:text-blue-700">
+                          <button onClick={() => if(detailAgent===a.agent_code){setDetailAgent(null)}else{setDetailAgent(a.agent_code);setShowWdHistory(false);setPendingWds([]);setWdPage(0)}} className="text-xs text-blue-500 hover:text-blue-700">
                             {detailAgent === a.agent_code ? "ซ่อน" : "📋"}
                           </button>
                           <button onClick={() => { setAgentForm(a); setShowAddAgent(true); }} className="text-xs text-blue-500 hover:text-blue-700">✏️</button>
