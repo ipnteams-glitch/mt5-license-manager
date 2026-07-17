@@ -1,4 +1,4 @@
--- MT5 License Manager — Supabase Migration
+﻿-- MT5 License Manager â€” Supabase Migration
 -- Run this in Supabase SQL Editor
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -67,7 +67,8 @@ CREATE TABLE agents (
   commission_paid NUMERIC(12,2) NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   bank_name TEXT NOT NULL DEFAULT '',
-  bank_account TEXT NOT NULL DEFAULT ''
+  bank_account TEXT NOT NULL DEFAULT '',
+  parent_code TEXT REFERENCES agents(agent_code) ON DELETE SET NULL,
 );
 
 -- Agent Withdrawals
@@ -82,6 +83,18 @@ CREATE TABLE agent_withdrawals (
   paid_at TIMESTAMPTZ
 );
 CREATE INDEX idx_wds_agent ON agent_withdrawals(agent_code);
+
+-- Commissions (MLM tracking)
+CREATE TABLE commissions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  agent_code TEXT NOT NULL REFERENCES agents(agent_code) ON DELETE CASCADE,
+  amount NUMERIC(12,2) NOT NULL,
+  level INTEGER NOT NULL DEFAULT 1,
+  source TEXT DEFAULT 'direct',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_comm_agent ON commissions(agent_code);
+CREATE INDEX idx_comm_created ON commissions(created_at);
 
 -- Crypto Wallets
 CREATE TABLE crypto_wallets (
@@ -140,13 +153,14 @@ CREATE TABLE port_systems (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- RLS (server-side uses service_role key → bypasses RLS)
+-- RLS (server-side uses service_role key â†’ bypasses RLS)
 ALTER TABLE members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE whitelist ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_withdrawals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE commissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crypto_topups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio ENABLE ROW LEVEL SECURITY;
@@ -158,3 +172,5 @@ INSERT INTO brokers (broker) VALUES
   ('TPTradesGroup-Demo'),('VTMarkets-Demo'),('VTMarkets-Live'),
   ('Exness-Real'),('ICMarkets-Demo'),('ICMarkets-Live'),
   ('Tickmill-Demo'),('Pepperstone-Demo');
+
+

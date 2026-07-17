@@ -65,6 +65,22 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
           </button>
         </div>
 
+        {/* Referral Link — ponytail: MLM agent recruitment */}
+        <div className="mb-6 rounded-xl bg-blue-50 p-4 shadow-sm">
+          <h2 className="font-semibold text-blue-800 mb-2">🔗 ลิงค์แนะนำเพื่อน</h2>
+          <p className="text-xs text-blue-600 mb-2">ส่งลิงค์นี้ให้เพื่อนสมัครตัวแทน — เพื่อนจะได้เป็น downline ของคุณ</p>
+          <div className="flex gap-2">
+            <input type="text" readOnly
+              value={`${typeof window !== "undefined" ? window.location.origin : ""}/register?ref=${agent.agent_code}`}
+              className="flex-1 rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-mono text-blue-800"
+            />
+            <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/register?ref=${agent.agent_code}`); }}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+              📋 คัดลอก
+            </button>
+          </div>
+        </div>
+
         {/* Stats Cards */}
         <div className="mb-6 grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-white p-4 shadow-sm">

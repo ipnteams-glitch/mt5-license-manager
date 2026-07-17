@@ -26,7 +26,7 @@ export default async function AgentPage() {
 
   const sales = await getPaymentsByAgentCode(agent.agent_code);
   // ponytail: reconcile commission_earned from payments (handles agent re-add after deletion)
-  const { reconcileAgentCommission } = await import("@/lib/sheets");
+  const { reconcileAgentCommission } = await import("@/lib/supabase");
   await reconcileAgentCommission(agent.agent_code);
   // ponytail: re-read agent after reconcile
   const refreshed = await getAgentByEmail(session.user.email);

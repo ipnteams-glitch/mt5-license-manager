@@ -202,6 +202,90 @@ export async function deleteAgent(code: string): Promise<void> {
 export async function addAgentCommission(code: string, amount: number): Promise<void> {
   const ag = await getAgentByCode(code); if (!ag) return;
   await supabase.from("agents").update({ commission_earned: ag.commission_earned + amount }).eq("agent_code", code);
+  // ponytail: track in commissions table for MLM audit + reconcile
+  await supabase.from("commissions").insert({
+    agent_code: code, amount, level: 1, source: "direct",
+  });
+}
+
+// ponytail: MLM commission split — 70/30 recursive, max 3 levels
+const MLM_MAX_DEPTH = 3;
+const MLM_KEEP_PCT = 0.70;     // agent keeps 70%
+const MLM_UP_PCT = 0.30;        // 30% goes upline
+const NEW_CUSTOMER_BONUS = 50;  // THB
+
+export async function distributeCommission(
+  saleAmount: number,       // THB
+  sellingAgentCode: string,
+  isNewCustomer: boolean
+): Promise<void> {
+  // ponytail: feature flag — skip entirely if not enabled
+  if (process.env.MLM_ENABLED !== "true") return;
+
+  try {
+    const seller = await getAgentByCode(sellingAgentCode);
+    if (!seller || seller.commission_percent <= 0) return;
+
+    const isVps = false;  // ponytail: VPS commission handled separately by caller
+    const pct = isVps ? seller.commission_vps_percent : seller.commission_percent;
+    const baseCommission = Math.round(saleAmount * (pct / 100) * 100) / 100;
+
+    // ── Walk up the tree ──
+    let pool = baseCommission;
+    let currentCode: string | null = sellingAgentCode;
+    let level = 1;
+
+    while (currentCode && level <= MLM_MAX_DEPTH && pool > 0.01) {
+      const agent = await getAgentByCode(currentCode);
+      if (!agent) break;
+
+      const keep = Math.round(pool * MLM_KEEP_PCT * 100) / 100;
+      pool = Math.round(pool * MLM_UP_PCT * 100) / 100;
+
+      await addAgentCommission(currentCode, keep);
+      // ponytail: update the level in commissions (override the default level:1 set by addAgentCommission)
+      if (level > 1) {
+        // Get the most recent commission row for this agent and update its level
+        const { data: latest } = await supabase.from("commissions")
+          .select("id").eq("agent_code", currentCode)
+          .order("created_at", { ascending: false }).limit(1).maybeSingle();
+        if (latest) {
+          await supabase.from("commissions").update({ level, source: "upline" }).eq("id", latest.id);
+        }
+      }
+
+      if (!agent.parent_code) {
+        // ponytail: last in chain — get remaining pool
+        if (pool > 0.01 && level < MLM_MAX_DEPTH) {
+          await addAgentCommission(currentCode, pool);
+          const { data: l2 } = await supabase.from("commissions")
+            .select("id").eq("agent_code", currentCode)
+            .order("created_at", { ascending: false }).limit(1).maybeSingle();
+          if (l2) await supabase.from("commissions").update({ level: level + 1, source: "upline_remainder" }).eq("id", l2.id);
+        }
+        break;
+      }
+
+      currentCode = agent.parent_code;
+      level++;
+    }
+
+    // ── New customer bonus (seller only, full amount) ──
+    if (isNewCustomer && NEW_CUSTOMER_BONUS > 0) {
+      await supabase.from("commissions").insert({
+        agent_code: sellingAgentCode, amount: NEW_CUSTOMER_BONUS, level: 0, source: "new_customer_bonus",
+      });
+      const sa = await getAgentByCode(sellingAgentCode);
+      if (sa) {
+        await supabase.from("agents").update({
+          commission_earned: sa.commission_earned + NEW_CUSTOMER_BONUS,
+        }).eq("agent_code", sellingAgentCode);
+      }
+    }
+  } catch (e) {
+    // ponytail: fire-and-forget — MLM failure must never block payment
+    console.error("[MLM] distributeCommission failed:", e);
+  }
 }
 export async function markAgentCommissionPaid(code: string): Promise<void> {
   const ag = await getAgentByCode(code); if (!ag) throw new Error("Agent not found");
@@ -212,10 +296,20 @@ export async function getPaymentsByAgentCode(code: string): Promise<Payment[]> {
   return (data || []) as Payment[];
 }
 export async function reconcileAgentCommission(code: string): Promise<void> {
+  // ponytail: MLM — earned comes from commissions table now (includes upline + direct + bonus)
+  const { data: c } = await supabase.from("commissions").select("amount").eq("agent_code", code);
+  const commEarned = (c || []).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+
+  // ponytail: also sum from payments.agent_commission for direct sales (backward compat)
   const { data: p } = await supabase.from("payments").select("agent_commission").eq("status", "paid").ilike("agent_code", code);
-  const earned = (p || []).reduce((s, x) => s + (x.agent_commission || 0), 0);
+  const paymentEarned = (p || []).reduce((s, x) => s + (Number(x.agent_commission) || 0), 0);
+
+  // ponytail: MAX guard — never let reconcile accidentally zero out existing earnings
+  const ag = await getAgentByCode(code);
+  const earned = Math.max(commEarned, paymentEarned, ag?.commission_earned || 0);
+
   const { data: w } = await supabase.from("agent_withdrawals").select("amount").eq("agent_code", code).eq("status", "paid");
-  const paid = (w || []).reduce((s, x) => s + (x.amount || 0), 0);
+  const paid = (w || []).reduce((s, x) => s + (Number(x.amount) || 0), 0);
   await supabase.from("agents").update({ commission_earned: earned, commission_paid: paid }).eq("agent_code", code);
 }
 

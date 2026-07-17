@@ -50,6 +50,7 @@ export interface Agent {
   created_at: string;
   bank_name: string;
   bank_account: string;
+  parent_code?: string | null;  // ponytail: MLM upline
 }
 
 // ── Agent Withdrawal (ถอนค่าคอม) ──

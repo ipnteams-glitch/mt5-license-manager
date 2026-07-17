@@ -1,30 +1,34 @@
-import { auth } from "@/lib/auth";
-import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, setAddonIbVpsExpiry, addAgentCommission, canUpgrade, calculateNewExpiry } from "@/lib/supabase";
+﻿import { auth } from "@/lib/auth";
+import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, setAddonIbVpsExpiry, addAgentCommission, distributeCommission, canUpgrade, calculateNewExpiry } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
 import { notifyVpsOrder } from "@/lib/notify";
 
-// POST /api/payment/admin-verify — แอดมินบังคับ verify การจ่าย (ข้าม EasySlip)
+// POST /api/payment/admin-verify â€” à¹à¸­à¸”à¸¡à¸´à¸™à¸šà¸±à¸‡à¸„à¸±à¸š verify à¸à¸²à¸£à¸ˆà¹ˆà¸²à¸¢ (à¸‚à¹‰à¸²à¸¡ EasySlip)
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user?.email) return NextResponse.json({ error: "กรุณาล็อคอิน" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "à¸à¸£à¸¸à¸“à¸²à¸¥à¹‡à¸­à¸„à¸­à¸´à¸™" }, { status: 401 });
 
   const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
   if (!adminEmails.includes(session.user.email)) {
-    return NextResponse.json({ error: "เฉพาะแอดมินเท่านั้น" }, { status: 403 });
+    return NextResponse.json({ error: "à¹€à¸‰à¸žà¸²à¸°à¹à¸­à¸”à¸¡à¸´à¸™à¹€à¸—à¹ˆà¸²à¸™à¸±à¹‰à¸™" }, { status: 403 });
   }
 
   try {
     const { txn_id } = await req.json();
-    if (!txn_id) return NextResponse.json({ error: "ต้องระบุ txn_id" }, { status: 400 });
+    if (!txn_id) return NextResponse.json({ error: "à¸•à¹‰à¸­à¸‡à¸£à¸°à¸šà¸¸ txn_id" }, { status: 400 });
 
     const payment = await getPaymentById(txn_id);
-    if (!payment) return NextResponse.json({ error: "ไม่พบรายการ" }, { status: 404 });
-    if (payment.status === "paid") return NextResponse.json({ success: false, message: "รายการนี้จ่ายแล้ว" });
+    if (!payment) return NextResponse.json({ error: "à¹„à¸¡à¹ˆà¸žà¸šà¸£à¸²à¸¢à¸à¸²à¸£" }, { status: 404 });
+    if (payment.status === "paid") return NextResponse.json({ success: false, message: "à¸£à¸²à¸¢à¸à¸²à¸£à¸™à¸µà¹‰à¸ˆà¹ˆà¸²à¸¢à¹à¸¥à¹‰à¸§" });
 
-    // Mark as paid (ข้าม EasySlip)
+    // Mark as paid (à¸‚à¹‰à¸²à¸¡ EasySlip)
     await markPaymentPaid(txn_id);
+
+    // Fetch member early for MLM isNewCustomer check
+    const memberCheck = await getMemberByEmail(payment.email);
+    const isNewCustomer = !memberCheck || memberCheck.package === "none";
 
     console.log("[admin-verify] payment.agent_code:", payment.agent_code, "agent_commission:", payment.agent_commission);
     // ponytail: credit agent commission
@@ -33,30 +37,32 @@ export async function POST(req: Request) {
       try {
         await addAgentCommission(payment.agent_code, payment.agent_commission);
         console.log("[admin-verify] addAgentCommission SUCCESS");
+      // ponytail: MLM upline commission
+      distributeCommission(payment.amount, payment.agent_code, isNewCustomer).catch(e => console.error("[MLM] distribute failed:", e));
       } catch (e: any) {
         console.error("[admin-verify] addAgentCommission FAILED:", e.message || e);
       }
     } else {
-      console.log("[admin-verify] SKIP agent commission — no agent_code or commission");
+      console.log("[admin-verify] SKIP agent commission â€” no agent_code or commission");
     }
 
-    // IB+VPS is an add-on — handle before main package logic
+    // IB+VPS is an add-on â€” handle before main package logic
     if (payment.package === "ib_vps_2200") {
       const addonExpiry = await setAddonIbVpsExpiry(payment.email);
       return NextResponse.json({
         success: true,
-        message: "✅ IB+VPS อนุมัติ — เพิ่ม VPS 1 ปี",
+        message: "âœ… IB+VPS à¸­à¸™à¸¸à¸¡à¸±à¸•à¸´ â€” à¹€à¸žà¸´à¹ˆà¸¡ VPS 1 à¸›à¸µ",
         addon_ib_vps_expiry: addonExpiry,
       });
     }
 
     // Upgrade member package
     const member = await getMemberByEmail(payment.email);
-    if (!member) return NextResponse.json({ success: false, message: "ไม่พบสมาชิก" });
+    if (!member) return NextResponse.json({ success: false, message: "à¹„à¸¡à¹ˆà¸žà¸šà¸ªà¸¡à¸²à¸Šà¸´à¸" });
 
     const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
     const { allowed, reason } = canUpgrade(member.package, payment.package, isExpired);
-    if (!allowed) return NextResponse.json({ success: false, message: reason || "ไม่สามารถอัปเกรดได้" });
+    if (!allowed) return NextResponse.json({ success: false, message: reason || "à¹„à¸¡à¹ˆà¸ªà¸²à¸¡à¸²à¸£à¸–à¸­à¸±à¸›à¹€à¸à¸£à¸”à¹„à¸”à¹‰" });
 
     const { expiry, maxPorts } = calculateNewExpiry(member, payment.package);
     await updateMemberPackage(payment.email, payment.package, maxPorts, expiry);
@@ -71,7 +77,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `[ADMIN] ต่ออายุสำเร็จ — ${pkgInfo.label}`,
+      message: `[ADMIN] à¸•à¹ˆà¸­à¸­à¸²à¸¢à¸¸à¸ªà¸³à¹€à¸£à¹‡à¸ˆ â€” ${pkgInfo.label}`,
       package: payment.package,
       expiry_date: expiry,
     });
