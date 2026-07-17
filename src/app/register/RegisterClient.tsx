@@ -117,12 +117,12 @@ export default function RegisterClient({ email, name, refCode }: Props) {
           <div>
             <label className="block text-sm font-medium text-zinc-600">🏦 ชื่อธนาคาร</label>
             <input type="text" value={bankName} onChange={e => setBankName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-black focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-600">🔢 เลขบัญชี</label>
             <input type="text" value={bankAccount} onChange={e => setBankAccount(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+              className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-black focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
           </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
