@@ -1,1 +1,11 @@
-`pre-domain-change
+pre-domain-change | session 2026-07-18
+
+1. Agent self-referral prevention (1677d65)
+2. Agent defaults: commission 15%, discount 10%, vps 5%/5% (17e58c2, 23b2235)
+3. Same-package renewal allowed — nr < cr (d9bc272)
+4. New user auto free package: 14 days, 5 ports, 1 permanent (11c53f0, 66dae24)
+5. Admin cascade delete member by email (1028c1a, 33f33f8)
+6. Agent page refresh button (6d527f3)
+7. Admin member list sorted by email (7bb7cd1)
+8. AGENTS.md: use Node.js script for file edits (894a6cc)
+9. EASYSLIP_API_KEY moved to Vercel env — Sheets no longer called
