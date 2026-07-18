@@ -30,7 +30,7 @@ export async function deleteMemberCascade(email: string): Promise<{ deleted: str
 export async function upsertMember(email: string, name: string): Promise<void> {
   const existing = await getMemberByEmail(email);
   if (existing) return;
-  const exp = new Date(); exp.setDate(exp.getDate() + 30); await supabase.from("members").insert({ email, name, role: "user", package: "free", max_ports: 5, expiry_date: exp.toISOString() });
+  const exp = new Date(); exp.setDate(exp.getDate() + 14); await supabase.from("members").insert({ email, name, role: "user", package: "free", max_ports: 5, expiry_date: exp.toISOString() });
 }
 export async function updateMemberPackage(email: string, pkg: PackageType, maxPorts: number, expiryDate: string): Promise<void> {
   await supabase.from("members").update({ package: pkg, max_ports: maxPorts, expiry_date: expiryDate || null }).eq("email", email);
