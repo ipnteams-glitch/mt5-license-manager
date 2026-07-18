@@ -32,6 +32,8 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   const [wlName, setWlName] = useState("");
   const [wlBroker, setWlBroker] = useState("");
   const [wlAdding, setWlAdding] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   // Agent state
   const [agentList, setAgentList] = useState(agents);

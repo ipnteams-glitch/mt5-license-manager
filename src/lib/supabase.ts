@@ -14,6 +14,19 @@ export async function getMemberByEmail(email: string): Promise<Member | null> {
   const { data } = await supabase.from("members").select("*").eq("email", email).single();
   return data as Member | null;
 }
+
+// ponytail: cascade delete all data for an email
+export async function deleteMemberCascade(email: string): Promise<{ deleted: string[] }> {
+  const tables = ["ports", "payments", "portfolio_accounts", "crypto_wallets", "crypto_topups", "port_systems"];
+  const deleted: string[] = [];
+  for (const t of tables) {
+    const col = (t === "ports" || t === "portfolio_accounts") ? "member_email" : "email";
+    try { await supabase.from(t).delete().eq(col, email); deleted.push(t); } catch {}
+  }
+  try { await supabase.from("members").delete().eq("email", email); deleted.push("members"); } catch {}
+  return { deleted };
+}
+
 export async function upsertMember(email: string, name: string): Promise<void> {
   const existing = await getMemberByEmail(email);
   if (existing) return;
