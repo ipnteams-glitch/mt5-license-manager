@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import type { Member, Port, PackageType, Payment, Agent, AgentWithdrawal } from "@/types";
@@ -11,10 +11,14 @@ type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist:
 export default function AdminClient({ members, ports, payments, whitelist, agents, pendingWithdrawals }: Props) {
   const { t } = useT();
   // ponytail: map agent_code → total pending withdrawal amount (no expand needed)
-  const pendingMap: Record<string, number> = {};
-  (pendingWithdrawals || []).forEach(w => {
-    pendingMap[w.agent_code] = (pendingMap[w.agent_code] || 0) + w.amount;
-  });
+  const [pendingMap, setPendingMap] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const map: Record<string, number> = {};
+    (pendingWithdrawals || []).forEach(w => {
+      map[w.agent_code] = (map[w.agent_code] || 0) + w.amount;
+    });
+    setPendingMap(map);
+  }, [pendingWithdrawals]);
   const [memberList, setMemberList] = useState(members);
   const [editing, setEditing] = useState<string | null>(null);
   const [selectedPkg, setSelectedPkg] = useState<PackageType>("none");
@@ -608,7 +612,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                             <td className="px-2 py-1 text-black">{w.bank_name}</td>
                             <td className="px-2 py-1 font-mono text-xs text-black">{w.bank_account}</td>
                             <td className="px-2 py-1">
-                              <button onClick={async () => { setMarkingWd(w.id); try { await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "mark_withdrawal_paid", withdrawal_id: w.id }) }); setAgentList((prev: any) => prev.map((a: any) => a.agent_code === w.agent_code ? { ...a, commission_paid: (a.commission_paid || 0) + (w.amount || 0) } : a)); setPendingWds((prev: any) => prev.filter((x: any) => x.id !== w.id)); } catch {} setMarkingWd(null); }} disabled={markingWd === w.id} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">{markingWd === w.id ? "..." : "ชำระแล้ว"}</button>
+                              <button onClick={async () => { setMarkingWd(w.id); try { await fetch("/api/agent/manage", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "mark_withdrawal_paid", withdrawal_id: w.id }) }); setAgentList((prev: any) => prev.map((a: any) => a.agent_code === w.agent_code ? { ...a, commission_paid: (a.commission_paid || 0) + (w.amount || 0) } : a)); setPendingMap((prev) => { const n = { ...prev }; n[w.agent_code] = (n[w.agent_code] || 0) - (w.amount || 0); if (n[w.agent_code] <= 0) delete n[w.agent_code]; return n; }); setPendingWds((prev: any) => prev.filter((x: any) => x.id !== w.id)); } catch {} setMarkingWd(null); }} disabled={markingWd === w.id} className="rounded bg-green-600 px-2 py-0.5 text-xs text-white disabled:opacity-50">{markingWd === w.id ? "..." : "ชำระแล้ว"}</button>
                             </td>
                           </tr>
                         ))}
