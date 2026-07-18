@@ -27,6 +27,7 @@ export async function GET(req: Request) {
       valid: true,
       agent_code: agent.agent_code,
       agent_name: agent.name,
+      agent_email: agent.email,
       discount_percent: discountPct,
       // also return raw values for UI display
       discount_pkg_percent: agent.discount_percent,

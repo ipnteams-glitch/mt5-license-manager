@@ -47,7 +47,8 @@ export async function POST(req: Request) {
     let agentCommission = 0;
     if (agent_code) {
       const agent = await getAgentByCode(agent_code);
-      if (agent) {
+      // ponytail: prevent self-referral — agent cannot use own code
+      if (agent && agent.email !== session.user.email) {
         const isVps = pkg === "ib_vps_2200";
         const discountPct = isVps ? agent.discount_vps_percent : agent.discount_percent;
         const commissionPct = isVps ? agent.commission_vps_percent : agent.commission_percent;

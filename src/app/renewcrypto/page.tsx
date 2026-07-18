@@ -118,6 +118,13 @@ export default function RenewCryptoPage() {
       const res = await fetch(`/api/agent/validate?code=${encodeURIComponent(code.trim())}&package=${pkg}`);
       const data = await res.json();
       if (data.valid) {
+        // ponytail: prevent self-referral — agent cannot use own code
+        if (data.agent_email === session?.user?.email) {
+          setAgentInfo(null);
+          setError("คุณไม่สามารถใช้โค้ดของตัวเองได้");
+          setValidatingAgent(false);
+          return;
+        }
         setAgentInfo(data);
       } else {
         setAgentInfo(null);
