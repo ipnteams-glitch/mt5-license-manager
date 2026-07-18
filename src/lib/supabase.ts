@@ -302,7 +302,7 @@ export async function createWithdrawal(agent: Agent, amount: number): Promise<Ag
   const { data: pw } = await supabase.from("agent_withdrawals").select("amount").eq("agent_code", agent.agent_code).eq("status", "pending");
   const ps = (pw || []).reduce((s, w) => s + (w.amount || 0), 0);
   const avail = agent.commission_earned - agent.commission_paid - ps;
-  if (amount <= 0 || amount > avail) throw new Error("ยอดถอนไม่ถูกต้อง (คงเหลือ " + avail.toFixed(2) + ")");
+  if (amount < 0.01 || amount > avail) throw new Error("ยอดถอนไม่ถูกต้อง (คงเหลือ " + avail.toFixed(2) + ")");
   const { data } = await supabase.from("agent_withdrawals").insert({
     id: uuidv4(), agent_code: agent.agent_code, amount, status: "pending",
     bank_name: agent.bank_name, bank_account: agent.bank_account,

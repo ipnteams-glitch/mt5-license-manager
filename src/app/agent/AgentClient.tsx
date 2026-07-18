@@ -30,7 +30,7 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
   async function handleWithdraw(e: React.FormEvent) {
     e.preventDefault();
     const amt = available;
-    if (!amt || amt <= 0) return;
+    if (!amt || amt <= 0.01) return;
     setWdSubmitting(true); setWdMsg("");
     try {
       const res = await fetch("/api/agent/manage", {
@@ -130,8 +130,8 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
           {!agent.bank_name && (
             <p className="text-sm text-red-500 mb-3">⚠️ ยังไม่ได้ระบุบัญชีธนาคาร — กรุณาแจ้งแอดมิน</p>
           )}
-          <button onClick={handleWithdraw} disabled={wdSubmitting || available <= 0 || !agent.bank_name}
-            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50">
+          <button onClick={handleWithdraw}
+            className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50" disabled={wdSubmitting || available < 0.01 || !agent.bank_name}>
             {wdSubmitting ? "กำลังดำเนินการ..." : `💰 ถอนทั้งหมด ฿${available.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
           </button>
           {wdMsg && <p className="mt-2 text-sm text-zinc-700">{wdMsg}</p>}
@@ -155,10 +155,10 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
                 <tbody>
                   {withdrawals.map(w => (
                     <tr key={w.id} className="border-b border-zinc-50">
-                      <td className="px-4 py-2 text-zinc-600">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                      <td className="px-4 py-2 text-zinc-600">{new Date(w.created_at).toLocaleString("en-GB")}</td>
                       <td className="px-4 py-2 text-right font-medium text-black">฿{w.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                       <td className="px-4 py-2">
-                        {w.status === "paid" ? <span className="text-green-600 font-medium">✅ จ่ายแล้ว ({w.paid_at ? new Date(w.paid_at).toLocaleDateString("en-GB") : ""})</span>
+                        {w.status === "paid" ? <span className="text-green-600 font-medium">✅ จ่ายแล้ว ({w.paid_at ? new Date(w.paid_at).toLocaleString("en-GB") : ""})</span>
                           : <span className="text-amber-600 font-medium">⏳ รอดำเนินการ</span>}
                       </td>
                     </tr>
