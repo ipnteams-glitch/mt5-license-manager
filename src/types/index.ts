@@ -90,7 +90,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "⭐ Free + IB Lifetime (Unlimited)", rank: -1,
   },
   free: {
-    key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 14, max_ports: 5,
+    key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 30, max_ports: 5,
     label: "ฟรี 5 พอร์ต 14 วัน\nหลังหมดอายุเหลือ 1 พอร์ตถาวร", rank: 1,
   },
   test_1: {
