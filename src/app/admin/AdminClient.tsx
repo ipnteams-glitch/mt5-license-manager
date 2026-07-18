@@ -603,7 +603,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                       <tbody>
                         {pendingWds.filter((w: any) => w.status === "pending").map((w: any) => (
                           <tr key={w.id} className="border-b border-zinc-100">
-                            <td className="px-2 py-1 text-black">{new Date(w.created_at).toLocaleDateString("en-GB")}</td>
+                            <td className="px-2 py-1 text-black">{new Date(w.created_at).toLocaleString("en-GB")}</td>
                             <td className="px-2 py-1 text-right font-medium text-black">฿{w.amount.toLocaleString()}</td>
                             <td className="px-2 py-1 text-black">{w.bank_name}</td>
                             <td className="px-2 py-1 font-mono text-xs text-black">{w.bank_account}</td>
