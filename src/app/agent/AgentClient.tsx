@@ -134,6 +134,7 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
             className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50" disabled={wdSubmitting || available < 0.01 || !agent.bank_name}>
             {wdSubmitting ? "กำลังดำเนินการ..." : `💰 ถอนทั้งหมด ฿${available.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
           </button>
+          <button onClick={() => router.refresh()} className="ml-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-600 hover:bg-zinc-50" title="Refresh">🔄</button>
           {wdMsg && <p className="mt-2 text-sm text-zinc-700">{wdMsg}</p>}
         </div>
 
