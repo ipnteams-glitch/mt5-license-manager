@@ -6,10 +6,15 @@ import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES } from "@/types";
 
-type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist: { name: string; broker: string; created_at: string }[]; agents: Agent[] };
+type Props = { members: Member[]; ports: Port[]; payments: Payment[]; whitelist: { name: string; broker: string; created_at: string }[]; agents: Agent[]; pendingWithdrawals?: AgentWithdrawal[] };
 
-export default function AdminClient({ members, ports, payments, whitelist, agents }: Props) {
+export default function AdminClient({ members, ports, payments, whitelist, agents, pendingWithdrawals }: Props) {
   const { t } = useT();
+  // ponytail: map agent_code → total pending withdrawal amount (no expand needed)
+  const pendingMap: Record<string, number> = {};
+  (pendingWithdrawals || []).forEach(w => {
+    pendingMap[w.agent_code] = (pendingMap[w.agent_code] || 0) + w.amount;
+  });
   const [memberList, setMemberList] = useState(members);
   const [editing, setEditing] = useState<string | null>(null);
   const [selectedPkg, setSelectedPkg] = useState<PackageType>("none");
@@ -470,6 +475,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                     <th className="px-2 py-1 text-right">ยอดสะสม</th>
                     <th className="px-2 py-1 text-right">จ่ายแล้ว</th>
                     <th className="px-2 py-1 text-right">คงค้าง</th>
+                    <th className="px-2 py-1 text-right">⏳ ถอน</th>
                     <th className="px-2 py-1 text-right"></th>
                   </tr>
                 </thead>
@@ -487,6 +493,15 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                         <td className="px-2 py-1 text-right text-black">฿{a.commission_earned.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-green-600">฿{a.commission_paid.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                         <td className="px-2 py-1 text-right text-amber-600">฿{pending.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                        <td className="px-2 py-1 text-right">
+                          {pendingMap[a.agent_code] ? (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-red-100 px-1.5 py-0.5 text-xs font-bold text-red-700">
+                              ⏳ ฿{pendingMap[a.agent_code].toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-zinc-300">-</span>
+                          )}
+                        </td>
                         <td className="px-2 py-1 text-right space-x-1">
                           <button onClick={() => { if(detailAgent===a.agent_code){setDetailAgent(null)}else{setDetailAgent(a.agent_code);setShowWdHistory(false);setPendingWds([]);setWdPage(0)}}} className="text-xs text-blue-500 hover:text-blue-700">
                             {detailAgent === a.agent_code ? "ซ่อน" : "📋"}

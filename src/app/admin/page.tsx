@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getAllMembers, getAllPorts, getAllPayments, getAllWhitelist, getAllAgents } from "@/lib/supabase";
-import type { Member, Port, Payment, Agent } from "@/types";
+import { getAllMembers, getAllPorts, getAllPayments, getAllWhitelist, getAllAgents, getAllWithdrawals } from "@/lib/supabase";
+import type { Member, Port, Payment, Agent, AgentWithdrawal } from "@/types";
 import AdminClient from "./AdminClient";
 
 export const dynamic = "force-dynamic";
@@ -30,15 +30,18 @@ export default async function AdminPage() {
   let payments: Payment[] = [];
   let whitelist: { name: string; broker: string; created_at: string }[] = [];
   let agents: Agent[] = [];
+  let pendingWithdrawals: AgentWithdrawal[] = [];
   try {
     members = await getAllMembers();
     ports = await getAllPorts();
     payments = await getAllPayments();
     whitelist = await getAllWhitelist();
     agents = await getAllAgents();
+    const allWds = await getAllWithdrawals();
+    pendingWithdrawals = allWds.filter((w: AgentWithdrawal) => w.status === "pending");
   } catch (e) {
     console.error("Admin fetch failed:", e);
   }
 
-  return <AdminClient members={members} ports={ports} payments={payments} whitelist={whitelist} agents={agents} />;
+  return <AdminClient members={members} ports={ports} payments={payments} whitelist={whitelist} agents={agents} pendingWithdrawals={pendingWithdrawals} />;
 }
