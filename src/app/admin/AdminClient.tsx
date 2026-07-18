@@ -39,7 +39,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     setAgentList(agents);
   }, [agents]);
   const [showAddAgent, setShowAddAgent] = useState(false);
-  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 10, commission_percent: 10, discount_vps_percent: 10, commission_vps_percent: 5, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
+  const [agentForm, setAgentForm] = useState<Agent>({ agent_code: "", name: "", email: "", discount_percent: 5, commission_percent: 15, discount_vps_percent: 5, commission_vps_percent: 5, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" });
   const [agentSaving, setAgentSaving] = useState(false);
   // Commission detail (read-only)
   const [detailAgent, setDetailAgent] = useState<string | null>(null);
@@ -445,7 +445,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
           <div className="rounded-xl bg-white shadow-sm p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-semibold text-black">🏷️ ตัวแทน ({agentList.length})</h2>
-              <button onClick={() => { setShowAddAgent(true); setAgentForm({ agent_code: "", name: "", email: "", discount_percent: 10, commission_percent: 10, discount_vps_percent: 10, commission_vps_percent: 5, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" }); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">+ เพิ่ม</button>
+              <button onClick={() => { setShowAddAgent(true); setAgentForm({ agent_code: "", name: "", email: "", discount_percent: 5, commission_percent: 15, discount_vps_percent: 5, commission_vps_percent: 5, commission_earned: 0, commission_paid: 0, created_at: "", bank_name: "", bank_account: "" }); }} className="rounded bg-blue-600 px-3 py-1 text-sm text-white">+ เพิ่ม</button>
             </div>
 
             {showAddAgent && (
