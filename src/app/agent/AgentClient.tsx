@@ -16,7 +16,8 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
   const [wdMsg, setWdMsg] = useState("");
   const [withdrawals, setWithdrawals] = useState<AgentWithdrawal[]>([]);
   // ponytail: subtract pending withdrawals to show true available balance
-  const available = agent.commission_earned - agent.commission_paid - withdrawals.filter(w => w.status === "pending").reduce((s, w) => s + w.amount, 0);
+  const pendingWdTotal = withdrawals.filter(w => w.status === "pending").reduce((s, w) => s + w.amount, 0);
+  const available = agent.commission_earned - agent.commission_paid - pendingWdTotal;
 
   useEffect(() => {
     fetch("/api/agent/manage", {
@@ -118,8 +119,13 @@ export default function AgentClient({ agent, sales, pendingCommission }: Props) 
         {/* Withdraw Form */}
         <div className="mb-6 rounded-xl bg-white p-4 shadow-sm">
           <h2 className="font-semibold text-zinc-800 mb-2">💸 ถอนค่าคอมมิชชั่น</h2>
-          <p className="text-sm text-zinc-500 mb-3">
+          <p className="text-sm text-zinc-500 mb-1">
             ยอดที่ถอนได้: <span className="font-bold text-green-600">฿{available.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            {pendingWdTotal > 0 && (
+              <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                ⏳ รอถอน ฿{pendingWdTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </span>
+            )}
           </p>
           {!agent.bank_name && (
             <p className="text-sm text-red-500 mb-3">⚠️ ยังไม่ได้ระบุบัญชีธนาคาร — กรุณาแจ้งแอดมิน</p>
