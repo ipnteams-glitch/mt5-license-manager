@@ -547,7 +547,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                             const isCrypto = cryptoMeta?.method === "crypto";
                             return (
                             <tr key={p.id} className="border-b border-zinc-100">
-                              <td className="px-2 py-1 text-black">{new Date(p.paid_at || p.created_at).toLocaleDateString("en-GB")}</td>
+                              <td className="px-2 py-1 text-black">{new Date(p.paid_at || p.created_at).toLocaleString("en-GB")}</td>
                               <td className="px-2 py-1 text-black">{p.email}</td>
                               <td className="px-2 py-1 text-black">{p.package}</td>
                               <td className="px-2 py-1 text-right text-green-600 font-medium">
