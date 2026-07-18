@@ -39,7 +39,7 @@ export function canUpgrade(currentPkg: PackageType, newPkg: PackageType, isExpir
   }
   const cr = PACKAGES[currentPkg]?.rank || 0, nr = PACKAGES[newPkg]?.rank || 0;
   if (isExpired) return { allowed: true };
-  if (nr <= cr) return { allowed: false, reason: "Cannot downgrade" };
+  if (nr < cr) return { allowed: false, reason: "Cannot downgrade" };
   return { allowed: true };
 }
 export function calculateNewExpiry(member: Member, pkg: PackageType) {
