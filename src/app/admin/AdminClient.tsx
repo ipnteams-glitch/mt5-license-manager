@@ -256,7 +256,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                 </tr>
               </thead>
               <tbody>
-                {memberList.map((m) => {
+                {[...memberList].sort((a, b) => a.email.localeCompare(b.email)).map((m) => {
                   const used = getPortCount(m.email);
                   const isEditing = editing === m.email;
                   return (
