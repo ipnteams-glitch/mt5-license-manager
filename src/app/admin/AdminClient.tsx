@@ -87,6 +87,20 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     } catch { setMsg("ลบไม่สำเร็จ"); }
   }
 
+  async function handleDeleteMember() {
+    if (!deleteEmail.trim()) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/members?email=${encodeURIComponent(deleteEmail.trim())}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMemberList(prev => prev.filter(m => m.email !== deleteEmail.trim()));
+      setMsg("ลบเรียบร้อย: " + data.deleted.join(", "));
+      setDeleteEmail("");
+    } catch (err: any) { setMsg("ลบไม่สำเร็จ: " + (err.message || "")); }
+    finally { setDeleting(false); }
+  }
+
 
   async function handleAddWhitelist(e: React.FormEvent) {
     e.preventDefault();
@@ -245,6 +259,17 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
 
         {activeTab === "members" && (
           <div className="rounded-xl bg-white shadow-sm overflow-x-auto">
+            <div className="border-b border-zinc-200 p-4">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-black mb-1">ลบสมาชิก (ลบข้อมูลทั้งหมด)</label>
+                  <input type="email" value={deleteEmail} onChange={e => setDeleteEmail(e.target.value)} placeholder="อีเมลที่จะลบ" className="w-full rounded border border-zinc-300 px-3 py-1.5 text-sm text-black placeholder:text-zinc-400 focus:border-red-500 focus:outline-none" />
+                </div>
+                <button onClick={() => { if (window.confirm("ลบข้อมูลทั้งหมดของ " + deleteEmail + "?")) handleDeleteMember(); }} disabled={deleting || !deleteEmail.trim()} className="rounded bg-red-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50">
+                  {deleting ? "..." : "Delete"}
+                </button>
+              </div>
+            </div>
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b bg-zinc-50 text-left text-xs font-medium text-black">
