@@ -371,7 +371,7 @@ export default function DashboardClient({
         <div className="mx-auto max-w-4xl px-3 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <a href="https://www.harvestfarm.site" target="_blank" rel="noopener" className="flex h-7 w-7 items-center justify-center rounded bg-blue-600 text-xs font-bold text-white hover:opacity-80">MT5</a>
+              <a href="https://www.forexcool.com" target="_blank" rel="noopener" className="flex h-7 w-7 items-center justify-center rounded bg-blue-600 text-xs font-bold text-white hover:opacity-80">MT5</a>
               <span className="text-sm font-semibold text-zinc-800">License Manager</span>
             </div>
             <div className="flex items-center gap-1.5">

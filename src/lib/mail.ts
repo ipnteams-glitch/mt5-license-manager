@@ -8,6 +8,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// ponytail: reuse AUTH_URL (NextAuth env) — no need for a separate APP_URL
+const appUrl = process.env.AUTH_URL || "https://mt5-license-manager.vercel.app";
+
 export async function sendPaymentSuccessEmail(
   to: string,
   name: string,
@@ -27,7 +30,7 @@ export async function sendPaymentSuccessEmail(
       📅 <b>หมดอายุ:</b> ${new Date(expiryDate).toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })}
     </p>
     <div style="text-align:center;margin:24px 0">
-      <a href="https://mt5-license-manager.vercel.app/dashboard" 
+      <a href="${appUrl}/dashboard" 
          style="background:#667eea;color:#fff;text-decoration:none;padding:12px 32px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block">
         🔐 ไปที่ Dashboard
       </a>

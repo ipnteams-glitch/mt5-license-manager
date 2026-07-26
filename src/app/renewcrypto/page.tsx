@@ -152,7 +152,7 @@ export default function RenewCryptoPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setBalance(data.new_balance);
-      window.location.href = "https://mt5.harvestfarm.site/dashboard?t=" + Date.now();
+      window.location.href = window.location.origin + "/dashboard" + "?t=" + Date.now();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -306,7 +306,7 @@ export default function RenewCryptoPage() {
           })}
         </div>
 
-        <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"}
+        <button onClick={() => window.location.href = window.location.origin + "/dashboard"}
           className="mt-4 w-full text-sm text-zinc-700 hover:underline">{t("back_to_dashboard")}</button>
       </div>
     </div>

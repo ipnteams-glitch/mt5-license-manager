@@ -113,7 +113,7 @@ export default function RenewPage() {
         if (pollingRef.current) clearInterval(pollingRef.current);
         setStep("done");
         setVerifying(false);
-        setTimeout(() => window.location.href = "https://mt5.harvestfarm.site/dashboard", 3000);
+        setTimeout(() => window.location.href = window.location.origin + "/dashboard", 3000);
       } else {
         setError(data.message || t("admin_verify_failed"));
       }
@@ -134,7 +134,7 @@ export default function RenewPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || t("error_occurred"));
         setStep("done");
-        setTimeout(() => window.location.href = "https://mt5.harvestfarm.site/dashboard", 3000);
+        setTimeout(() => window.location.href = window.location.origin + "/dashboard", 3000);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -180,7 +180,7 @@ export default function RenewPage() {
           clearInterval(interval);
           setStep("done");
           setVerifying(false);
-          setTimeout(() => window.location.href = "https://mt5.harvestfarm.site/dashboard", 3000);
+          setTimeout(() => window.location.href = window.location.origin + "/dashboard", 3000);
         } else if (data.cancelled) {
           clearInterval(interval);
           setVerifying(false);
@@ -353,7 +353,7 @@ export default function RenewPage() {
             <button
               onClick={() => {
                 if (pollingRef.current) clearInterval(pollingRef.current);
-                window.location.href = "https://mt5.harvestfarm.site/dashboard";
+                window.location.href = window.location.origin + "/dashboard";
               }}
               className="mt-3 w-full rounded-lg bg-green-600 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-all"
             >
@@ -422,7 +422,7 @@ export default function RenewPage() {
               </div>
             </div>
           </button>
-          <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"} className="mt-4 text-sm text-zinc-500 hover:underline">
+          <button onClick={() => window.location.href = window.location.origin + "/dashboard"} className="mt-4 text-sm text-zinc-500 hover:underline">
             {t("back_to_dashboard")}
           </button>
         </div>
@@ -516,7 +516,7 @@ export default function RenewPage() {
           {activating ? t("loading") : selected === "free" ? t("activate_free") : t("create_qr")}
         </button>
 
-        <button onClick={() => window.location.href = "https://mt5.harvestfarm.site/dashboard"} className="mt-3 w-full text-sm text-zinc-500 hover:underline">
+        <button onClick={() => window.location.href = window.location.origin + "/dashboard"} className="mt-3 w-full text-sm text-zinc-500 hover:underline">
           {t("back_to_dashboard")}
         </button>
       </div>
