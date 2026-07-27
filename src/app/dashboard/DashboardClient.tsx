@@ -561,10 +561,9 @@ export default function DashboardClient({
                 <thead>
                   <tr className="border-b text-left text-xs font-medium text-zinc-500">
                     <th className="pb-2">MT5 Account</th>
+                    <th className="pb-2">{t("broker")}</th>
                     <th className="pb-2">{t("admin_col_date_added")}</th>
                     <th className="pb-2 text-red-600 font-bold">{t("dash_col_expiry")}</th>
-                    <th className="pb-2 text-right">{t("dash_col_select")}</th>
-                    <th className="pb-2 text-right text-yellow-600 font-bold">{t("dash_col_run")}</th>
                     <th className="pb-2 text-right">{t("admin_col_manage")}</th>
                   </tr>
                 </thead>
@@ -572,6 +571,7 @@ export default function DashboardClient({
                   {portList.map((port) => (
                     <tr key={port.id} className="border-b border-zinc-100">
                       <td className="py-3 font-mono font-medium text-zinc-800">{port.mt5_account}</td>
+                      <td className="py-3 text-zinc-500">{port.mt5_broker}</td>
                       <td className="py-3 text-zinc-500">
                         {new Date(port.created_at).toLocaleDateString("en-GB")}
                       </td>
@@ -590,16 +590,6 @@ export default function DashboardClient({
                             <span className="text-zinc-400">-</span>
                           );
                         })()}
-                      </td>
-                      <td className="py-3 text-right">
-                        <button
-                          onClick={() => openSystemsModal(port)}
-                          disabled={!displayPkgLabel?.includes("Premium") && !displayPkgLabel?.includes("VIP") && !displayPkgLabel?.includes("Live With Us") && !isAdmin}
-                          className={!displayPkgLabel?.includes("Premium") && !displayPkgLabel?.includes("VIP") && !displayPkgLabel?.includes("Live With Us") && !isAdmin ? "text-xs text-zinc-300 cursor-not-allowed" : "text-xs text-blue-500 hover:text-blue-700"}
-                        >⚙️</button>
-                      </td>
-                      <td className="py-3 text-xs font-bold text-right text-blue-600">
-                        {portStatuses[port.mt5_account]?.systems || "-"}
                       </td>
                       <td className="py-3 text-right">
                         <button
