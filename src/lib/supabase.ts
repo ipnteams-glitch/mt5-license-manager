@@ -3,6 +3,7 @@ import { supabase } from "./supabase-client";
 import { v4 as uuidv4 } from "uuid";
 import type { Member, Port, Payment, PackageType, PortfolioAccount, PortSystem, Agent, AgentWithdrawal } from "@/types";
 import { PACKAGES } from "@/types";
+import { normalizeBroker } from "./broker-utils"; // ponytail: normalize before ILIKE match
 
 // ═══════════ Members ═══════════
 
@@ -96,7 +97,8 @@ export async function findPortByAccount(account: string, broker?: string): Promi
   const q = supabase.from("ports").select("*").eq("mt5_account", account);
   q.eq("status", "active");
   if (broker) {
-    const pattern = "%" + broker.replace(/%/g, "\\%") + "%";
+    const normalized = normalizeBroker(broker);
+    const pattern = "%" + normalized.replace(/%/g, "\\%") + "%";
     q.or("mt5_broker.ilike." + pattern);
   }
   const { data } = await q.limit(1);

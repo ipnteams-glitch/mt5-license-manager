@@ -7,6 +7,7 @@ import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
 import { PACKAGES, ALL_SYSTEMS } from "@/types";
 import brokersData from "../../../brokers.json";
+import { deriveBaseBrokers } from "@/lib/broker-utils";
 
 
 type Props = {
@@ -77,7 +78,7 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
-  const BROKERS = brokersData as string[];
+  const BROKERS = deriveBaseBrokers(brokersData as string[]);
   const [eaVersion, setEaVersion] = useState<string | null>(null);
 
   // Fetch EA version from Google Drive
