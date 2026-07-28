@@ -110,7 +110,8 @@ export async function GET(req: Request) {
       email: member.email,
       package: pkgInfo?.name_en || member.package,
       package_key: member.package,
-      expiry_date: member.expiry_date,
+      // ponytail: first port is always permanent — show "LifeTime"
+      expiry_date: isFirstPort ? "LifeTime" : (member.expiry_date || ""),
       days_left: daysLeft,
     });
   } catch (err: any) {
