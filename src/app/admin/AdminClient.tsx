@@ -188,12 +188,15 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     setMsg("");
   }
 
+  // ponytail: single source of truth for lifetime packages
+  const isLifetime = (pkg: PackageType) => pkg === "free" || pkg === "live_with_us" || pkg === "free_ib";
+
   async function saveEdit() {
     setSaving(true);
     setMsg("");
     try {
       // Free package: auto-set unlimited expiry
-      const finalExpiry = (selectedPkg === "free" || selectedPkg === "live_with_us" || selectedPkg === "free_ib") ? "3000-12-31" : expiryDate;
+      const finalExpiry = isLifetime(selectedPkg) ? "3000-12-31" : expiryDate;
       const res = await fetch("/api/admin/members", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -292,7 +295,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                       <td className="px-2 py-1 font-medium text-zinc-800">{m.name}</td>
                       <td className="px-2 py-1">
                         {isEditing ? (
-                          <select value={selectedPkg} onChange={(e) => { setSelectedPkg(e.target.value as PackageType); if (e.target.value === "free" || e.target.value === "live_with_us" || e.target.value === "free_ib") setExpiryDate("3000-12-31"); }} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900">
+                          <select value={selectedPkg} onChange={(e) => { setSelectedPkg(e.target.value as PackageType); if (isLifetime(e.target.value as PackageType)) setExpiryDate("3000-12-31"); }} className="rounded border border-zinc-300 px-2 py-1 text-xs text-gray-900">
                             {pkgOptions.map((k) => (<option key={k} value={k}>{PACKAGES[k].label}</option>))}
                           </select>
                         ) : (
