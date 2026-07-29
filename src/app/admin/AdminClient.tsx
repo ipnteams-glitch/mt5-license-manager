@@ -188,14 +188,14 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     setMsg("");
   }
 
-  // ponytail: single source of truth for lifetime packages
-  const isLifetime = (pkg: PackageType) => pkg === "free" || pkg === "live_with_us" || pkg === "free_ib";
+  // ponytail: only truly permanent packages
+  const isLifetime = (pkg: PackageType) => pkg === "live_with_us" || pkg === "free_ib";
 
   async function saveEdit() {
     setSaving(true);
     setMsg("");
     try {
-      // Free package: auto-set unlimited expiry
+      // ponytail: lifetime packages → far-future expiry; free stays 14d
       const finalExpiry = isLifetime(selectedPkg) ? "3000-12-31" : expiryDate;
       const res = await fetch("/api/admin/members", {
         method: "PUT",
