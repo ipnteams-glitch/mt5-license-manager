@@ -99,7 +99,7 @@ export async function findPortByAccount(account: string, broker?: string): Promi
   if (broker) {
     const normalized = normalizeBroker(broker);
     const pattern = "%" + normalized.replace(/%/g, "\\%") + "%";
-    q.or("mt5_broker.ilike." + pattern);
+    q.ilike("mt5_broker", pattern);
   }
   const { data } = await q.limit(1);
   return (data?.[0] as Port) || null;
