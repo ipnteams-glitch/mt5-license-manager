@@ -90,6 +90,19 @@ export async function GET(req: Request) {
       }
     }
 
+    // ── freenew: no permanent port, all ports invalid after expiry ──
+    if (daysLeft <= 0 && member.package === "freenew") {
+      return NextResponse.json({
+        valid: false,
+        email: member.email,
+        package: member.package,
+        package_key: member.package,
+        expiry_date: member.expiry_date,
+        days_left: 0,
+        reason: "แพคเกจฟรีใหม่หมดอายุ — กรุณาซื้อแพคเกจเพื่อใช้งานต่อ",
+      });
+    }
+
     // ── ตรวจสอบโควต้าพอร์ต: ไม่อนุญาตเกิน max_ports ──
     if (portIndex >= member.max_ports) {
       return NextResponse.json({
