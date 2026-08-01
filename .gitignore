@@ -51,4 +51,6 @@ import.env
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+
+# MQL5 source code (security: prevent source leak)
+*.mq5
