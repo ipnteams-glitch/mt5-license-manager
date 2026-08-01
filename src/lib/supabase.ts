@@ -31,7 +31,7 @@ export async function deleteMemberCascade(email: string): Promise<{ deleted: str
 export async function upsertMember(email: string, name: string): Promise<void> {
   const existing = await getMemberByEmail(email);
   if (existing) return;
-  const exp = new Date(); exp.setDate(exp.getDate() + 14); await supabase.from("members").insert({ email, name, role: "user", package: "free", max_ports: 5, expiry_date: exp.toISOString() });
+  const exp = new Date(); exp.setDate(exp.getDate() + 14); await supabase.from("members").insert({ email, name, role: "user", package: "freenew", max_ports: 5, expiry_date: exp.toISOString() });
 }
 export async function updateMemberPackage(email: string, pkg: PackageType, maxPorts: number, expiryDate: string): Promise<void> {
   await supabase.from("members").update({ package: pkg, max_ports: maxPorts, expiry_date: expiryDate || null }).eq("email", email);
@@ -44,6 +44,13 @@ export async function setAddonIbVpsExpiry(email: string, expiry?: string): Promi
 export async function setIbVpsChoice(email: string, choice: string): Promise<void> {
   await supabase.from("members").update({ ib_vps_choice: choice }).eq("email", email);
 }
+// ponytail: check if member has ever bought a paid non-VPS package
+export async function hasBoughtPaidPackage(email: string): Promise<boolean> {
+  const { data } = await supabase.from("payments").select("package").eq("email", email).eq("status", "paid");
+  if (!data || data.length === 0) return false;
+  return data.some((p: any) => p.package !== "ib_vps_2200");
+}
+
 export function canUpgrade(currentPkg: PackageType, newPkg: PackageType, isExpired: boolean) {
   if (currentPkg === "free_ib" || currentPkg === "live_with_us") return { allowed: false, reason: "Already on lifetime plan" };
   if (newPkg === "ib_vps_2200") {

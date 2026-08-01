@@ -66,7 +66,7 @@ export interface AgentWithdrawal {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "test_1" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
+export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
 
 export interface PackageInfo {
   key: PackageType;
@@ -93,9 +93,17 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 14, max_ports: 5,
     label: "ฟรี 5 พอร์ต 14 วัน\nหลังหมดอายุเหลือ 1 พอร์ตถาวร", rank: 1,
   },
+  freenew: {
+    key: "freenew", name: "ฟรี (ใหม่)", name_en: "Free New", price: 0, duration_days: 14, max_ports: 5,
+    label: "ฟรี 5 พอร์ต 14 วัน\nหมดอายุแล้วหมดเลย", rank: 1,
+  },
   test_1: {
     key: "test_1", name: "ทดสอบ", name_en: "Test", price: 1, duration_days: 3, max_ports: 3,
     label: "🧪 1 THB / 3 Days", rank: 2,
+  },
+  startup100: {
+    key: "startup100", name: "StartUp100", name_en: "StartUp100", price: 100, duration_days: 30, max_ports: 1,
+    label: "100 THB | 1 Port | 30 Days", rank: 3,
   },
   "1000_2m": {
     key: "1000_2m", name: "Basic", name_en: "Basic", price: 299, duration_days: 30, max_ports: 2,
@@ -244,7 +252,9 @@ export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
   none: 0,
   free_ib: 0,
   free: 0,
+  freenew: 0,
   test_1: 0.01,
+  startup100: 3,
   "1000_2m": 11,
   "2490_3m": 31,
   "3900_6m": 81,

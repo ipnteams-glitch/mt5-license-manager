@@ -74,7 +74,7 @@ export async function GET(req: Request) {
     const isFirstPort = portIndex === 0;
 
     // ── หลังหมดอายุ → พอร์ตแรกใช้ได้ถาวร, พอร์ตอื่นถูกปฏิเสธ ──
-    if (daysLeft <= 0 && member.package !== "free_ib" && member.package !== "live_with_us") {
+    if (daysLeft <= 0 && member.package !== "free_ib" && member.package !== "live_with_us" && member.package !== "freenew") {
       if (isFirstPort) {
         daysLeft = 9999; // พอร์ตแรก: ผ่าน (ถาวร)
       } else {

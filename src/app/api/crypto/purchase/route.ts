@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { purchasePackage, getWallet } from "@/lib/crypto-wallets";
+import { hasBoughtPaidPackage } from "@/lib/supabase";
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -12,12 +13,18 @@ export async function POST(req: Request) {
 
   try {
     const { package: pkg, agent_code } = await req.json();
-    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType))
+    const STARTUP_ALLOWED = (pkg as string) === "startup100";
+    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType) && !STARTUP_ALLOWED)
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
 
     if (TEST_PACKAGES.includes(pkg as PackageType) && session.user.email !== "ipnteams@gmail.com")
       return NextResponse.json({ error: "สำหรับทดสอบเท่านั้น" }, { status: 403 });
 
+    // ponytail: startup100 — only for first-time buyers
+    if (pkg === "startup100") {
+      const alreadyBought = await hasBoughtPaidPackage(session.user.email);
+      if (alreadyBought) return NextResponse.json({ error: "แพคเกจ StartUp100 สำหรับลูกค้าใหม่เท่านั้น" }, { status: 400 });
+    }
     const result = await purchasePackage(session.user.email, pkg as PackageType, agent_code);
     const pkgInfo = PACKAGES[pkg as PackageType];
     revalidatePath("/dashboard");

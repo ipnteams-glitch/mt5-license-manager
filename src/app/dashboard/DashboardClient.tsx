@@ -579,7 +579,9 @@ export default function DashboardClient({
                         {(() => {
                           const sorted = [...portList].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
                           const isFirst = sorted[0]?.mt5_account === port.mt5_account;
-                          if (isFirst) {
+                          // ponytail: freenew has no permanent port — only show ถาวร for packages that get it
+                          const hasPermanentPort = member.package !== "freenew";
+                          if (isFirst && hasPermanentPort) {
                             return <span className="text-green-600 font-medium">ถาวร</span>;
                           }
                           return displayExpiryDate ? (

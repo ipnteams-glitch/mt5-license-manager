@@ -179,7 +179,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     }
   }
 
-  const pkgOptions: PackageType[] = ["free", "1000_2m", "3900_6m", "live_with_us", "ib_vps_2200", "none"];
+  const pkgOptions: PackageType[] = ["free", "freenew", "startup100", "1000_2m", "3900_6m", "live_with_us", "ib_vps_2200", "none"];
 
   function startEdit(m: Member) {
     setEditing(m.email);

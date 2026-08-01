@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode } from "@/lib/supabase";
+import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode, hasBoughtPaidPackage } from "@/lib/supabase";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
@@ -12,7 +12,8 @@ export async function POST(req: Request) {
 
   try {
     const { package: pkg, promo, agent_code } = await req.json();
-    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType)) {
+    const STARTUP_ALLOWED = (pkg as string) === "startup100"; const ALL_BUYABLE = ["startup100"] as PackageType[];
+    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType) && !STARTUP_ALLOWED) {
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
     }
 

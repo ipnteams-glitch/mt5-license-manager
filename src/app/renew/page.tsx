@@ -32,6 +32,7 @@ export default function RenewPage() {
   const [verifying, setVerifying] = useState(false);
   const [activating, setActivating] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const [startupEligible, setStartupEligible] = useState(false);
   const [timeLeft, setTimeLeft] = useState(900); // 15 นาที
 
   // Upload slip
@@ -59,6 +60,7 @@ export default function RenewPage() {
 
   function pkgBg(key: PackageType) {
     if (key === "1000_2m" || key === "3900_6m" || key === "live_with_us") return "bg-amber-50";
+    if (key === "startup100") return "bg-green-50";
     if (key === "ib_vps_2200") return "bg-purple-50";
     return "";
   }

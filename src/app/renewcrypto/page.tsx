@@ -27,11 +27,22 @@ export default function RenewCryptoPage() {
   const [agentInfo, setAgentInfo] = useState<{ agent_code: string; agent_name: string; discount_percent: number; discounted_price: number; commission: number; discount_pkg_percent: number; discount_vps_percent: number; commission_pkg_percent: number; commission_vps_percent: number } | null>(null);
   const [validatingAgent, setValidatingAgent] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const [startupEligible, setStartupEligible] = useState(false);
 
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
-  const visiblePackages = (isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES).filter(k => k !== "free");
+  const visiblePackages = [
+    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
+    ...(startupEligible ? ["startup100" as PackageType] : []),
+  ].filter(k => k !== "free");
 
   useEffect(() => { fetchBalance(); }, []);
+  // ponytail: check if member can buy startup100
+  useEffect(() => {
+    fetch("/api/member/startup-eligible")
+      .then(r => r.json())
+      .then(d => { if (d.eligible) setStartupEligible(true); })
+      .catch(() => {});
+  }, []);
   async function fetchBalance() {
     try {
       const res = await fetch("/api/crypto/balance");
