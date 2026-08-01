@@ -58,6 +58,8 @@ export default async function DashboardPage() {
     const expiry = new Date(member.expiry_date);
     const now = new Date();
     daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    // ponytail: cap absurdly far-future expiry (e.g. admin set 3000-12-31 for non-lifetime pkg)
+    if (daysLeft > 36500 && pkgInfo.duration_days < 36500) daysLeft = pkgInfo.duration_days;
     isExpired = daysLeft <= 0;
   }
 
