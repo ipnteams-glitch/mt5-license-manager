@@ -16,9 +16,10 @@ export default function RenewPage() {
 
 
 
-  const visiblePackages = (isTestUser
-    ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES]
-    : BUYABLE_PACKAGES).filter((k) => k !== "free");
+  const visiblePackages = [
+    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
+    ...(startupEligible ? ["startup100" as PackageType] : []),
+  ].filter((k) => k !== "free");
   const [step, setStep] = useState<"method" | "select" | "qr" | "done">("method");
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [qrBase64, setQrBase64] = useState("");
@@ -41,6 +42,14 @@ export default function RenewPage() {
   const [uploading, setUploading] = useState(false);
   const [slipResult, setSlipResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cancelling, setCancelling] = useState(false);
+
+  // ponytail: check if member can buy startup100
+  useEffect(() => {
+    fetch("/api/member/startup-eligible")
+      .then(r => r.json())
+      .then(d => { if (d.eligible) setStartupEligible(true); })
+      .catch(() => {});
+  }, []);
 
   // นับถอยหลัง
   useEffect(() => {
