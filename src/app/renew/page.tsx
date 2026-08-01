@@ -16,10 +16,6 @@ export default function RenewPage() {
 
 
 
-  const visiblePackages = [
-    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
-    ...(startupEligible ? ["startup100" as PackageType] : []),
-  ].filter((k) => k !== "free");
   const [step, setStep] = useState<"method" | "select" | "qr" | "done">("method");
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [qrBase64, setQrBase64] = useState("");
@@ -34,6 +30,12 @@ export default function RenewPage() {
   const [activating, setActivating] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const [startupEligible, setStartupEligible] = useState(false);
+
+  const visiblePackages = [
+    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
+    ...(startupEligible ? ["startup100" as PackageType] : []),
+  ].filter((k) => k !== "free");
+
   const [timeLeft, setTimeLeft] = useState(900); // 15 นาที
 
   // Upload slip
