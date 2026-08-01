@@ -406,7 +406,7 @@ export default function DashboardClient({
                 <p className="text-sm text-zinc-500">{t("status")}</p>
                 {displayIsExpired ? (
                   <p className="font-semibold text-red-600">{t("dash_expired_label")}</p>
-                ) : member.package === "free" || member.package === "free_ib" || member.package === "live_with_us" ? (
+                ) : member.package === "free_ib" || member.package === "live_with_us" ? (
                   <p className="font-semibold text-green-600">✅ ไม่จำกัดวัน</p>
                 ) : displayDaysLeft > 0 ? (
                   <p className="font-semibold text-green-600">{t("dash_days_left", { n: displayDaysLeft })}</p>
