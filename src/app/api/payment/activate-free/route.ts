@@ -12,6 +12,8 @@ export async function POST() {
     const member = await getMemberByEmail(session.user.email);
     if (!member) return NextResponse.json({ error: "ไม่พบสมาชิก" }, { status: 404 });
 
+    if (member.package === "freenew") return NextResponse.json({ error: "แพคเกจฟรีใหม่ ไม่สามารถใช้แพคเกจฟรีเดิมได้ — กรุณาซื้อแพคเกจ" }, { status: 400 });
+
     const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : true;
     const { allowed, reason } = canUpgrade(member.package, "free", isExpired);
     if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
