@@ -124,7 +124,7 @@ export async function GET(req: Request) {
       package: pkgInfo?.name_en || member.package,
       package_key: member.package,
       // ponytail: first port is always permanent — show "LifeTime"
-      expiry_date: isFirstPort ? "LifeTime" : (member.expiry_date || ""),
+      expiry_date: (isFirstPort && member.package !== "freenew") ? "LifeTime" : (member.expiry_date || ""),
       days_left: daysLeft,
     });
   } catch (err: any) {

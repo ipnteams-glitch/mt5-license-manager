@@ -22,6 +22,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "แพคเกจนี้สำหรับทดสอบเท่านั้น" }, { status: 403 });
     }
 
+    if (pkg === "startup100") {
+      const alreadyBought = await hasBoughtPaidPackage(session.user.email);
+      if (alreadyBought) return NextResponse.json({ error: "แพคเกจ StartUp100 สำหรับลูกค้าใหม่เท่านั้น" }, { status: 400 });
+    }
+
     const pkgInfo = PACKAGES[pkg as PackageType];
     const member = await getMemberByEmail(session.user.email);
     if (!member) return NextResponse.json({ error: "ไม่พบสมาชิก" }, { status: 404 });
