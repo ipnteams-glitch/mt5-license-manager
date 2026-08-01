@@ -32,8 +32,8 @@ export default function RenewPage() {
   const [startupEligible, setStartupEligible] = useState(false);
 
   const visiblePackages = [
-    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
     ...(startupEligible ? ["startup100" as PackageType] : []),
+    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
   ].filter((k) => k !== "free");
 
   const [timeLeft, setTimeLeft] = useState(900); // 15 นาที

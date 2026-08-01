@@ -31,8 +31,8 @@ export default function RenewCryptoPage() {
 
   const isTestUser = session?.user?.email === "ipnteams@gmail.com";
   const visiblePackages = [
-    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
     ...(startupEligible ? ["startup100" as PackageType] : []),
+    ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
   ].filter(k => k !== "free");
 
   useEffect(() => { fetchBalance(); }, []);

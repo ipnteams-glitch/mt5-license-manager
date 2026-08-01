@@ -91,7 +91,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   free: {
     key: "free", name: "ฟรี", name_en: "Free", price: 0, duration_days: 14, max_ports: 5,
-    label: "ฟรี 5 พอร์ต 14 วัน\nหลังหมดอายุเหลือ 1 พอร์ตถาวร", rank: 1,
+    label: "ฟรี 5 พอร์ต 14 วัน", rank: 1,
   },
   freenew: {
     key: "freenew", name: "ฟรี (ใหม่)", name_en: "Free New", price: 0, duration_days: 14, max_ports: 5,
