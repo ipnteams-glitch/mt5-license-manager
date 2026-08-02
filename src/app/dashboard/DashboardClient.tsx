@@ -127,6 +127,7 @@ export default function DashboardClient({
   const [loginStatus, setLoginStatus] = useState<null | "ok" | "fail">(null);
   const [loginMsg, setLoginMsg] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<Port | null>(null);
+  const [deletingPortId, setDeletingPortId] = useState<string | null>(null);
 
 
 
@@ -218,6 +219,9 @@ export default function DashboardClient({
   }
 
   async function handleDeletePort(portId: string) {
+    // Close dialog instantly, show progress bar on the row
+    setDeleteConfirm(null);
+    setDeletingPortId(portId);
     setError("");
     try {
       const res = await fetch(`/api/ports?id=${portId}`, { method: "DELETE" });
@@ -228,6 +232,8 @@ export default function DashboardClient({
       setUsedCount(usedCount - 1);
     } catch (err: any) {
         setError(err.message);
+    } finally {
+      setDeletingPortId(null);
     }
   }
 
@@ -568,7 +574,19 @@ export default function DashboardClient({
                   </tr>
                 </thead>
                 <tbody>
-                  {portList.map((port) => (
+                  {portList.map((port) =>
+                    deletingPortId === port.id ? (
+                      <tr key={port.id} className="border-b border-zinc-100">
+                        <td colSpan={5} className="py-3">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-zinc-500">กำลังลบ {port.mt5_account}...</span>
+                            <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-red-400 rounded-full animate-pulse" style={{ width: "100%" }} />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
                     <tr key={port.id} className="border-b border-zinc-100">
                       <td className="py-3 font-mono font-medium text-zinc-800">{port.mt5_account}</td>
                       <td className="py-3 text-zinc-500">{port.mt5_broker}</td>
@@ -602,7 +620,8 @@ export default function DashboardClient({
                         </button>
                       </td>
                     </tr>
-                  ))}
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -904,10 +923,7 @@ export default function DashboardClient({
                   className="rounded-lg px-6 py-2 text-sm text-zinc-600 hover:bg-zinc-100 border"
                 >{t("no")}</button>
                 <button
-                  onClick={async () => {
-                    await handleDeletePort(deleteConfirm.id);
-                    setDeleteConfirm(null);
-                  }}
+                  onClick={() => handleDeletePort(deleteConfirm.id)}
                   className="rounded-lg px-6 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600"
                 >{t("delete_yes")}</button>
               </div>
