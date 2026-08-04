@@ -66,7 +66,7 @@ export interface AgentWithdrawal {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none";
+export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none" | "admin";
 
 export interface PackageInfo {
   key: PackageType;
@@ -84,6 +84,10 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   none: {
     key: "none", name: "ไม่มีแพคเกจ", name_en: "None", price: 0, duration_days: 0, max_ports: 0,
     label: "No Package", rank: 0,
+  },
+  admin: {
+    key: "admin", name: "🛡️ Admin", name_en: "Admin", price: 0, duration_days: 99999, max_ports: 999,
+    label: "Admin Unlimited", rank: -2,
   },
   free_ib: {
     key: "free_ib", name: "⭐ ฟรี+IB", name_en: "Free+IB", price: 0, duration_days: 99999, max_ports: 999,
@@ -261,4 +265,5 @@ export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
   "4900_1y": 176,
   ib_vps_2200: 74,
   live_with_us: 301,
+  admin: 0,
 };

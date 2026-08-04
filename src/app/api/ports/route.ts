@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     // เช็ควันหมดอายุ
-    if (member.expiry_date) {
+    if (member.package !== "admin" && member.expiry_date) {
       const expiry = new Date(member.expiry_date);
       if (expiry <= new Date()) {
         return NextResponse.json({ error: "แพคเกจของคุณหมดอายุแล้ว — ติดต่อแอดมินเพื่อต่ออายุ" }, { status: 403 });
