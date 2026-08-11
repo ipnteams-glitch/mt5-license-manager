@@ -78,6 +78,7 @@ export default function DashboardClient({
   const [savingSystems, setSavingSystems] = useState(false);
   const [multiplier, setMultiplier] = useState("1.0");
   const [systemsCache, setSystemsCache] = useState<Record<string, string>>({});
+  const [showBrokers, setShowBrokers] = useState(false); // ponytail: collapsible broker list
   const BROKERS = deriveBaseBrokers(brokersData as string[]);
   const [eaVersion, setEaVersion] = useState<string | null>(null);
 
@@ -482,6 +483,26 @@ export default function DashboardClient({
             )}
           </div>
         )}
+
+        {/* Supported Brokers — ponytail: collapsible, no extra fetch */}
+        <div className="rounded-xl bg-white p-4 shadow-sm mb-4">
+          <button
+            onClick={() => setShowBrokers(!showBrokers)}
+            className="flex w-full items-center justify-between text-sm font-medium text-zinc-700 hover:text-zinc-900"
+          >
+            <span>🏢 Supported Brokers ({BROKERS.length})</span>
+            <span className="text-xs text-zinc-400">{showBrokers ? "▲" : "▼"}</span>
+          </button>
+          {showBrokers && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {BROKERS.map(b => (
+                <span key={b} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs text-blue-700">
+                  {b}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Ports List */}
         <div className="rounded-xl bg-white p-6 shadow-sm">
