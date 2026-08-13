@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPortfolioByEmail, addPortfolioAccount, deletePortfolioAccount } from "@/lib/supabase";
+import { getPortfolioByEmail, addPortfolioAccount, deletePortfolioAccount, getMemberByEmail, getPortfolioQuota } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // Cache จัดการโดย sheets.ts (in-memory, 10s TTL) — ไม่ต้อง cache ซ้ำที่นี่
@@ -14,7 +14,9 @@ export async function GET(req: Request) {
   if (queryEmail && queryEmail.endsWith("@gmail.com")) {
     try {
       const accounts = await getPortfolioByEmail(queryEmail);
-      return NextResponse.json({ accounts });
+      const member = await getMemberByEmail(queryEmail);
+      const quota = getPortfolioQuota(member);
+      return NextResponse.json({ accounts, quota });
     } catch (err: any) {
       return NextResponse.json({ error: err.message }, { status: 500 });
     }
@@ -28,7 +30,9 @@ export async function GET(req: Request) {
 
   try {
     const accounts = await getPortfolioByEmail(session.user.email);
-    return NextResponse.json({ accounts });
+    const member = await getMemberByEmail(session.user.email);
+    const quota = getPortfolioQuota(member);
+    return NextResponse.json({ accounts, quota });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -47,10 +51,11 @@ export async function POST(req: Request) {
       if (!broker) {
         return NextResponse.json({ error: "กรุณาเลือกโบรกเกอร์" }, { status: 400 });
       }
-      // Limit: max 20 portfolio accounts
+      const member = await getMemberByEmail(session.user.email);
+      const quota = getPortfolioQuota(member);
       const existing = await getPortfolioByEmail(session.user.email);
-      if (existing.length >= 20) {
-        return NextResponse.json({ error: "Maximum 20 portfolio accounts allowed" }, { status: 400 });
+      if (existing.length >= quota) {
+        return NextResponse.json({ error: "เกินโควต้าพอร์ตของคุณแล้ว" }, { status: 400 });
       }
       const account = await addPortfolioAccount(session.user.email, mt5_account, broker);
       return NextResponse.json({ success: true, account });
@@ -63,9 +68,11 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     if (body.email && body.email.endsWith("@gmail.com")) {
+      const m2 = await getMemberByEmail(body.email);
+      const q2 = getPortfolioQuota(m2);
       const existing2 = await getPortfolioByEmail(body.email);
-      if (existing2.length >= 20) {
-        return NextResponse.json({ error: "Maximum 20 portfolio accounts allowed" }, { status: 400 });
+      if (existing2.length >= q2) {
+        return NextResponse.json({ error: "เกินโควต้าพอร์ตของคุณแล้ว" }, { status: 400 });
       }
       if (!body.broker) {
         return NextResponse.json({ error: "กรุณาเลือกโบรกเกอร์" }, { status: 400 });

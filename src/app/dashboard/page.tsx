@@ -65,6 +65,8 @@ export default async function DashboardPage() {
 
   // ── ทุกแพคเกจหลังหมดอายุ: เหลือ 1 port ถาวร ──
   let portsTotal = member.max_ports > 0 ? member.max_ports : 1;
+  // ponytail: ib_folio = Portfolio เท่านั้น ไม่มีสิทธิเพิ่ม EA port
+  if (member.package === "ib_folio") portsTotal = 0;
   let packageLabel = pkgInfo.label;
   if (isExpired && member.package !== "free_ib" && member.package !== "live_with_us" && member.package !== "freenew") {
     portsTotal = 1;

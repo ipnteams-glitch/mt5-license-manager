@@ -383,7 +383,7 @@ export default function DashboardClient({
               <span className="text-sm font-semibold text-zinc-800">License Manager</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <a href="https://thaifxbook.com" target="_blank" rel="noopener noreferrer" className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700">📊 Portfolio</a>
+              <a href="/portfolio" className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700">📊 Portfolio</a>
               <a href="/renew" className="rounded bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white">{t("renew")}</a>
               <a href="/agent" className="rounded bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-700">🏷️ Agent</a>
               {isAdmin && <a href="/admin" className="rounded border px-3 py-1 text-xs font-medium">{t("admin_panel")}</a>}

@@ -179,7 +179,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
     }
   }
 
-  const pkgOptions: PackageType[] = ["admin", "free", "freenew", "startup100", "1000_2m", "3900_6m", "live_with_us", "ib_vps_2200", "none"];
+  const pkgOptions: PackageType[] = ["admin", "free", "freenew", "startup100", "1000_2m", "3900_6m", "live_with_us", "ib_vps_2200", "ib_folio", "none"];
 
   function startEdit(m: Member) {
     setEditing(m.email);
@@ -189,7 +189,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   }
 
   // ponytail: only truly permanent packages
-  const isLifetime = (pkg: PackageType) => pkg === "live_with_us" || pkg === "free_ib" || pkg === "admin";
+  const isLifetime = (pkg: PackageType) => pkg === "live_with_us" || pkg === "free_ib" || pkg === "admin" || pkg === "ib_folio";
 
   async function saveEdit() {
     setSaving(true);

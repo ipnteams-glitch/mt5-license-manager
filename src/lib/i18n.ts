@@ -153,7 +153,7 @@ export const translations = {
   uploading_slip_title: { th: "📎 อัปโหลดสลิป", en: "📎 Upload Slip" },
 
   // ── Portfolio Page ──
-  portfolio_your_ports: { th: "พอร์ตของคุณ ({count})", en: "Your Ports ({count})" },
+  portfolio_your_ports: { th: "พอร์ตของคุณ ({count}/{quota})", en: "Your Ports ({count}/{quota})" },
   portfolio_add_btn: { th: "+ เพิ่มพอร์ต", en: "+ Add Port" },
   portfolio_close_btn: { th: "✕ ปิด", en: "✕ Close" },
   portfolio_account_placeholder: { th: "หมายเลข MT5 Account", en: "MT5 Account Number" },
@@ -171,6 +171,8 @@ export const translations = {
   balance: { th: "Balance", en: "Balance" },
   float_pl: { th: "Float P/L", en: "Float P/L" },
   total_profit: { th: "Total Profit", en: "Total Profit" },
+  open_positions: { th: "ไม้ที่เปิด", en: "Open Positions" },
+  margin_level: { th: "Margin Level", en: "Margin Level" },
   last_updated: { th: "อัปเดตล่าสุด", en: "Last updated" },
   waiting_update: { th: "รออัปเดต", en: "Waiting for update" },
   delete_port: { th: "ลบพอร์ต", en: "Delete port" },

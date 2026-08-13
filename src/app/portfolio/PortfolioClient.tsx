@@ -2,20 +2,23 @@
 // v2 - broker dropdown 2026-06-24
 
 import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { PortfolioAccount } from "@/types";
 import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
 import brokersData from "../../../brokers.json";
+import { deriveBaseBrokers } from "@/lib/broker-utils";
 
 type Props = {
   initialAccounts: PortfolioAccount[];
+  initialQuota: number;
 };
 
-export default function PortfolioClient({ initialAccounts }: Props) {
+export default function PortfolioClient({ initialAccounts, initialQuota }: Props) {
   const { data: session } = useSession();
   const { t } = useT();
   const [accounts, setAccounts] = useState<PortfolioAccount[]>(initialAccounts);
+  const [quota, setQuota] = useState<number>(initialQuota);
   const [mt5Account, setMt5Account] = useState("");
   const [mt5Broker, setMt5Broker] = useState("");
   const [adding, setAdding] = useState(false);
@@ -26,13 +29,28 @@ export default function PortfolioClient({ initialAccounts }: Props) {
 
 
 
-  const BROKERS = brokersData as string[];
+  // ponytail: poll API every 5s — no Supabase Realtime dependency, no new env vars
+  const refreshAccounts = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/portfolio?email=${session?.user?.email}`);
+      const data = await res.json();
+      if (data.accounts) setAccounts(data.accounts);
+      if (typeof data.quota === "number") setQuota(data.quota);
+    } catch {}
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    const id = setInterval(refreshAccounts, 5000);
+    return () => clearInterval(id);
+  }, [refreshAccounts]);
+
+  const BROKERS = deriveBaseBrokers(brokersData as string[]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!mt5Account.trim()) return;
-    if (accounts.length >= 20) {
-      setError("Maximum 20 ports allowed");
+    if (accounts.length >= quota) {
+      setError(`เกินโควต้าแล้ว (สูงสุด ${quota} พอร์ต)`);
       return;
     }
     setAdding(true);
@@ -131,11 +149,11 @@ export default function PortfolioClient({ initialAccounts }: Props) {
         {/* Add Button */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-zinc-800">
-            {t("portfolio_your_ports", { count: accounts.length })}
+            {t("portfolio_your_ports", { count: accounts.length, quota })}
           </h2>
           <button
             onClick={() => setShowAdd(!showAdd)}
-            disabled={accounts.length >= 20}
+            disabled={accounts.length >= quota}
             className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {showAdd ? t("portfolio_close_btn") : t("portfolio_add_btn")}
@@ -145,7 +163,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
         {/* Add Form */}
         {showAdd && (
           <form onSubmit={handleAdd} className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-            <div className="flex gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
               <input
                 type="text"
                 value={mt5Account}
@@ -158,7 +176,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                 required
                 value={mt5Broker}
                 onChange={(e) => setMt5Broker(e.target.value)}
-                className="w-44 rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none"
+                className="w-full rounded-lg border border-zinc-200 px-3 py-2.5 text-sm text-zinc-900 focus:border-blue-500 focus:outline-none sm:w-44"
               >
                 <option value="">-- โบรกเกอร์ --</option>
                 {BROKERS.map(b => (
@@ -168,7 +186,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
               <button
                 type="submit"
                 disabled={adding || !mt5Account.trim()}
-                className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                className="w-full rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50 sm:w-auto"
               >
                 {adding ? t("portfolio_adding") : t("portfolio_add")}
               </button>
@@ -176,18 +194,18 @@ export default function PortfolioClient({ initialAccounts }: Props) {
           </form>
         )}
 
-        {/* Float P/L Bar Chart */}
+        {/* Gain by Account */}
         {accounts.length > 0 && (() => {
           return (
             <div className="mb-6 rounded-xl bg-white p-5 shadow-sm">
-              <h3 className="mb-4 text-sm font-semibold text-zinc-700">{t("portfolio_chart_title") || "Float P/L by Account"}</h3>
+              <h3 className="mb-4 text-sm font-semibold text-zinc-700">Gain by Account</h3>
               <div className="space-y-2">
                 {accounts.map((acc) => {
-                  const pctReturn = acc.floating_pl; // already a percentage from sheets
-                  const absPct = Math.min(Math.abs(pctReturn), 100);
-                  const isPositive = pctReturn >= 0;
+                  const gainPct = acc.growth_pct || 0;
+                  const absPct = Math.min(Math.abs(gainPct), 100);
+                  const isPositive = gainPct >= 0;
                   const barColor = isPositive ? "bg-green-500" : "bg-red-500";
-                  const displayPct = `${isPositive ? "+" : ""}${pctReturn.toFixed(1)}`; // show full %, bar width already capped
+                  const displayPct = `${isPositive ? "+" : ""}${gainPct.toFixed(1)}%`;
                   return (
                     <div key={acc.id} className="flex items-center gap-3">
                       <span className="w-28 flex-shrink-0 text-xs font-mono font-semibold text-zinc-700 truncate" title={acc.mt5_account}>
@@ -199,7 +217,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                           style={{ width: `${Math.max(absPct, 3)}%`, minWidth: absPct > 0 ? "2rem" : 0 }}
                         >
                           <span className="text-xs font-bold text-white drop-shadow-sm whitespace-nowrap">
-                            {displayPct}%
+                            {displayPct}
                           </span>
                         </div>
                       </div>
@@ -226,8 +244,8 @@ export default function PortfolioClient({ initialAccounts }: Props) {
           <div className="grid gap-4 sm:grid-cols-2">
             {accounts.map((acc) => {
               const floating = formatPL(acc.floating_pl);
-              const profit = formatPL(acc.total_profit);
-              const pctColor = acc.floating_pl >= 0 ? "text-green-600" : "text-red-500";
+              // ponytail: total_profit card replaced by open_positions + margin_level
+              const pctColor = "text-green-600";
               const pctText = `${acc.floating_pl >= 0 ? "+" : ""}${acc.floating_pl.toFixed(2)}%`;
               const isUpdated = acc.last_updated && (Date.now() - new Date(acc.last_updated).getTime()) < 2 * 60 * 60 * 1000;
 
@@ -254,7 +272,7 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                   </div>
 
                   {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Balance */}
                     <div className="rounded-lg bg-zinc-50 p-3">
                       <div className="text-xs text-zinc-500 mb-1">{t("balance")}</div>
@@ -264,13 +282,19 @@ export default function PortfolioClient({ initialAccounts }: Props) {
                     {/* Floating P/L */}
                     <div className="rounded-lg bg-zinc-50 p-3">
                       <div className="text-xs text-zinc-500 mb-1">{t("float_pl")}</div>
-                      <div className={`text-sm font-bold ${pctColor}`}>{pctText}</div>
+                      <div className={`text-sm font-bold ${floating.color}`}>{floating.text}</div>
                     </div>
 
-                    {/* Total Profit */}
+                    {/* Open Positions */}
                     <div className="rounded-lg bg-zinc-50 p-3">
-                      <div className="text-xs text-zinc-500 mb-1">{t("total_profit")}</div>
-                      <div className={`text-sm font-bold ${profit.color}`}>${profit.text}</div>
+                      <div className="text-xs text-zinc-500 mb-1">{t("open_positions")}</div>
+                      <div className="text-sm font-bold text-zinc-900">{acc.open_positions ?? 0}</div>
+                    </div>
+
+                    {/* Margin Level */}
+                    <div className="rounded-lg bg-zinc-50 p-3">
+                      <div className="text-xs text-zinc-500 mb-1">{t("margin_level")}</div>
+                      <div className="text-sm font-bold text-zinc-900">{(acc.margin_level ?? 0).toFixed(1)}%</div>
                     </div>
                   </div>
 

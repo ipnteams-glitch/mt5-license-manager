@@ -52,7 +52,7 @@ export async function hasBoughtPaidPackage(email: string): Promise<boolean> {
 }
 
 export function canUpgrade(currentPkg: PackageType, newPkg: PackageType, isExpired: boolean) {
-  if (currentPkg === "free_ib" || currentPkg === "live_with_us") return { allowed: false, reason: "Already on lifetime plan" };
+  if (currentPkg === "free_ib" || currentPkg === "live_with_us" || currentPkg === "ib_folio") return { allowed: false, reason: "Already on lifetime plan" };
   if (newPkg === "ib_vps_2200") {
     if (!["live_with_us", "free_ib"].includes(currentPkg) && !isExpired && !["4900_1y"].includes(currentPkg))
       return { allowed: false, reason: "VIP only" };
@@ -178,6 +178,18 @@ export async function getPortfolioByEmail(email: string): Promise<PortfolioAccou
   const { data } = await supabase.from("portfolio").select("*").eq("member_email", email).order("created_at");
   return (data || []) as PortfolioAccount[];
 }
+// ponytail: portfolio quota — admin=30, max 5 for others, free/freenew/none/expired=0
+export function getPortfolioQuota(member: Member | null): number {
+  if (!member) return 0;
+  const pkg = member.package as PackageType;
+  const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
+  if (!pkg || pkg === "none") return 0;
+  if (pkg === "free" || pkg === "freenew") return 0;
+  if (isExpired) return 0;
+  if (pkg === "admin") return 30;
+  if (pkg === "ib_folio") return 5;
+  return Math.min(PACKAGES[pkg]?.max_ports ?? 0, 5);
+}
 export async function addPortfolioAccount(email: string, mt5Account: string, broker: string): Promise<PortfolioAccount> {
   const { data } = await supabase.from("portfolio").insert({ member_email: email, mt5_account: mt5Account, broker }).select().single();
   return data as PortfolioAccount;
@@ -188,10 +200,23 @@ export async function deletePortfolioAccount(id: string, email: string): Promise
 export async function updatePortfolioBalance(id: string, balance: number, floatingPl: number, totalProfit: number): Promise<void> {
   await supabase.from("portfolio").update({ balance, floating_pl: floatingPl, total_profit: totalProfit, last_updated: new Date().toISOString() }).eq("id", id);
 }
-export async function pushPortfolioData(mt5Account: string, data: { balance: number; floating_pl: number; total_profit: number; broker?: string }): Promise<void> {
-  const { data: ex } = await supabase.from("portfolio").select("id").eq("mt5_account", mt5Account).single();
-  if (ex) await supabase.from("portfolio").update({ balance: data.balance, floating_pl: data.floating_pl, total_profit: data.total_profit, broker: data.broker || "", last_updated: new Date().toISOString() }).eq("id", ex.id);
-  else await supabase.from("portfolio").insert({ mt5_account: mt5Account, member_email: "", broker: data.broker || "", balance: data.balance, floating_pl: data.floating_pl, total_profit: data.total_profit });
+export async function pushPortfolioData(mt5Account: string, data: { balance?: number; floating_pl?: number; total_profit?: number; broker?: string; margin_level?: number; open_positions?: number; growth_pct?: number }): Promise<boolean> {
+  // ponytail: update-first — 1 query ในกรณีปกติ (พอร์ตถูกเพิ่มแล้ว) insert เฉพาะกรณีไม่มี
+  // ponytail: partial update — only touch fields the EA actually sent (realtime skips total_profit)
+  const updates: Record<string, unknown> = { last_updated: new Date().toISOString() };
+  if (data.balance !== undefined) updates.balance = data.balance;
+  if (data.floating_pl !== undefined) updates.floating_pl = data.floating_pl;
+  if (data.total_profit !== undefined) updates.total_profit = data.total_profit;
+  if (data.margin_level !== undefined) updates.margin_level = data.margin_level;
+  if (data.open_positions !== undefined) updates.open_positions = data.open_positions;
+  if (data.growth_pct !== undefined) updates.growth_pct = data.growth_pct;
+  if (data.broker !== undefined) updates.broker = data.broker;
+  const { data: updatedRows } = await supabase.from("portfolio")
+    .update(updates)
+    .eq("mt5_account", mt5Account)
+    .neq("member_email", "")
+    .select("id");
+  return !!(updatedRows && updatedRows.length > 0);
 }
 
 // ═══════════ Brokers ═══════════

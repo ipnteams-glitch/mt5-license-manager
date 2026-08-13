@@ -66,7 +66,7 @@ export interface AgentWithdrawal {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "live_with_us" | "none" | "admin";
+export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "ib_folio" | "live_with_us" | "none" | "admin";
 
 export interface PackageInfo {
   key: PackageType;
@@ -100,6 +100,10 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   freenew: {
     key: "freenew", name: "ฟรี (ใหม่)", name_en: "Free New", price: 0, duration_days: 14, max_ports: 5,
     label: "ฟรี 5 พอร์ต 14 วัน\nหมดอายุแล้วหมดเลย", rank: 1,
+  },
+  ib_folio: {
+    key: "ib_folio", name: "IB Folio", name_en: "IB Folio", price: 0, duration_days: 99999, max_ports: 0,
+    label: "IB Portfolio 5 พอร์ต", rank: -1,
   },
   test_1: {
     key: "test_1", name: "ทดสอบ", name_en: "Test", price: 1, duration_days: 3, max_ports: 3,
@@ -149,6 +153,9 @@ export interface PortfolioAccount {
   balance: number;
   floating_pl: number;
   total_profit: number;
+  margin_level: number;
+  open_positions: number;
+  growth_pct: number;
   last_updated: string;
   created_at: string;
 }
@@ -264,6 +271,7 @@ export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
   "3900_6m": 81,
   "4900_1y": 176,
   ib_vps_2200: 74,
+  ib_folio: 0,
   live_with_us: 301,
   admin: 0,
 };

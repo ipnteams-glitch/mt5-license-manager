@@ -63,7 +63,7 @@ export default function LandingPage() {
           </button>
 
           <a
-            href="https://thaifxbook.com"
+            href="/portfolio"
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-1 items-center justify-center rounded-xl bg-blue-600 px-6 py-4 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
