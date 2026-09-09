@@ -154,16 +154,6 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
       if (agentCommission > 0) {
         rate = await getUsdThbRate();
         agentCommission = Math.round(agentCommission * rate * 100) / 100;
-        // ponytail: record payment row for agent/admin visibility
-        supabase.from("payments").insert({
-          email, package: pkg, amount: price, satang: 0,
-          status: "paid", paid_at: new Date().toISOString(),
-          agent_code: agent_code || null, agent_commission: agentCommission,
-          qr_payload: JSON.stringify({ method: "crypto", usdt: price, rate, thb: agentCommission }),
-        }).then(
-          () => console.log("[crypto] payment recorded in Supabase"),
-          (e: unknown) => console.error("[crypto] Supabase payment insert failed:", e)
-        );
       }
     }
   }
@@ -185,6 +175,18 @@ export async function purchasePackage(email: string, pkg: PackageType, agent_cod
 
   const { expiry, maxPorts } = calculateNewExpiry(member, pkg);
   const pkgInfo = PACKAGES[pkg];
+  // ponytail: record a paid payment row for EVERY crypto purchase (not just agent ones) —
+  // hasBoughtPaidPackage() and the startup100 "first-time only" rule rely on this.
+  try {
+    await supabase.from("payments").insert({
+      email, package: pkg, amount: price, satang: 0,
+      status: "paid", paid_at: new Date().toISOString(),
+      agent_code: agent_code || null, agent_commission: agentCommission || null,
+      qr_payload: JSON.stringify({ method: "crypto", usdt: price, rate, thb: agentCommission }),
+    });
+  } catch (e: unknown) {
+    console.error("[crypto] Supabase payment insert failed:", e);
+  }
 
   // IB+VPS addon
   if (pkg === "ib_vps_2200") {
