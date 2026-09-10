@@ -110,11 +110,11 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "🧪 1 THB / 3 Days", rank: 2,
   },
   startup100: {
-    key: "startup100", name: "StartUp100", name_en: "StartUp100", price: 100, duration_days: 30, max_ports: 1,
-    label: "100 THB | 1 Port | 30 Days", rank: 3,
+    key: "startup100", name: "StartUp100", name_en: "StartUp100", price: 100, duration_days: 30, max_ports: 2,
+    label: "100 THB | 2 Ports | 30 Days", rank: 3,
   },
   "1000_2m": {
-    key: "1000_2m", name: "Basic", name_en: "Basic", price: 299, duration_days: 30, max_ports: 2,
+    key: "1000_2m", name: "Basic", name_en: "Basic", price: 299, duration_days: 30, max_ports: 3,
     label: "Any Broker | 30Day", rank: 4,
     old_price: 990,
   },
@@ -124,7 +124,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     old_price: 3900,
   },
   "3900_6m": {
-    key: "3900_6m", name: "6Month", name_en: "6Month", price: 2590, duration_days: 180, max_ports: 10,
+    key: "3900_6m", name: "6Month", name_en: "6Month", price: 2590, duration_days: 180, max_ports: 5,
     label: "180 Day | Any Broker", rank: 5,
     old_price: 5900,
   },
@@ -138,7 +138,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "vCPU 2 / RAM 4GB / 1 Year\nOnly VIP | Life | IB", rank: 8,
   },
   live_with_us: {
-    key: "live_with_us", name: "💎 LifeTime", name_en: "LifeTime", price: 9900, duration_days: 99999, max_ports: 20,
+    key: "live_with_us", name: "💎 LifeTime", name_en: "LifeTime", price: 9900, duration_days: 99999, max_ports: 7,
     label: "Lifetime | Any Broker", rank: 9,
     old_price: 24900,
   },
