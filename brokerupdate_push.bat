@@ -9,7 +9,7 @@ if %errorlevel% neq 0 (
 )
 echo.
 echo ===== Syncing to Supabase =====
-node sync_brokers_to_supabase.js
+python sync_brokers_to_supabase.py
 if %errorlevel% neq 0 (
     echo ERROR: Supabase sync failed!
     pause
@@ -17,7 +17,7 @@ if %errorlevel% neq 0 (
 )
 echo.
 echo ===== Committing and pushing =====
-git add brokers.json sync_brokers_to_supabase.js brokerupdate_push.bat
+git add brokers.json sync_brokers_to_supabase.py brokerupdate_push.bat
 git diff --cached --quiet || git commit -m "update brokers from sheet"
 git push
 echo.
