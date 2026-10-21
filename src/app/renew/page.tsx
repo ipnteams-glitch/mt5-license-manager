@@ -29,10 +29,8 @@ export default function RenewPage() {
   const [verifying, setVerifying] = useState(false);
   const [activating, setActivating] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const [startupEligible, setStartupEligible] = useState(false);
 
   const visiblePackages = [
-    ...(startupEligible ? ["startup100" as PackageType] : []),
     ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
   ].filter((k) => k !== "free");
 
@@ -44,14 +42,6 @@ export default function RenewPage() {
   const [uploading, setUploading] = useState(false);
   const [slipResult, setSlipResult] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cancelling, setCancelling] = useState(false);
-
-  // ponytail: check if member can buy startup100
-  useEffect(() => {
-    fetch("/api/member/startup-eligible")
-      .then(r => r.json())
-      .then(d => { if (d.eligible) setStartupEligible(true); })
-      .catch(() => {});
-  }, []);
 
   // นับถอยหลัง
   useEffect(() => {
