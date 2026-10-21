@@ -16,6 +16,7 @@ export default function RenewPage() {
 
 
 
+  const [addonEligible, setAddonEligible] = useState(false);
   const [step, setStep] = useState<"method" | "select" | "qr" | "done">("method");
   const [selected, setSelected] = useState<PackageType | null>(null);
   const [qrBase64, setQrBase64] = useState("");
@@ -32,7 +33,16 @@ export default function RenewPage() {
 
   const visiblePackages = [
     ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
+    ...(addonEligible ? ["port_addon" as PackageType] : []),
   ].filter((k) => k !== "free");
+
+  // เช็คสิทธิ์ซื้อพอร์ตเพิ่ม (แพคเกจเดิมเหลือ >3 วัน)
+  useEffect(() => {
+    fetch("/api/member/me")
+      .then(r => r.json())
+      .then(d => { if (d.addon_eligible) setAddonEligible(true); })
+      .catch(() => {});
+  }, []);
 
   const [timeLeft, setTimeLeft] = useState(900); // 15 นาที
 

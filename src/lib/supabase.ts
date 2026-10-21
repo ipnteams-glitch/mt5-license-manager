@@ -2,7 +2,7 @@
 import { supabase } from "./supabase-client";
 import { v4 as uuidv4 } from "uuid";
 import type { Member, Port, Payment, PackageType, PortfolioAccount, PortSystem, Agent, AgentWithdrawal } from "@/types";
-import { PACKAGES } from "@/types";
+import { PACKAGES, PORT_ADDON_PORTS } from "@/types";
 import { normalizeBroker } from "./broker-utils"; // ponytail: normalize before ILIKE match
 
 // ═══════════ Members ═══════════
@@ -69,6 +69,25 @@ export function calculateNewExpiry(member: Member, pkg: PackageType) {
   if (expired || !member.expiry_date) now.setDate(now.getDate() + info.duration_days);
   else { now.setTime(new Date(member.expiry_date).getTime()); now.setDate(now.getDate() + info.duration_days); }
   return { expiry: now.toISOString(), maxPorts: info.max_ports };
+}
+
+// ซื้อพอร์ตเพิ่มได้เมื่อแพคเกจเดิมเหลือมากกว่า 3 วัน (lifetime = ได้เสมอ)
+export function portAddonEligible(member: Member | null): boolean {
+  if (!member) return false;
+  if (member.package === "none" || member.max_ports <= 0) return false;
+  if (member.package === "live_with_us" || member.package === "free_ib" || member.package === "ib_folio") return true;
+  if (!member.expiry_date) return false;
+  const days = (new Date(member.expiry_date).getTime() - Date.now()) / 86400000;
+  return days > 3;
+}
+
+// เพิ่มพอร์ตในแพคเกจเดิม (คงแพคเกจ + วันหมดอายุเดิม)
+export async function activatePortAddon(email: string): Promise<number> {
+  const m = await getMemberByEmail(email);
+  if (!m) throw new Error("Member not found");
+  const newMax = (m.max_ports || 0) + PORT_ADDON_PORTS;
+  await updateMemberPackage(email, m.package, newMax, m.expiry_date || "");
+  return newMax;
 }
 
 // ═══════════ Ports ═══════════

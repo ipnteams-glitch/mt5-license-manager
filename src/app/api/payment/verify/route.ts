@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, getEasySlipApiKey, addAgentCommission, canUpgrade, calculateNewExpiry } from "@/lib/supabase";
+import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, getEasySlipApiKey, addAgentCommission, canUpgrade, calculateNewExpiry, activatePortAddon } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
@@ -64,6 +64,12 @@ async function completePayment(txnId: string, email: string, pkg: string, amount
 
   const member = await getMemberByEmail(email);
   if (!member) return;
+
+  // ซื้อพอร์ตเพิ่ม: เพิ่มพอร์ตในแพคเกจเดิม ไม่เปลี่ยนแพคเกจ/วันหมดอายุ
+  if (pkg === "port_addon") {
+    await activatePortAddon(email);
+    return;
+  }
 
   const { allowed } = canUpgrade(member.package, pkg as any, false);
   if (!allowed) return;

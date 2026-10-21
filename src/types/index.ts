@@ -66,7 +66,7 @@ export interface AgentWithdrawal {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "ib_folio" | "live_with_us" | "none" | "admin";
+export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "ib_folio" | "live_with_us" | "port_addon" | "none" | "admin";
 
 export interface PackageInfo {
   key: PackageType;
@@ -142,7 +142,15 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "Lifetime | Any Broker", rank: 9,
     old_price: 24900,
   },
+  // ซื้อพอร์ตเพิ่มในแพคเกจเดิม (ไม่เปลี่ยนแพคเกจ/วันหมดอายุ) — max_ports = จำนวนพอร์ตที่เพิ่ม
+  port_addon: {
+    key: "port_addon", name: "เพิ่ม 2 พอร์ต", name_en: "+2 Ports", price: 200, duration_days: 0, max_ports: 2,
+    label: "ต่อแพคเกจเดิม +2 พอร์ต", rank: 0,
+  },
 };
+
+// จำนวนพอร์ตที่ได้ต่อการซื้อ port_addon 1 ครั้ง
+export const PORT_ADDON_PORTS = 2;
 
 // ── Portfolio (MyPortfolio) ──
 export interface PortfolioAccount {
@@ -273,5 +281,6 @@ export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
   ib_vps_2200: 74,
   ib_folio: 0,
   live_with_us: 301,
+  port_addon: 0, // ซื้อพอร์ตเพิ่มรับเฉพาะ PromptPay (crypto ปิดไว้ด้วยราคา 0 → throw)
   admin: 0,
 };

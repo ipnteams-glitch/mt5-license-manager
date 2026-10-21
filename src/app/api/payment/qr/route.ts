@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode, hasBoughtPaidPackage } from "@/lib/supabase";
+import { createPayment, getMemberByEmail, canUpgrade, getAgentByCode, hasBoughtPaidPackage, portAddonEligible } from "@/lib/supabase";
 import { PACKAGES, BUYABLE_PACKAGES, TEST_PACKAGES } from "@/types";
 import type { PackageType } from "@/types";
 import { NextResponse } from "next/server";
@@ -13,7 +13,8 @@ export async function POST(req: Request) {
   try {
     const { package: pkg, promo, agent_code } = await req.json();
     const STARTUP_ALLOWED = (pkg as string) === "startup100"; const ALL_BUYABLE = ["startup100"] as PackageType[];
-    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType) && !STARTUP_ALLOWED) {
+    const IS_ADDON = (pkg as string) === "port_addon";
+    if (!BUYABLE_PACKAGES.includes(pkg as PackageType) && !TEST_PACKAGES.includes(pkg as PackageType) && !STARTUP_ALLOWED && !IS_ADDON) {
       return NextResponse.json({ error: "แพคเกจไม่ถูกต้อง" }, { status: 400 });
     }
 
@@ -31,10 +32,15 @@ export async function POST(req: Request) {
     const member = await getMemberByEmail(session.user.email);
     if (!member) return NextResponse.json({ error: "ไม่พบสมาชิก" }, { status: 404 });
 
-    // ตรวจสอบสิทธิ์การอัปเกรด (ห้าม downgrade)
-    const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
-    const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
-    if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
+    if (IS_ADDON) {
+      // ซื้อพอร์ตเพิ่ม: ต้องมีแพคเกจเดิมเหลือมากกว่า 3 วัน
+      if (!portAddonEligible(member)) return NextResponse.json({ error: "ซื้อพอร์ตเพิ่มได้เฉพาะเมื่อแพคเกจเหลือมากกว่า 3 วัน" }, { status: 400 });
+    } else {
+      // ตรวจสอบสิทธิ์การอัปเกรด (ห้าม downgrade)
+      const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
+      const { allowed, reason } = canUpgrade(member.package, pkg as PackageType, isExpired);
+      if (!allowed) return NextResponse.json({ error: reason }, { status: 400 });
+    }
 
     // Promo: June 2026 discounted prices
     const promoPrices: Record<string, number> = {

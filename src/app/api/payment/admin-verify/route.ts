@@ -1,5 +1,5 @@
 ﻿import { auth } from "@/lib/auth";
-import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, setAddonIbVpsExpiry, addAgentCommission, distributeCommission, canUpgrade, calculateNewExpiry } from "@/lib/supabase";
+import { getPaymentById, markPaymentPaid, getMemberByEmail, updateMemberPackage, setAddonIbVpsExpiry, addAgentCommission, distributeCommission, canUpgrade, calculateNewExpiry, activatePortAddon } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import { NextResponse } from "next/server";
 import { sendPaymentSuccessEmail } from "@/lib/mail";
@@ -59,6 +59,12 @@ export async function POST(req: Request) {
     // Upgrade member package
     const member = await getMemberByEmail(payment.email);
     if (!member) return NextResponse.json({ success: false, message: "à¹„à¸¡à¹ˆà¸žà¸šà¸ªà¸¡à¸²à¸Šà¸´à¸" });
+
+    // ซื้อพอร์ตเพิ่ม: เพิ่มพอร์ตในแพคเกจเดิม ไม่เปลี่ยนแพคเกจ/วันหมดอายุ
+    if (payment.package === "port_addon") {
+      const newMax = await activatePortAddon(payment.email);
+      return NextResponse.json({ success: true, message: "เพิ่ม 2 พอร์ต สำเร็จ (รวม " + newMax + " พอร์ต)", package: member.package });
+    }
 
     const isExpired = member.expiry_date ? new Date(member.expiry_date) <= new Date() : false;
     const { allowed, reason } = canUpgrade(member.package, payment.package, isExpired);
