@@ -145,6 +145,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   "2900_3m": {
     key: "2900_3m", name: "Starter", name_en: "Starter", price: 2900, duration_days: 90, max_ports: 3,
     label: "90 Day | Any Broker", rank: 5,
+    old_price: 5800,
   },
   "365_1y": {
     key: "365_1y", name: "💎 1 Year", name_en: "1 Year", price: 9900, duration_days: 365, max_ports: 7,
