@@ -66,7 +66,7 @@ export interface AgentWithdrawal {
 }
 
 // ── Package Types ──
-export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "3900_6m" | "4900_1y" | "ib_vps_2200" | "ib_folio" | "live_with_us" | "port_addon" | "none" | "admin";
+export type PackageType = "free" | "free_ib" | "freenew" | "test_1" | "startup100" | "1000_2m" | "2490_3m" | "2900_3m" | "3900_6m" | "4900_1y" | "365_1y" | "ib_vps_2200" | "ib_folio" | "live_with_us" | "port_addon" | "none" | "admin";
 
 export interface PackageInfo {
   key: PackageType;
@@ -142,10 +142,19 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
     label: "Lifetime | Any Broker", rank: 9,
     old_price: 24900,
   },
+  "2900_3m": {
+    key: "2900_3m", name: "Starter", name_en: "Starter", price: 2900, duration_days: 90, max_ports: 3,
+    label: "90 Day | Any Broker", rank: 5,
+  },
+  "365_1y": {
+    key: "365_1y", name: "💎 1 Year", name_en: "1 Year", price: 9900, duration_days: 365, max_ports: 7,
+    label: "365 Day | Any Broker", rank: 9,
+    old_price: 24900,
+  },
   // ซื้อพอร์ตเพิ่มในแพคเกจเดิม (ไม่เปลี่ยนแพคเกจ/วันหมดอายุ) — max_ports = จำนวนพอร์ตที่เพิ่ม
   port_addon: {
     key: "port_addon", name: "เพิ่ม 2 พอร์ต", name_en: "+2 Ports", price: 200, duration_days: 0, max_ports: 2,
-    label: "ต่อแพคเกจเดิม +2 พอร์ต", rank: 0,
+    label: "ในแพคเกจเดิม +2 พอร์ต", rank: 0,
   },
 };
 
@@ -168,7 +177,7 @@ export interface PortfolioAccount {
   created_at: string;
 }
 
-export const BUYABLE_PACKAGES: PackageType[] = ["free", "1000_2m", "3900_6m", "live_with_us"];
+export const BUYABLE_PACKAGES: PackageType[] = ["free", "2900_3m", "365_1y"];
 
 export const TEST_PACKAGES: PackageType[] = ["test_1"];
 
@@ -276,8 +285,10 @@ export const PACKAGE_USDT_PRICES: Record<PackageType, number> = {
   startup100: 3,
   "1000_2m": 11,
   "2490_3m": 31,
+  "2900_3m": 88,
   "3900_6m": 81,
   "4900_1y": 176,
+  "365_1y": 300,
   ib_vps_2200: 74,
   ib_folio: 0,
   live_with_us: 301,
