@@ -1,9 +1,25 @@
+import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/supabase";
 import { PACKAGES } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
+
+const FARM_BASE = "https://ipnteams-glitch.github.io/farm-dashboard/";
+
+// Signed handoff: let an already-authenticated member open the farm dashboard
+// without a second Google sign-in. The farm backend trusts this HMAC token
+// (shared FARM_SECRET) so the email cannot be forged in the URL.
+function buildFarmUrl(email: string): string {
+  const secret = process.env.FARM_SECRET || "";
+  if (!secret) return FARM_BASE; // not configured -> plain link (Google sign-in)
+  const payload = Buffer.from(
+    JSON.stringify({ email, exp: Math.floor(Date.now() / 1000) + 3600 })
+  ).toString("base64url");
+  const sig = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
+  return `${FARM_BASE}#t=${payload}.${sig}`;
+}
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -78,8 +94,11 @@ export default async function DashboardPage() {
   const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim());
   const isAdmin = adminEmails.includes(session.user.email);
 
+  const farmUrl = buildFarmUrl(session.user.email);
+
   return (
     <DashboardClient
+      farmUrl={farmUrl}
       member={member}
       ports={ports}
       portsUsed={portsUsed}

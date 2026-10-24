@@ -19,6 +19,7 @@ type Props = {
   daysLeft: number;
   isExpired: boolean;
   isAdmin: boolean;
+  farmUrl: string;
   addonIbVpsExpiry?: string;
   ibVpsChoice?: string;
   pendingPayments?: Payment[];
@@ -34,6 +35,7 @@ export default function DashboardClient({
   daysLeft,
   isExpired,
   isAdmin,
+  farmUrl,
   addonIbVpsExpiry,
   ibVpsChoice,
   pendingPayments,
@@ -383,7 +385,7 @@ export default function DashboardClient({
               <span className="text-sm font-semibold text-zinc-800">License Manager</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <a href="https://ipnteams-glitch.github.io/farm-dashboard/" target="_blank" rel="noopener" className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700">📈 Dashboard</a>
+              <a href={farmUrl} target="_blank" rel="noopener" className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700">📈 Dashboard</a>
               <a href="/renew" className="rounded bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white">{t("renew")}</a>
               <a href="/agent" className="rounded bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-700">🏷️ Agent</a>
               {isAdmin && <a href="/admin" className="rounded border px-3 py-1 text-xs font-medium">{t("admin_panel")}</a>}
