@@ -384,6 +384,7 @@ export default function DashboardClient({
             </div>
             <div className="flex items-center gap-1.5">
               <a href="/portfolio" className="rounded bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700">📊 Portfolio</a>
+              <a href="https://ipnteams-glitch.github.io/farm-dashboard/" target="_blank" rel="noopener" className="rounded bg-cyan-600 px-3 py-1 text-xs font-medium text-white hover:bg-cyan-700">📈 Dashboard</a>
               <a href="/renew" className="rounded bg-gradient-to-r from-purple-600 to-blue-600 px-3 py-1 text-xs font-medium text-white">{t("renew")}</a>
               <a href="/agent" className="rounded bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-700">🏷️ Agent</a>
               {isAdmin && <a href="/admin" className="rounded border px-3 py-1 text-xs font-medium">{t("admin_panel")}</a>}
