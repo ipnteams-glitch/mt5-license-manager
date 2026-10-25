@@ -6,7 +6,7 @@ import { PACKAGES } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
 
-const FARM_BASE = "https://ipnteams-glitch.github.io/farm-dashboard/";
+const FARM_BASE = "https://www.forexcool.com/portfolio/";
 
 // Signed handoff: let an already-authenticated member open the farm dashboard
 // without a second Google sign-in. The farm backend trusts this HMAC token
