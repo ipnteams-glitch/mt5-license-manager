@@ -510,7 +510,10 @@ export default function DashboardClient({
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-bold text-zinc-800">{t("dash_your_ports")}</h2>
-            {displayPortsTotal > 0 && usedCount < displayPortsTotal && !displayIsExpired && (
+            {/* ponytail: show Add even when expired so legacy 'free' can re-add
+                their permanent port (displayPortsTotal=1). Paid expired has
+                displayPortsTotal=0 so no button. Quota still gates slots. */}
+            {displayPortsTotal > 0 && usedCount < displayPortsTotal && (
               <button
                 onClick={() => setShowAddPort(!showAddPort)}
                 className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -521,7 +524,7 @@ export default function DashboardClient({
             {displayPortsTotal === 0 && (
               <span className="text-xs text-zinc-400">{t("dash_no_package")}</span>
             )}
-            {displayIsExpired && (
+            {displayIsExpired && usedCount >= displayPortsTotal && (
               <span className="text-xs text-red-500">{t("dash_pkg_expired_hint")}</span>
             )}
           </div>
