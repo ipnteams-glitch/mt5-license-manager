@@ -104,6 +104,10 @@ export async function getPortsByEmail(email: string): Promise<Port[]> {
   const { data } = await supabase.from("ports").select("*").eq("member_email", email).order("created_at");
   return (data || []) as Port[];
 }
+// Stamp last_check = now() when the EA verifies this port (real usage signal).
+export async function touchPortCheck(id: string): Promise<void> {
+  await supabase.from("ports").update({ last_check: new Date().toISOString() }).eq("id", id);
+}
 export async function addPort(email: string, account: string, broker: string, maxPorts?: number): Promise<Port> {
   if (maxPorts !== undefined) { const all = await getPortsByEmail(email); if (all.length >= maxPorts) throw new Error("โควต้าเต็มแล้ว (" + maxPorts + " พอร์ต)"); }
   const { data } = await supabase.from("ports").insert({ member_email: email, mt5_account: account, mt5_broker: broker }).select().single();

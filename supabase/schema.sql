@@ -26,7 +26,9 @@ CREATE TABLE ports (
   mt5_account TEXT NOT NULL,
   mt5_broker TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'removed')),
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- last time the EA verified this port (real usage signal; null = never)
+  last_check TIMESTAMPTZ
 );
 CREATE INDEX idx_ports_member ON ports(member_email);
 CREATE INDEX idx_ports_account ON ports(mt5_account);

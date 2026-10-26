@@ -1,4 +1,4 @@
-import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts } from "@/lib/supabase";
+import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts, touchPortCheck } from "@/lib/supabase";
 import { PACKAGES, hasPermanentPortEntitlement } from "@/types";
 import { NextResponse } from "next/server";
 
@@ -115,7 +115,8 @@ export async function GET(req: Request) {
       });
     }
 
-    // ผ่านทุกเงื่อนไข
+    // ผ่านทุกเงื่อนไข — stamp last_check เป็นสัญญาณการใช้งานจริง
+    await touchPortCheck(port.id);
     const pkgInfo = PACKAGES[member.package];
     return NextResponse.json({
       valid: true,

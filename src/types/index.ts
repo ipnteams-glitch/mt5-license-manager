@@ -29,6 +29,8 @@ export interface Port {
   mt5_broker: string;
   status: "active" | "removed";
   created_at: string;
+  // last time the EA called /api/verify-port for this port (real usage signal)
+  last_check?: string | null;
 }
 
 // ── Payment Transaction ──

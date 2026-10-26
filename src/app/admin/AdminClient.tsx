@@ -222,7 +222,7 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
   }
 
   function getPortCount(email: string) {
-    return ports.filter((p) => p.member_email === email && p.status === t("active")).length;
+    return ports.filter((p) => p.member_email === email && p.status === "active").length;
   }
 
   return (
@@ -345,18 +345,27 @@ export default function AdminClient({ members, ports, payments, whitelist, agent
                   <th className="px-2 py-1">{t("admin_col_owner")}</th>
                   <th className="px-2 py-1">{t("status")}</th>
                   <th className="px-2 py-1">{t("wl_date_added")}</th>
+                  <th className="px-2 py-1">Last Check</th>
                 </tr>
               </thead>
               <tbody>
-                {ports.filter((p) => p.status === t("active")).map((p) => (
+                {ports.filter((p) => p.status === "active").map((p) => {
+                  // last_check = real usage signal; color by recency
+                  const lc = p.last_check ? new Date(p.last_check) : null;
+                  const ageDays = lc ? (Date.now() - lc.getTime()) / 86400000 : Infinity;
+                  const lcClass = !lc ? "text-red-500" : ageDays > 30 ? "text-orange-500" : "text-green-600";
+                  const lcText = !lc ? "ไม่เคย" : lc.toLocaleDateString("en-GB");
+                  return (
                   <tr key={p.id} className="border-b border-zinc-100 hover:bg-zinc-50">
                     <td className="px-2 py-1 font-mono font-medium text-zinc-800">{p.mt5_account}</td>
                     <td className="px-2 py-1 text-black">{p.mt5_broker}</td>
                     <td className="px-2 py-1 text-xs text-black">{p.member_email}</td>
                     <td className="px-2 py-1"><span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700">active</span></td>
                     <td className="px-2 py-1 text-black">{new Date(p.created_at).toLocaleDateString("en-GB")}</td>
+                    <td className={`px-2 py-1 font-medium ${lcClass}`}>{lcText}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
