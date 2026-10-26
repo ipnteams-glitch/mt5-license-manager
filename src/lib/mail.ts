@@ -11,6 +11,23 @@ const transporter = nodemailer.createTransport({
 // ponytail: reuse AUTH_URL (NextAuth env) — no need for a separate APP_URL
 const appUrl = process.env.AUTH_URL || "https://mt5-license-manager.vercel.app";
 
+// Send a backup email with one or more file attachments (e.g. the daily
+// members/rights snapshot). Throws on failure so the caller can report it.
+export async function sendBackupEmail(
+  to: string | string[],
+  subject: string,
+  html: string,
+  attachments: { filename: string; content: string | Buffer; contentType?: string }[]
+) {
+  await transporter.sendMail({
+    from: `"MT5 License Manager" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+    attachments,
+  });
+}
+
 export async function sendPaymentSuccessEmail(
   to: string,
   name: string,
