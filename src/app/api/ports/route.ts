@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { addPort, deletePort, getAllPorts, getMemberByEmail, getPortSystems } from "@/lib/supabase";
+import { addPort, deletePort, getAllPorts, getMemberByEmail, getPortsByEmail, getPortSystems } from "@/lib/supabase";
 import { NextResponse } from "next/server";
 
 // POST /api/ports — เพิ่มพอร์ต MT5
@@ -35,10 +35,22 @@ export async function POST(req: Request) {
     }
 
     // เช็ควันหมดอายุ
+    // ── permanent-port entitlement ──
+    // พอร์ตถาวร 1 พอร์ต = สิทธิ์เฉพาะโปรฟรีเก่า (package "free") เท่านั้น
+    // ลูกค้า free เก่าที่หมดอายุและลบพอร์ตถาวรแล้ว ยังเพิ่มกลับได้ 1 พอร์ต
+    // โดยไม่ต้องต่ออายุ แพคเกจอื่นที่หมดอายุถูกปฏิเสธ
+    let expiredPermanentReadd = false;
     if (member.package !== "admin" && member.expiry_date) {
       const expiry = new Date(member.expiry_date);
       if (expiry <= new Date()) {
-        return NextResponse.json({ error: "แพคเกจของคุณหมดอายุแล้ว — ติดต่อแอดมินเพื่อต่ออายุ" }, { status: 403 });
+        const hasPermanentPort = member.package === "free";
+        const existing = await getPortsByEmail(session.user.email);
+        const activeCount = existing.filter(p => p.status === "active").length;
+        if (!hasPermanentPort || activeCount >= 1) {
+          return NextResponse.json({ error: "แพคเกจของคุณหมดอายุแล้ว — ติดต่อแอดมินเพื่อต่ออายุ" }, { status: 403 });
+        }
+        // อนุญาตเพิ่มพอร์ตถาวรกลับ 1 พอร์ต (ข้ามโควต้า max_ports ของแพคเกจเดิม)
+        expiredPermanentReadd = true;
       }
     }
 
@@ -46,7 +58,7 @@ export async function POST(req: Request) {
       session.user.email,
       mt5_account,
       mt5_broker || "",
-      member.max_ports
+      expiredPermanentReadd ? undefined : member.max_ports
     );
 
     return NextResponse.json({ success: true, port });

@@ -79,14 +79,22 @@ export default async function DashboardPage() {
     isExpired = daysLeft <= 0;
   }
 
-  // ── ทุกแพคเกจหลังหมดอายุ: เหลือ 1 port ถาวร ──
+  // ── หลังหมดอายุ ──
+  // พอร์ตถาวร 1 พอร์ต = สิทธิ์เฉพาะโปรฟรีเก่า (package "free") เท่านั้น
   let portsTotal = member.max_ports > 0 ? member.max_ports : 1;
   // ponytail: ib_folio = Portfolio เท่านั้น ไม่มีสิทธิเพิ่ม EA port
   if (member.package === "ib_folio") portsTotal = 0;
   let packageLabel = pkgInfo.label;
-  if (isExpired && member.package !== "free_ib" && member.package !== "live_with_us" && member.package !== "freenew") {
-    portsTotal = 1;
-    packageLabel = pkgInfo.name + " — หมดอายุ\nเหลือ 1 พอร์ตถาวร (ต่ออายุเพื่อเพิ่มพอร์ต)";
+  const isLifetimePkg =
+    member.package === "free_ib" || member.package === "live_with_us" || member.package === "admin";
+  if (isExpired && !isLifetimePkg) {
+    if (member.package === "free") {
+      portsTotal = 1;
+      packageLabel = pkgInfo.name + " — หมดอายุ\nเหลือ 1 พอร์ตถาวร (ต่ออายุเพื่อเพิ่มพอร์ต)";
+    } else {
+      portsTotal = 0;
+      packageLabel = pkgInfo.name + " — หมดอายุ\nกรุณาต่ออายุเพื่อใช้งานต่อ";
+    }
   }
 
 

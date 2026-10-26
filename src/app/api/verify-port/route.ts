@@ -73,9 +73,18 @@ export async function GET(req: Request) {
     const portIndex = memberPorts.findIndex(p => p.mt5_account === account);
     const isFirstPort = portIndex === 0;
 
-    // ── หลังหมดอายุ → พอร์ตแรกใช้ได้ถาวร, พอร์ตอื่นถูกปฏิเสธ ──
-    if (daysLeft <= 0 && member.package !== "free_ib" && member.package !== "live_with_us" && member.package !== "freenew" && member.package !== "admin") {
-      if (isFirstPort) {
+    // แพคเกจตลอดชีพ (ไม่มีวันหมดอายุจริง) — ไม่เข้าเงื่อนไขหมดอายุ
+    const isLifetimePkg =
+      member.package === "admin" ||
+      member.package === "free_ib" ||
+      member.package === "live_with_us" ||
+      member.package === "ib_folio";
+
+    // ── หลังหมดอายุ ──
+    // พอร์ตถาวร 1 พอร์ต = สิทธิ์เฉพาะโปรฟรีเก่า (package "free") เท่านั้น
+    // แพคเกจอื่นที่หมดอายุ (รวมฟรีใหม่ "freenew" และแพคเกจที่ซื้อ) ถูกปฏิเสธทุกพอร์ต
+    if (daysLeft <= 0 && !isLifetimePkg) {
+      if (member.package === "free" && isFirstPort) {
         daysLeft = 9999; // พอร์ตแรก: ผ่าน (ถาวร)
       } else {
         return NextResponse.json({
@@ -85,22 +94,11 @@ export async function GET(req: Request) {
           package_key: member.package,
           expiry_date: member.expiry_date,
           days_left: 0,
-          reason: "แพคเกจหมดอายุ — พอร์ตแรกใช้ฟรีถาวร ต้องการเพิ่มพอร์ต กรุณาต่ออายุ",
+          reason: member.package === "free"
+            ? "แพคเกจหมดอายุ — พอร์ตแรกใช้ฟรีถาวร ต้องการเพิ่มพอร์ต กรุณาต่ออายุ"
+            : "แพคเกจหมดอายุ — กรุณาต่ออายุเพื่อใช้งานต่อ",
         });
       }
-    }
-
-    // ── freenew: no permanent port, all ports invalid after expiry ──
-    if (daysLeft <= 0 && member.package === "freenew") {
-      return NextResponse.json({
-        valid: false,
-        email: member.email,
-        package: member.package,
-        package_key: member.package,
-        expiry_date: member.expiry_date,
-        days_left: 0,
-        reason: "แพคเกจฟรีใหม่หมดอายุ — กรุณาซื้อแพคเกจเพื่อใช้งานต่อ",
-      });
     }
 
     // ── ตรวจสอบโควต้าพอร์ต: ไม่อนุญาตเกิน max_ports ──
@@ -123,8 +121,8 @@ export async function GET(req: Request) {
       email: member.email,
       package: pkgInfo?.name_en || member.package,
       package_key: member.package,
-      // ponytail: first port is always permanent — show "LifeTime"
-      expiry_date: (isFirstPort && member.package !== "freenew") ? "LifeTime" : (member.expiry_date || ""),
+      // ponytail: permanent first port = old free promo only
+      expiry_date: (isFirstPort && member.package === "free") ? "LifeTime" : (member.expiry_date || ""),
       days_left: daysLeft,
     });
   } catch (err: any) {
