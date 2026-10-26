@@ -50,8 +50,8 @@ export async function GET(req: Request) {
 
     const json = JSON.stringify(snapshot, null, 2);
 
-    // ── recipients: ADMIN_EMAILS, fall back to EMAIL_USER ──
-    const recipients = (process.env.ADMIN_EMAILS || process.env.EMAIL_USER || "")
+    // ── recipient: dedicated backup inbox (override with BACKUP_EMAIL) ──
+    const recipients = (process.env.BACKUP_EMAIL || "ipnteams@gmail.com")
       .split(",")
       .map((e) => e.trim())
       .filter(Boolean);
