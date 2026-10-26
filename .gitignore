@@ -52,5 +52,15 @@ import.env
 next-env.d.ts
 
 
-# MQL5 source code (security: prevent source leak)
+# MQL5 source + compiled EA (security: prevent source leak)
 *.mq5
+*.ex5
+
+# local scratch / debug / state (machine-specific, not for repo)
+STATE.md
+last.txt
+_f.js
+_fix_grabweb_crash.js
+fix_grabweb.js
+patch_grabweb.js
+Run_Dashboard/
