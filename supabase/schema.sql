@@ -13,7 +13,10 @@ CREATE TABLE members (
   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   addon_ib_vps_expiry TIMESTAMPTZ,
-  ib_vps_choice TEXT CHECK (ib_vps_choice IN ('1', '2'))
+  ib_vps_choice TEXT CHECK (ib_vps_choice IN ('1', '2')),
+  -- legacy free promo: permanent 1-port entitlement that survives expiry and
+  -- stays even after the member upgrades to another package.
+  legacy_free_port BOOLEAN NOT NULL DEFAULT false
 );
 
 -- Ports

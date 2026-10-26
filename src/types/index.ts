@@ -9,6 +9,16 @@ export interface Member {
   created_at: string;
   addon_ib_vps_expiry?: string;
   ib_vps_choice?: string;
+  // legacy free promo: this member earned a permanent 1-port entitlement
+  // that survives expiry and stays even after buying another package.
+  legacy_free_port?: boolean;
+}
+
+// Permanent 1-port entitlement: the old free promo ("free" package) OR a
+// member explicitly flagged (so it is kept even after upgrading to a paid
+// package, which overwrites the package key).
+export function hasPermanentPortEntitlement(m: Pick<Member, "package" | "legacy_free_port">): boolean {
+  return m.package === "free" || m.legacy_free_port === true;
 }
 
 // ── Port (พอร์ต MT5) ──

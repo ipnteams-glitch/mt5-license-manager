@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getMemberByEmail, getPortsByEmail, getAllPayments } from "@/lib/supabase";
-import { PACKAGES } from "@/types";
+import { PACKAGES, hasPermanentPortEntitlement } from "@/types";
 import type { Member, Port, Payment } from "@/types";
 import DashboardClient from "./DashboardClient";
 
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
   const isLifetimePkg =
     member.package === "free_ib" || member.package === "live_with_us" || member.package === "admin";
   if (isExpired && !isLifetimePkg) {
-    if (member.package === "free") {
+    if (hasPermanentPortEntitlement(member)) {
       portsTotal = 1;
       packageLabel = pkgInfo.name + " — หมดอายุ\nเหลือ 1 พอร์ตถาวร (ต่ออายุเพื่อเพิ่มพอร์ต)";
     } else {

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import type { Member, Port, Payment } from "@/types";
 import { useT } from "@/lib/LanguageContext";
 import LangSwitch from "@/components/LangSwitch";
-import { PACKAGES, ALL_SYSTEMS } from "@/types";
+import { PACKAGES, ALL_SYSTEMS, hasPermanentPortEntitlement } from "@/types";
 import brokersData from "../../../brokers.json";
 import { deriveBaseBrokers } from "@/lib/broker-utils";
 
@@ -623,8 +623,8 @@ export default function DashboardClient({
                         {(() => {
                           const sorted = [...portList].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
                           const isFirst = sorted[0]?.mt5_account === port.mt5_account;
-                          // ponytail: permanent first port = old free promo only
-                          const hasPermanentPort = member.package === "free";
+                          // ponytail: permanent first port = legacy free promo entitlement
+                          const hasPermanentPort = hasPermanentPortEntitlement(member);
                           if (isFirst && hasPermanentPort) {
                             return <span className="text-green-600 font-medium">ถาวร</span>;
                           }

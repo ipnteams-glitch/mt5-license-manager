@@ -1,5 +1,5 @@
 import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts } from "@/lib/supabase";
-import { PACKAGES } from "@/types";
+import { PACKAGES, hasPermanentPortEntitlement } from "@/types";
 import { NextResponse } from "next/server";
 
 // GET /api/verify-port?account=12345678&name=xxx&broker=yyy
@@ -81,10 +81,11 @@ export async function GET(req: Request) {
       member.package === "ib_folio";
 
     // ── หลังหมดอายุ ──
-    // พอร์ตถาวร 1 พอร์ต = สิทธิ์เฉพาะโปรฟรีเก่า (package "free") เท่านั้น
+    // พอร์ตถาวร 1 พอร์ต = สิทธิ์โปรฟรีเก่า (package "free" หรือ flag legacy_free_port)
     // แพคเกจอื่นที่หมดอายุ (รวมฟรีใหม่ "freenew" และแพคเกจที่ซื้อ) ถูกปฏิเสธทุกพอร์ต
+    const permanentEntitled = hasPermanentPortEntitlement(member);
     if (daysLeft <= 0 && !isLifetimePkg) {
-      if (member.package === "free" && isFirstPort) {
+      if (permanentEntitled && isFirstPort) {
         daysLeft = 9999; // พอร์ตแรก: ผ่าน (ถาวร)
       } else {
         return NextResponse.json({
@@ -94,7 +95,7 @@ export async function GET(req: Request) {
           package_key: member.package,
           expiry_date: member.expiry_date,
           days_left: 0,
-          reason: member.package === "free"
+          reason: permanentEntitled
             ? "แพคเกจหมดอายุ — พอร์ตแรกใช้ฟรีถาวร ต้องการเพิ่มพอร์ต กรุณาต่ออายุ"
             : "แพคเกจหมดอายุ — กรุณาต่ออายุเพื่อใช้งานต่อ",
         });
@@ -121,8 +122,8 @@ export async function GET(req: Request) {
       email: member.email,
       package: pkgInfo?.name_en || member.package,
       package_key: member.package,
-      // ponytail: permanent first port = old free promo only
-      expiry_date: (isFirstPort && member.package === "free") ? "LifeTime" : (member.expiry_date || ""),
+      // ponytail: permanent first port = legacy free promo entitlement
+      expiry_date: (isFirstPort && permanentEntitled) ? "LifeTime" : (member.expiry_date || ""),
       days_left: daysLeft,
     });
   } catch (err: any) {

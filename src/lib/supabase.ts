@@ -34,7 +34,11 @@ export async function upsertMember(email: string, name: string): Promise<void> {
   const exp = new Date(); exp.setDate(exp.getDate() + 14); await supabase.from("members").insert({ email, name, role: "user", package: "freenew", max_ports: 5, expiry_date: exp.toISOString() });
 }
 export async function updateMemberPackage(email: string, pkg: PackageType, maxPorts: number, expiryDate: string): Promise<void> {
-  await supabase.from("members").update({ package: pkg, max_ports: maxPorts, expiry_date: expiryDate || null }).eq("email", email);
+  const patch: Record<string, unknown> = { package: pkg, max_ports: maxPorts, expiry_date: expiryDate || null };
+  // Earning the legacy free promo sets a permanent 1-port entitlement that
+  // survives a later upgrade. Only ever set it true here, never clear it.
+  if (pkg === "free") patch.legacy_free_port = true;
+  await supabase.from("members").update(patch).eq("email", email);
 }
 export async function setAddonIbVpsExpiry(email: string, expiry?: string): Promise<string> {
   const exp = expiry || (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return d.toISOString(); })();

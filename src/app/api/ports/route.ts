@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { addPort, deletePort, getAllPorts, getMemberByEmail, getPortsByEmail, getPortSystems } from "@/lib/supabase";
+import { hasPermanentPortEntitlement } from "@/types";
 import { NextResponse } from "next/server";
 
 // POST /api/ports — เพิ่มพอร์ต MT5
@@ -36,14 +37,14 @@ export async function POST(req: Request) {
 
     // เช็ควันหมดอายุ
     // ── permanent-port entitlement ──
-    // พอร์ตถาวร 1 พอร์ต = สิทธิ์เฉพาะโปรฟรีเก่า (package "free") เท่านั้น
-    // ลูกค้า free เก่าที่หมดอายุและลบพอร์ตถาวรแล้ว ยังเพิ่มกลับได้ 1 พอร์ต
+    // พอร์ตถาวร 1 พอร์ต = สิทธิ์โปรฟรีเก่า (package "free" หรือ flag legacy_free_port)
+    // ลูกค้าเก่าที่หมดอายุและลบพอร์ตถาวรแล้ว ยังเพิ่มกลับได้ 1 พอร์ต
     // โดยไม่ต้องต่ออายุ แพคเกจอื่นที่หมดอายุถูกปฏิเสธ
     let expiredPermanentReadd = false;
     if (member.package !== "admin" && member.expiry_date) {
       const expiry = new Date(member.expiry_date);
       if (expiry <= new Date()) {
-        const hasPermanentPort = member.package === "free";
+        const hasPermanentPort = hasPermanentPortEntitlement(member);
         const existing = await getPortsByEmail(session.user.email);
         const activeCount = existing.filter(p => p.status === "active").length;
         if (!hasPermanentPort || activeCount >= 1) {
