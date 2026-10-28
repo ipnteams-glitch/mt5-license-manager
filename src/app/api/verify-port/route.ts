@@ -1,5 +1,6 @@
 import { findPortByAccount, getMemberByEmail, getAllWhitelist, checkWhitelist, getAllPorts, touchPortCheck } from "@/lib/supabase";
 import { PACKAGES, hasPermanentPortEntitlement } from "@/types";
+import { signLicense } from "@/lib/license-sign";
 import { NextResponse } from "next/server";
 
 // GET /api/verify-port?account=12345678&name=xxx&broker=yyy
@@ -24,6 +25,7 @@ export async function GET(req: Request) {
         package_key: "whitelist",
         expiry_date: "2099-12-31",
         days_left: 9999,
+        sig: signLicense(account, "2099-12-31"),
       });
     }
   }
@@ -118,14 +120,16 @@ export async function GET(req: Request) {
     // ผ่านทุกเงื่อนไข — stamp last_check เป็นสัญญาณการใช้งานจริง
     await touchPortCheck(port.id);
     const pkgInfo = PACKAGES[member.package];
+    // ponytail: permanent first port = legacy free promo entitlement
+    const expiryOut = (isFirstPort && permanentEntitled) ? "LifeTime" : (member.expiry_date || "");
     return NextResponse.json({
       valid: true,
       email: member.email,
       package: pkgInfo?.name_en || member.package,
       package_key: member.package,
-      // ponytail: permanent first port = legacy free promo entitlement
-      expiry_date: (isFirstPort && permanentEntitled) ? "LifeTime" : (member.expiry_date || ""),
+      expiry_date: expiryOut,
       days_left: daysLeft,
+      sig: signLicense(account, expiryOut),
     });
   } catch (err: any) {
     return NextResponse.json(
