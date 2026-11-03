@@ -15,7 +15,7 @@ import { hasPermanentPortEntitlement } from "@/types";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
-const SESSION_TTL = 86400; // 24 ชม.
+const SESSION_TTL = 604800; // 7 วัน — ทน vercel ล่มได้นานขึ้น (EA ถือ token เดิมเทรดต่อได้จนหมดอายุ)
 
 function issueToken(account: string, ea: string): string | null {
   const secret = process.env.SESSION_SECRET;
@@ -50,6 +50,19 @@ export async function GET(req: Request) {
 
   if (!account) {
     return NextResponse.json({ error: "ต้องระบุ account number" }, { status: 400 });
+  }
+
+  // Trial EAs — เวอร์ชันแจกทดลอง ไม่ต้องลงทะเบียน port: ออก session token ฟรี
+  // รวมด่าน socket เข้ากับด่าน license ของ EA: ผ่าน EA แล้ว = socket ต้องผ่านด้วย
+  // (ไม่งั้นลูกค้าเข้า EA ได้แต่ socket เงียบ ไม่เปิดไม้)
+  //   ea=26 = Harvest_Farm_Cookie (ตรงกับ eaid ใน EA)
+  //   cutoff ต้อง >= วัน CheckExpirationFixed ของ EA (2026.12.31) เสมอ
+  //   EA ถอดตัวเองที่ 2026.12.31 (ExpertRemove) อยู่แล้ว → ตั้งเผื่อถึง 2027.01.01
+  //   หลัง cutoff จะตกไปด่านตรวจ port ปกติ
+  const TRIAL_EAS = new Set(["26"]);
+  const TRIAL_CUTOFF_MS = Date.parse("2027-01-01T00:00:00+07:00");
+  if (TRIAL_EAS.has(ea) && Date.now() < TRIAL_CUTOFF_MS) {
+    return ok(account, ea);
   }
 
   // Whitelist — ไม่จำกัดพอร์ต ไม่หมดอายุ
