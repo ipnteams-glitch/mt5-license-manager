@@ -166,7 +166,7 @@ export const PACKAGES: Record<PackageType, PackageInfo> = {
   },
   // ซื้อพอร์ตเพิ่มในแพคเกจเดิม (ไม่เปลี่ยนแพคเกจ/วันหมดอายุ) — max_ports = จำนวนพอร์ตที่เพิ่ม
   port_addon: {
-    key: "port_addon", name: "เพิ่ม 2 พอร์ต", name_en: "+2 Ports", price: 200, duration_days: 0, max_ports: 2,
+    key: "port_addon", name: "เพิ่ม 2 พอร์ต", name_en: "+2 Ports", price: 500, duration_days: 0, max_ports: 2,
     label: "ในแพคเกจเดิม +2 พอร์ต", rank: 0,
   },
 };
