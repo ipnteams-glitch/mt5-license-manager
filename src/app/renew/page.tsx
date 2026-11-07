@@ -33,7 +33,7 @@ export default function RenewPage() {
 
   const visiblePackages = [
     ...(isTestUser ? [...TEST_PACKAGES, ...BUYABLE_PACKAGES] : BUYABLE_PACKAGES),
-    ...(addonEligible ? ["port_addon" as PackageType] : []),
+    "port_addon" as PackageType,
   ].filter((k) => k !== "free");
 
   // เช็คสิทธิ์ซื้อพอร์ตเพิ่ม (แพคเกจเดิมเหลือ >3 วัน)
@@ -456,12 +456,15 @@ export default function RenewPage() {
             const pkg = PACKAGES[key];
             const isSelected = selected === key;
             const isFree = key === "test_1";
+            const addonLocked = key === "port_addon" && !addonEligible;
             return (
               <button
                 key={key}
-                onClick={() => setSelected(key)}
+                onClick={() => { if (!addonLocked) setSelected(key); }}
+                disabled={addonLocked}
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
-                  isSelected ? "border-blue-500 bg-blue-50 shadow-md" : `border-zinc-200 hover:border-zinc-300 ${pkgBg(key)}`
+                  addonLocked ? "border-zinc-200 bg-zinc-100 opacity-60 cursor-not-allowed"
+                  : isSelected ? "border-blue-500 bg-blue-50 shadow-md" : `border-zinc-200 hover:border-zinc-300 ${pkgBg(key)}`
                 }`}
               >
                 <div className="flex justify-between items-center">
@@ -487,6 +490,7 @@ export default function RenewPage() {
                     <p className="text-xs text-zinc-400">{pkg.max_ports >= 999 ? t("unlimited") : `${pkg.max_ports} ${t("port_suffix")}`}</p>
                   </div>
                 </div>
+                {addonLocked && <p className="text-[11px] text-amber-600 mt-2">⚠️ ต้องมีแพคเกจที่ใช้งานอยู่ (เหลือมากกว่า 3 วัน)</p>}
               </button>
             );
           })}
