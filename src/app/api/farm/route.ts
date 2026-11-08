@@ -17,7 +17,7 @@ const ALLOW = new Set([
   "https://forexcool.com",
   "https://ipnteams-glitch.github.io",
 ]);
-const MODES = new Set(["overview", "mine", "shared", "clear"]);
+const MODES = new Set(["overview", "mine", "shared", "clear", "view"]);
 
 function cors(origin: string | null): Record<string, string> {
   const o = origin && ALLOW.has(origin) ? origin : "https://www.forexcool.com";
@@ -42,7 +42,7 @@ export async function GET(req: Request) {
   }
 
   const qs = new URLSearchParams({ mode });
-  for (const k of ["token", "login", "s"]) {
+  for (const k of ["token", "login", "s", "email"]) {
     const v = searchParams.get(k);
     if (v) qs.set(k, v);
   }
